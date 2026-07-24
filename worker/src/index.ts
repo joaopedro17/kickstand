@@ -49,23 +49,37 @@ export default {
     }
 
     if (request.method === 'POST' && url.pathname === '/token') {
-      const { code, code_verifier, redirect_uri } = await request.json<{
-        code: string;
-        code_verifier: string;
-        redirect_uri: string;
-      }>();
-      return proxyTokenRequest(
-        { grant_type: 'authorization_code', code, code_verifier, redirect_uri },
-        env
-      );
+      try {
+        const { code, code_verifier, redirect_uri } = await request.json<{
+          code: string;
+          code_verifier: string;
+          redirect_uri: string;
+        }>();
+        return proxyTokenRequest(
+          { grant_type: 'authorization_code', code, code_verifier, redirect_uri },
+          env
+        );
+      } catch {
+        return new Response('Invalid JSON body', {
+          status: 400,
+          headers: corsHeaders(env.ALLOWED_ORIGIN),
+        });
+      }
     }
 
     if (request.method === 'POST' && url.pathname === '/refresh') {
-      const { refresh_token } = await request.json<{ refresh_token: string }>();
-      return proxyTokenRequest(
-        { grant_type: 'refresh_token', refresh_token },
-        env
-      );
+      try {
+        const { refresh_token } = await request.json<{ refresh_token: string }>();
+        return proxyTokenRequest(
+          { grant_type: 'refresh_token', refresh_token },
+          env
+        );
+      } catch {
+        return new Response('Invalid JSON body', {
+          status: 400,
+          headers: corsHeaders(env.ALLOWED_ORIGIN),
+        });
+      }
     }
 
     return new Response('Not found', {
