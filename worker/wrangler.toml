@@ -1,0 +1,6 @@
+name = "kickstand-token-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-07-23"
+
+[vars]
+ALLOWED_ORIGIN = "chrome-extension://REPLACE_WITH_EXTENSION_ID"
