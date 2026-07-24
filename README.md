@@ -1,11 +1,18 @@
-# Kickstand
+# <img src="extension/public/icons/48.png" width="38" align="left" /> Kickstand
+> A browser companion for Kick.com — track channels, catch who's live, browse the rest
 
-A browser extension companion for [Kick.com](https://kick.com) — track
-channels by slug, see who's live at a glance, get notified when a tracked
-channel goes live, and browse top live streams and categories.
+Kickstand lets you follow Kick.com channels by slug and see at a glance who's
+live, right from your browser toolbar. It notifies you when a tracked channel
+goes live, and lets you browse the platform's live streams and categories
+without leaving your current tab.
 
 Manifest V3, cross-browser (Chrome + Firefox), built with
 [WXT](https://wxt.dev) + TypeScript + React.
+
+## Install
+
+Not published to the Chrome Web Store or Firefox Add-ons yet — build it from
+source and load it unpacked (see [Build](#build) below).
 
 ## Project structure
 
@@ -14,26 +21,47 @@ Manifest V3, cross-browser (Chrome + Firefox), built with
 - `worker/` — a Cloudflare Worker that proxies the OAuth token exchange so
   `client_secret` never ships inside the extension.
 
-## Prerequisites
+## Build
+
+### Prerequisites
 
 - Node.js 18+
 - [pnpm](https://pnpm.io)
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free tier is
   enough) for the Worker
-- A Kick OAuth application (see below)
+- A Kick OAuth application (see step 2 below)
 
-## 1. Register a Kick OAuth app
+### 1. Generate a stable extension key
+
+Chrome derives the extension's ID from a public key embedded in the
+manifest. Generating one up front keeps the ID (and therefore the OAuth
+redirect URI below) identical across every rebuild, instead of a new random
+ID on every unpacked reload:
+
+```bash
+mkdir -p extension/.secrets
+openssl genrsa -out extension/.secrets/extension-key.pem 2048
+openssl rsa -in extension/.secrets/extension-key.pem -pubout -outform DER \
+  -out extension/.secrets/extension-key-pub.der
+openssl base64 -A -in extension/.secrets/extension-key-pub.der \
+  -out extension/.secrets/extension-key-pub.b64
+```
+
+`extension/.secrets/` is gitignored — keep `extension-key.pem` safe and out
+of version control. `wxt.config.ts` reads the `.b64` file and embeds it as
+the manifest `key`, so this only needs to be done once per checkout.
+
+### 2. Register a Kick OAuth app
 
 Kickstand needs a `client_id`/`client_secret` pair from Kick's developer
-portal, with a redirect URI matching your extension's identity redirect
-(`https://<extension-id>.chromiumapp.org/` for Chrome — you'll get the
-extension ID after loading it unpacked once; you can also generate a
-consistent ID ahead of time with a `key` field in the manifest if Kick
-requires the URI before install).
+portal (`kick.com/settings/developer`), with a redirect URI matching your
+extension's identity redirect: `https://<extension-id>.chromiumapp.org/` for
+Chrome. Build the extension once (see step 5) to compute the ID from the key
+you just generated — no need to load it unpacked first.
 
 Once registered, you'll have a `client_id` and `client_secret`.
 
-## 2. Deploy the Cloudflare Worker
+### 3. Deploy the Cloudflare Worker
 
 ```bash
 cd worker
@@ -58,7 +86,7 @@ For local development instead of deploying, copy `.dev.vars.example` to
 `.dev.vars`, fill in real values, and run `pnpm dev` (starts on
 `http://localhost:8787`).
 
-## 3. Configure the extension
+### 4. Configure the extension
 
 Edit `extension/lib/config.ts`:
 
@@ -67,7 +95,7 @@ export const KICK_CLIENT_ID = 'your_kick_client_id';
 export const WORKER_BASE_URL = 'https://kickstand-token-proxy.<you>.workers.dev';
 ```
 
-## 4. Run the extension in dev mode
+### 5. Run the extension in dev mode
 
 ```bash
 cd extension
@@ -79,7 +107,7 @@ pnpm dev
 This opens a Chromium window with Kickstand loaded unpacked and live-reloads
 on file changes.
 
-## 5. Load the extension unpacked manually
+### 6. Load the extension unpacked manually
 
 **Chrome:**
 1. Run `pnpm build` inside `extension/` (outputs to `extension/.output/chrome-mv3/`).
@@ -103,7 +131,44 @@ pnpm test
 Unit tests cover `extension/lib/` (auth, Kick API client, storage/diff
 logic). Popup and background wiring are verified manually via `pnpm dev`.
 
+## Frequently Asked Questions
+
+### Why do I have to type the channel slug instead of searching by name?
+
+Kick's public API only supports looking up a channel by its exact slug —
+there's no search-by-display-name endpoint to query against. The slug is the
+part of the channel's URL after `kick.com/`, e.g. `xqc` for `kick.com/xqc`.
+
+### Why isn't the Browse tab sorted by viewer count out of the box?
+
+Kick's `/public/v2/livestreams` endpoint has no sort parameter — it always
+returns livestreams oldest-started-first. Kickstand fetches a larger batch
+per page and sorts it client-side by viewer count to approximate what the
+website shows, but with thousands of concurrent streams a perfect global
+ranking would require fetching every live stream on the platform, which
+isn't practical from a popup.
+
+### Will I get logged out often?
+
+No. Kick access tokens last 2 hours, but refresh tokens last 30 days on a
+sliding window that resets on every successful refresh. As long as you open
+the extension at least once a month, you effectively stay logged in
+indefinitely.
+
 ## Design & implementation plan
 
 - `docs/superpowers/specs/2026-07-23-kickstand-design.md`
 - `docs/superpowers/plans/2026-07-23-kickstand-implementation.md`
+
+## Credits
+
+Kickstand was inspired by [Gumbo](https://github.com/Seldszar/Gumbo), Alexandre
+Breteau's excellent Twitch companion extension. If you want the same
+experience for Twitch, go check it out.
+
+## License
+
+Copyright (c) 2026 João Pedro
+
+This software is released under the terms of the MIT License. See the
+[LICENSE](LICENSE) file for further information.
