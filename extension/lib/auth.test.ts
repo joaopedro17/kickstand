@@ -4,9 +4,11 @@ import {
   isTokenExpiringSoon,
   refreshTokens,
   getValidAccessToken,
+  withAuthRetry,
   logout,
 } from './auth';
 import { authTokensStorage, type AuthTokens } from './storage';
+import { KickApiError } from './kick-api';
 
 function tokens(overrides: Partial<AuthTokens> = {}): AuthTokens {
   return {
@@ -113,6 +115,118 @@ describe('getValidAccessToken', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401 }));
     expect(await getValidAccessToken()).toBeNull();
     expect(await authTokensStorage.getValue()).toBeNull();
+  });
+
+  it('shares a single in-flight refresh across concurrent calls', async () => {
+    await authTokensStorage.setValue(tokens({ expiresAt: Date.now() + 1000 }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        access_token: 'access-concurrent',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'refresh-concurrent',
+        refresh_expires_in: 86400,
+        scope: 'user:read',
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const [first, second, third] = await Promise.all([
+      getValidAccessToken(),
+      getValidAccessToken(),
+      getValidAccessToken(),
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(first).toBe('access-concurrent');
+    expect(second).toBe('access-concurrent');
+    expect(third).toBe('access-concurrent');
+  });
+});
+
+describe('withAuthRetry', () => {
+  beforeEach(() => {
+    fakeBrowser.reset();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function mockRefreshSuccess(accessToken: string) {
+    return vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        access_token: accessToken,
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: `refresh-for-${accessToken}`,
+        refresh_expires_in: 86400,
+        scope: 'user:read',
+      }),
+    });
+  }
+
+  it('returns null immediately when logged out, without calling fn', async () => {
+    const fn = vi.fn();
+    expect(await withAuthRetry(fn)).toBeNull();
+    expect(fn).not.toHaveBeenCalled();
+  });
+
+  it('retries once after a 401 and succeeds with the refreshed token', async () => {
+    await authTokensStorage.setValue(tokens());
+    vi.stubGlobal('fetch', mockRefreshSuccess('access-retried'));
+
+    const fn = vi
+      .fn()
+      .mockRejectedValueOnce(new KickApiError('unauthorized', 'Access token rejected', 401))
+      .mockResolvedValueOnce('ok-result');
+
+    const result = await withAuthRetry(fn);
+
+    expect(result).toBe('ok-result');
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(fn).toHaveBeenNthCalledWith(1, 'access-1');
+    expect(fn).toHaveBeenNthCalledWith(2, 'access-retried');
+    expect((await authTokensStorage.getValue())?.accessToken).toBe('access-retried');
+  });
+
+  it('clears auth state and returns null when the 401 persists after refresh', async () => {
+    await authTokensStorage.setValue(tokens());
+    vi.stubGlobal('fetch', mockRefreshSuccess('access-still-bad'));
+
+    const fn = vi
+      .fn()
+      .mockRejectedValue(new KickApiError('unauthorized', 'Access token rejected', 401));
+
+    const result = await withAuthRetry(fn);
+
+    expect(result).toBeNull();
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(await authTokensStorage.getValue()).toBeNull();
+  });
+
+  it('clears auth state and returns null when the forced refresh itself fails', async () => {
+    await authTokensStorage.setValue(tokens());
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401 }));
+
+    const fn = vi
+      .fn()
+      .mockRejectedValue(new KickApiError('unauthorized', 'Access token rejected', 401));
+
+    const result = await withAuthRetry(fn);
+
+    expect(result).toBeNull();
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(await authTokensStorage.getValue()).toBeNull();
+  });
+
+  it('propagates non-unauthorized errors without retrying', async () => {
+    await authTokensStorage.setValue(tokens());
+    const fn = vi.fn().mockRejectedValue(new KickApiError('network', 'Network request failed'));
+
+    await expect(withAuthRetry(fn)).rejects.toThrow('Network request failed');
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });
 

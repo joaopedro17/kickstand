@@ -1,4 +1,4 @@
-import { getValidAccessToken } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/auth';
 import { fetchLivestreamsForUsers, chunk } from '@/lib/kick-api';
 import {
   trackedChannelsStorage,
@@ -30,12 +30,6 @@ async function setupAlarm(): Promise<void> {
 }
 
 export async function pollNow(): Promise<void> {
-  const accessToken = await getValidAccessToken();
-  if (!accessToken) {
-    await browser.action.setBadgeText({ text: '' });
-    return;
-  }
-
   const tracked = await trackedChannelsStorage.getValue();
   if (tracked.length === 0) {
     await browser.action.setBadgeText({ text: '' });
@@ -52,7 +46,16 @@ export async function pollNow(): Promise<void> {
 
   for (const batch of chunk(ids, 100)) {
     try {
-      const livestreams = await fetchLivestreamsForUsers(batch, accessToken);
+      const livestreams = await withAuthRetry((accessToken) =>
+        fetchLivestreamsForUsers(batch, accessToken)
+      );
+      if (livestreams === null) {
+        // Not logged in, or auth failed even after a refresh-and-retry —
+        // stop polling and clear the badge rather than keep hammering a
+        // dead token or displaying stale live status.
+        await browser.action.setBadgeText({ text: '' });
+        return;
+      }
       for (const id of batch) {
         const stream = livestreams.find((l) => l.broadcaster_user.id === id);
         next[id] = stream

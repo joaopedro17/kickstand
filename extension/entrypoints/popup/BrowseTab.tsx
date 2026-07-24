@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getValidAccessToken } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/auth';
 import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
 import type { KickLivestream } from '@/lib/types';
 
@@ -13,16 +13,17 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
     setLoading(true);
     setError(null);
     try {
-      const accessToken = await getValidAccessToken();
-      if (!accessToken) throw new Error('Not logged in');
-      const res = await fetchLivestreams(
-        {
-          cursor: reset ? undefined : cursor ?? undefined,
-          limit: 20,
-          categoryId: categoryId ? [categoryId] : undefined,
-        },
-        accessToken
+      const res = await withAuthRetry((accessToken) =>
+        fetchLivestreams(
+          {
+            cursor: reset ? undefined : cursor ?? undefined,
+            limit: 20,
+            categoryId: categoryId ? [categoryId] : undefined,
+          },
+          accessToken
+        )
       );
+      if (!res) throw new Error('Not logged in');
       setStreams((prev) => (reset ? res.data : [...prev, ...res.data]));
       setCursor(res.pagination.next_cursor);
     } catch (err) {

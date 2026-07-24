@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getValidAccessToken } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/auth';
 import { resolveChannelsBySlug, KickApiError } from '@/lib/kick-api';
 import {
   trackedChannelsStorage,
@@ -32,9 +32,11 @@ export function FollowingTab() {
     setAddError(null);
     setAdding(true);
     try {
-      const accessToken = await getValidAccessToken();
-      if (!accessToken) throw new Error('Not logged in');
-      const [resolved] = await resolveChannelsBySlug([slug], accessToken);
+      const resolvedChannels = await withAuthRetry((accessToken) =>
+        resolveChannelsBySlug([slug], accessToken)
+      );
+      if (!resolvedChannels) throw new Error('Not logged in');
+      const [resolved] = resolvedChannels;
       if (!resolved) throw new Error(`No channel found for "${slug}"`);
 
       const current = await trackedChannelsStorage.getValue();

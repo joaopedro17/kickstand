@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getValidAccessToken } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/auth';
 import { fetchCategories, KickApiError } from '@/lib/kick-api';
 import type { KickCategoryWithTags } from '@/lib/types';
 
@@ -17,12 +17,13 @@ export function CategoriesTab({
     setLoading(true);
     setError(null);
     try {
-      const accessToken = await getValidAccessToken();
-      if (!accessToken) throw new Error('Not logged in');
-      const res = await fetchCategories(
-        { cursor: reset ? undefined : cursor ?? undefined, limit: 25 },
-        accessToken
+      const res = await withAuthRetry((accessToken) =>
+        fetchCategories(
+          { cursor: reset ? undefined : cursor ?? undefined, limit: 25 },
+          accessToken
+        )
       );
+      if (!res) throw new Error('Not logged in');
       setCategories((prev) => (reset ? res.data : [...prev, ...res.data]));
       setCursor(res.pagination.next_cursor);
     } catch (err) {
