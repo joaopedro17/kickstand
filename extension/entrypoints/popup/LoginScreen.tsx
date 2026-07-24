@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { startLoginFlow } from '@/lib/auth';
 
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [error, setError] = useState<string | null>(null);
@@ -8,12 +7,17 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   async function handleLogin() {
     setError(null);
     setLoading(true);
-    try {
-      await startLoginFlow();
+    // Runs in the background service worker, not here — launchWebAuthFlow's
+    // OAuth window steals focus and closes this popup mid-flow otherwise.
+    // If that happens, this response never arrives, but authTokensStorage's
+    // watcher in App.tsx picks up the result next time the popup opens.
+    const result = await browser.runtime.sendMessage({ type: 'login' }).catch(
+      () => null
+    );
+    if (result?.success) {
       onLoggedIn();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
+    } else {
+      setError(result?.error ?? 'Login failed');
       setLoading(false);
     }
   }

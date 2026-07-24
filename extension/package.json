@@ -2,7 +2,7 @@
   "name": "kickstand",
   "description": "Track Kick.com channels, see who's live, and browse streams.",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

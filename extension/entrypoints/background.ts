@@ -1,4 +1,4 @@
-import { withAuthRetry } from '@/lib/auth';
+import { startLoginFlow, withAuthRetry } from '@/lib/auth';
 import { fetchLivestreamsForUsers, chunk } from '@/lib/kick-api';
 import {
   trackedChannelsStorage,
@@ -105,6 +105,21 @@ export async function pollNow(): Promise<void> {
   await browser.action.setBadgeText({ text: liveCount > 0 ? String(liveCount) : '' });
 }
 
+// Runs the OAuth flow here rather than in the popup: launchWebAuthFlow opens
+// a new window, which steals focus and causes the extension popup to close
+// — killing the popup's JS context mid-flow before the token exchange ever
+// completes. The background service worker persists across that focus
+// change, so it's the only place this can reliably finish. The popup picks
+// up the result via authTokensStorage.watch() once it's next opened.
+async function login(): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    await startLoginFlow();
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Login failed' };
+  }
+}
+
 export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(() => setupAlarm());
   browser.runtime.onStartup.addListener(() => setupAlarm());
@@ -116,5 +131,6 @@ export default defineBackground(() => {
 
   browser.runtime.onMessage.addListener((message) => {
     if (message?.type === 'poll-now') return pollNow();
+    if (message?.type === 'login') return login();
   });
 });

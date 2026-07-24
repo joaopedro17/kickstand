@@ -3,4 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2026-07-23"
 
 [vars]
-ALLOWED_ORIGIN = "chrome-extension://gchdfmgcnoahllcfnfnpkkhihfgambbg"
+# Firefox origins are matched by scheme in src/index.ts, not listed here —
+# moz-extension:// UUIDs are randomized per browser profile, so there's no
+# single fixed value to pin.
+ALLOWED_ORIGINS = "chrome-extension://gchdfmgcnoahllcfnfnpkkhihfgambbg"
