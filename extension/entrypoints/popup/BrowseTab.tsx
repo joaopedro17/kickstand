@@ -3,7 +3,7 @@ import { getValidAccessToken } from '@/lib/auth';
 import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
 import type { KickLivestream } from '@/lib/types';
 
-export function BrowseTab() {
+export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
   const [streams, setStreams] = useState<KickLivestream[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,11 @@ export function BrowseTab() {
       const accessToken = await getValidAccessToken();
       if (!accessToken) throw new Error('Not logged in');
       const res = await fetchLivestreams(
-        { cursor: reset ? undefined : cursor ?? undefined, limit: 20 },
+        {
+          cursor: reset ? undefined : cursor ?? undefined,
+          limit: 20,
+          categoryId: categoryId ? [categoryId] : undefined,
+        },
         accessToken
       );
       setStreams((prev) => (reset ? res.data : [...prev, ...res.data]));
@@ -33,7 +37,7 @@ export function BrowseTab() {
   useEffect(() => {
     load(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [categoryId]);
 
   function openStream(slug: string) {
     browser.tabs.create({ url: `https://kick.com/${slug}` });
