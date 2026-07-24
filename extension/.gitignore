@@ -9,7 +9,12 @@ lerna-debug.log*
 
 node_modules
 .output
-.secrets
+# Only the private key needs to stay out of git — the public key it derives
+# (extension-key-pub.b64) is safe to commit: it's embedded verbatim in the
+# published manifest.json anyway, and CI needs it to build the same
+# extension ID as local builds.
+.secrets/extension-key.pem
+.secrets/extension-key-pub.der
 stats.html
 stats-*.json
 .wxt

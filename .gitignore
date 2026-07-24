@@ -5,3 +5,4 @@ dist/
 .dev.vars
 .gstack/
 docs/
+.env.submit
