@@ -59,6 +59,7 @@ export default function App() {
             active={activeTab}
             onChange={(tab) => {
               setActiveTab(tab);
+              setShowSettings(false);
               if (tab !== 'browse') setBrowseCategory(null);
             }}
           />

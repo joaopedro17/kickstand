@@ -103,13 +103,16 @@ export async function fetchLivestreams(
   params: { categoryId?: number[]; cursor?: string; limit?: number },
   accessToken: string
 ): Promise<PaginatedResponse<KickLivestream>> {
+  // Kick's API has no sort param — it returns livestreams oldest-started-first.
+  // Sorting by viewer count has to happen client-side after fetching (see
+  // BrowseTab), so callers should request a large `limit` to get a
+  // representative sample instead of just the oldest few streams.
   return kickFetch<PaginatedResponse<KickLivestream>>(
     '/public/v2/livestreams',
     {
       category_id: params.categoryId,
       cursor: params.cursor,
       limit: params.limit,
-      sort: 'viewer_count',
     },
     accessToken
   );

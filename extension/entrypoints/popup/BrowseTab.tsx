@@ -3,6 +3,12 @@ import { withAuthRetry } from '@/lib/auth';
 import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
 import type { KickLivestream } from '@/lib/types';
 
+// Kick's API returns livestreams oldest-first with no sort option, so a
+// small page would mostly surface long-running low-viewer streams. Fetching
+// a much bigger batch per page makes the client-side viewer-count sort
+// actually representative of what's live right now.
+const FETCH_LIMIT = 100;
+
 export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
   const [streams, setStreams] = useState<KickLivestream[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -17,7 +23,7 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
         fetchLivestreams(
           {
             cursor: reset ? undefined : cursor ?? undefined,
-            limit: 20,
+            limit: FETCH_LIMIT,
             categoryId: categoryId ? [categoryId] : undefined,
           },
           accessToken

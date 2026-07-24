@@ -107,7 +107,11 @@ export function FollowingTab() {
           {adding ? 'Adding…' : 'Add'}
         </button>
       </div>
-      <p style={{ color: '#666', fontSize: 12, marginTop: -8, marginBottom: 12 }}>
+      <p style={{ color: '#666', fontSize: 12, marginTop: -8, marginBottom: 4 }}>
+        Kickstand can't look channels up by name — Kick's API only supports finding a
+        channel by its exact slug, so you'll need to type it in yourself.
+      </p>
+      <p style={{ color: '#666', fontSize: 12, marginTop: 0, marginBottom: 12 }}>
         The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's{' '}
         <code>xqc</code>.
       </p>
