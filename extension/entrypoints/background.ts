@@ -43,7 +43,11 @@ export async function pollNow(): Promise<void> {
   }
 
   const previous = await liveStatusStorage.getValue();
-  const next: LiveStatusCache = { ...previous };
+  // Start empty (not `{ ...previous }`) so entries for channels no longer
+  // tracked are pruned rather than carried forward indefinitely — otherwise
+  // a stale `isLive: true` entry for an untracked channel would inflate the
+  // badge count forever, since the count sums over the whole cache.
+  const next: LiveStatusCache = {};
   const ids = tracked.map((c) => c.broadcasterUserId);
 
   for (const batch of chunk(ids, 100)) {
