@@ -43,6 +43,13 @@ export interface PaginatedResponse<T> {
   pagination: { next_cursor: string | null };
 }
 
+export interface KickUser {
+  user_id: number;
+  name: string;
+  email: string;
+  profile_picture: string;
+}
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;

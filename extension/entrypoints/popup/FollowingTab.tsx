@@ -107,6 +107,10 @@ export function FollowingTab() {
           {adding ? 'Adding…' : 'Add'}
         </button>
       </div>
+      <p style={{ color: '#666', fontSize: 12, marginTop: -8, marginBottom: 12 }}>
+        The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's{' '}
+        <code>xqc</code>.
+      </p>
       {addError && <p style={{ color: 'crimson', fontSize: 12 }}>{addError}</p>}
 
       {sorted.length === 0 && <p>No tracked channels yet. Add one by slug above.</p>}

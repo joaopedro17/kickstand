@@ -3,6 +3,7 @@ import type {
   KickCategoryWithTags,
   KickChannel,
   KickLivestream,
+  KickUser,
   PaginatedResponse,
 } from './types';
 
@@ -104,9 +105,19 @@ export async function fetchLivestreams(
 ): Promise<PaginatedResponse<KickLivestream>> {
   return kickFetch<PaginatedResponse<KickLivestream>>(
     '/public/v2/livestreams',
-    { category_id: params.categoryId, cursor: params.cursor, limit: params.limit },
+    {
+      category_id: params.categoryId,
+      cursor: params.cursor,
+      limit: params.limit,
+      sort: 'viewer_count',
+    },
     accessToken
   );
+}
+
+export async function fetchCurrentUser(accessToken: string): Promise<KickUser> {
+  const res = await kickFetch<{ data: KickUser[] }>('/public/v1/users', {}, accessToken);
+  return res.data[0];
 }
 
 export async function fetchCategories(

@@ -24,7 +24,10 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
         )
       );
       if (!res) throw new Error('Not logged in');
-      setStreams((prev) => (reset ? res.data : [...prev, ...res.data]));
+      setStreams((prev) => {
+        const merged = reset ? res.data : [...prev, ...res.data];
+        return [...merged].sort((a, b) => b.viewer_count - a.viewer_count);
+      });
       setCursor(res.pagination.next_cursor);
     } catch (err) {
       setError(
