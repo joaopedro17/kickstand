@@ -47,6 +47,12 @@ export function BrowseTab() {
         </div>
       )}
 
+      {loading && streams.length === 0 && (
+        <div style={{ color: '#666', fontSize: 12, padding: '8px 0' }}>
+          Loading…
+        </div>
+      )}
+
       {streams.map((stream) => (
         <div
           key={stream.id}
