@@ -75,7 +75,14 @@ export async function startLoginFlow(): Promise<AuthTokens> {
   const redirected = new URL(responseUrl);
   const code = redirected.searchParams.get('code');
   const returnedState = redirected.searchParams.get('state');
-  if (!code) throw new Error('No authorization code returned');
+  const oauthError = redirected.searchParams.get('error');
+  const oauthErrorDescription = redirected.searchParams.get('error_description');
+  if (oauthError) {
+    throw new Error(
+      `Kick rejected login: ${oauthError}${oauthErrorDescription ? ` — ${oauthErrorDescription}` : ''}`
+    );
+  }
+  if (!code) throw new Error(`No authorization code returned (${redirected.search || 'empty query string'})`);
   if (returnedState !== state) throw new Error('OAuth state mismatch');
 
   const tokenResponse = await exchangeCodeForTokens(code, verifier, redirectUri);

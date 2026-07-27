@@ -2,6 +2,11 @@ name: Release extension
 
 on:
   workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write # needed to attach zips to the GitHub Release
 
 jobs:
   submit:
@@ -23,6 +28,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Only runs when triggered by a published GitHub Release, so the
+      # built version always matches the release tag (e.g. v1.0.2 -> 1.0.2)
+      # instead of relying on package.json having been bumped manually
+      # beforehand. Manual workflow_dispatch runs build whatever version is
+      # already committed.
+      - name: Set version from release tag
+        if: github.event_name == 'release'
+        run: npm pkg set version="${TAG_NAME#v}"
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+
       - name: Run tests
         run: pnpm test
 
@@ -33,6 +49,15 @@ jobs:
         run: |
           pnpm zip
           pnpm zip:firefox
+
+      - name: Attach zips to the GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            .output/*-chrome.zip .output/*-firefox.zip .output/*-sources.zip \
+            --repo "${{ github.repository }}"
 
       - name: Submit to stores
         run: |

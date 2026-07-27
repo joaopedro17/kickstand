@@ -42,7 +42,7 @@ export default defineConfig({
       },
       name: 'Kickstand',
       description: 'Track Kick.com channels, see who\'s live, and browse streams.',
-      permissions: ['storage', 'alarms', 'notifications', 'identity', 'tabs'],
+      permissions: ['storage', 'alarms', 'notifications', 'identity'],
       host_permissions: ['https://api.kick.com/*', 'https://id.kick.com/*'],
       icons: {
         16: 'icons/16.png',

@@ -6,4 +6,4 @@ compatibility_date = "2026-07-23"
 # Firefox origins are matched by scheme in src/index.ts, not listed here —
 # moz-extension:// UUIDs are randomized per browser profile, so there's no
 # single fixed value to pin.
-ALLOWED_ORIGINS = "chrome-extension://gchdfmgcnoahllcfnfnpkkhihfgambbg"
+ALLOWED_ORIGINS = "chrome-extension://fofneiapfajbddbhiphbockicakhfdpn,chrome-extension://gchdfmgcnoahllcfnfnpkkhihfgambbg"

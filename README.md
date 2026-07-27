@@ -61,6 +61,18 @@ you just generated — no need to load it unpacked first.
 
 Once registered, you'll have a `client_id` and `client_secret`.
 
+**Important — the pinned key's ID is a dev-only convenience.** `pnpm zip`
+sets `WXT_SKIP_MANIFEST_KEY` for the Chrome build, so the Chrome Web Store
+assigns its own ID on first submission rather than deriving one from
+`extension-key-pub.b64`. That store-assigned ID (`CHROME_EXTENSION_ID` in
+the table below, visible on the Developer Dashboard after the first manual
+submission) is permanent and is what real users' `browser.identity.getRedirectURL()`
+resolves to — it is what must be registered as the Kick OAuth app's redirect
+URI and in `worker/wrangler.toml`'s `ALLOWED_ORIGINS`, not the locally
+pinned dev ID. Mixing the two up causes an OAuth `redirect_uri mismatch`
+that only reproduces on the published build (Kickstand hit this in its
+first Chrome Web Store review).
+
 ### 3. Deploy the Cloudflare Worker
 
 ```bash
