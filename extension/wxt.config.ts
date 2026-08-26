@@ -2,7 +2,7 @@ import { defineConfig } from 'wxt';
 import { readFileSync } from 'node:fs';
 
 export default defineConfig({
-  modules: ['@wxt-dev/module-react'],
+  modules: ['@wxt-dev/module-react', '@wxt-dev/i18n/module'],
   manifest: (env) => {
     // Pins the Chrome extension ID (see extension/.secrets/extension-id.txt)
     // for local unpacked builds so the Kick OAuth redirect URI and the
@@ -40,8 +40,9 @@ export default defineConfig({
           },
         },
       },
-      name: 'Kickstand',
-      description: 'Track Kick.com channels, see who\'s live, and browse streams.',
+      default_locale: 'en',
+      name: '__MSG_extName__',
+      description: '__MSG_extDescription__',
       permissions: ['storage', 'alarms', 'notifications', 'identity'],
       host_permissions: ['https://api.kick.com/*', 'https://id.kick.com/*'],
       icons: {

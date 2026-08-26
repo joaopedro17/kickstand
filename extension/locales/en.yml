@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Track Kick.com channels, see who's live, and browse streams.
+
+tabs:
+  following: Following
+  browse: Browse
+  categories: Categories
+
+login:
+  title: Kickstand
+  subtitle: Track Kick channels and see who's live.
+  button: Log in with Kick
+  buttonLoading: Logging in…
+
+app:
+  settingsTitle: Settings
+
+following:
+  slugPlaceholder: channel-slug
+  addButton: Add
+  addButtonLoading: Adding…
+  slugHelp1: Kickstand can't look channels up by name — Kick's API only supports finding a channel by its exact slug, so you'll need to type it in yourself.
+  slugHelp2Prefix: "The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's"
+  emptyState: No tracked channels yet. Add one by slug above.
+  mute: Mute
+  unmute: Unmute
+  channelNotFound: 'No channel found for "{slug}"'
+  alreadyTracked: '"{slug}" is already tracked'
+
+settings:
+  title: Settings
+  pollingInterval: Polling interval
+  every1Minute: Every 1 minute
+  every1HalfMinutes: Every 1.5 minutes
+  notifyToggle: Notify when a tracked channel goes live
+  trackedChannels: Tracked channels
+  logout: Log out
+
+notifications:
+  liveTitle: '{slug} is live!'
+  liveDefaultMessage: Streaming now on Kick
+
+common:
+  loading: Loading…
+  loadMore: Load more
+  retry: Retry
+  viewers: viewers
+  remove: Remove
+
+errors:
+  network: Network error — check your connection and try again.
+  unauthorized: Your session expired — please log in again.
+  rate-limited: Kick is rate-limiting requests — please wait a moment and try again.
+  other: Something went wrong talking to Kick. Please try again.
+  cancelled: Login was cancelled.
+  oauth_rejected: Kick rejected the login request.
+  no_code: Login didn't complete — no authorization code was returned.
+  state_mismatch: Login couldn't be verified — please try again.
+  exchange_failed: Couldn't complete login with Kick. Please try again.
+  not_logged_in: You're not logged in.
+  unknown: Something went wrong. Please try again.
