@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { i18n } from '#i18n';
 import { authTokensStorage } from '@/lib/storage';
 import { withAuthRetry } from '@/lib/auth';
 import { fetchCurrentUser } from '@/lib/kick-api';
@@ -66,7 +67,7 @@ export default function App() {
         </div>
         <button
           onClick={() => setShowSettings((v) => !v)}
-          title="Settings"
+          title={i18n.t('app.settingsTitle')}
           style={{
             width: 28,
             height: 28,
@@ -79,7 +80,7 @@ export default function App() {
           }}
         >
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Settings" width={28} height={28} style={{ objectFit: 'cover' }} />
+            <img src={avatarUrl} alt={i18n.t('app.settingsTitle')} width={28} height={28} style={{ objectFit: 'cover' }} />
           ) : (
             '⚙️'
           )}
