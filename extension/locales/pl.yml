@@ -50,7 +50,7 @@ common:
 errors:
   network: Błąd sieci — sprawdź połączenie i spróbuj ponownie.
   unauthorized: Twoja sesja wygasła — zaloguj się ponownie.
-  rate-limited: Kick tymczasowo ogranicza liczbę żądań — poczekaj chwilę i spróbuj ponownie.
+  rateLimited: Kick tymczasowo ogranicza liczbę żądań — poczekaj chwilę i spróbuj ponownie.
   other: Coś poszło nie tak podczas komunikacji z Kick. Spróbuj ponownie.
   cancelled: Logowanie zostało anulowane.
   oauth_rejected: Kick odrzucił próbę logowania.

@@ -256,7 +256,6 @@ describe('startLoginFlow', () => {
     );
   });
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 

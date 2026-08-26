@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { load } from 'js-yaml';
+import { CODE_TO_KEY } from './lib/error-messages';
 
 const LOCALES_DIR = join(__dirname, 'locales');
 
@@ -39,4 +40,23 @@ describe('locale files', () => {
       expect(keys).toEqual(enKeys);
     });
   }
+
+  it('every locale key is a valid browser-extension message name after flattening', () => {
+    for (const file of files) {
+      const keys = flattenKeys(loadLocale(file));
+      for (const key of keys) {
+        const messageName = key.replaceAll('.', '_');
+        expect(messageName).toMatch(/^[A-Za-z0-9_@]+$/);
+      }
+    }
+  });
+
+  it('error-messages.ts CODE_TO_KEY values stay in sync with en.yml errors.* keys', () => {
+    const enErrorKeys = flattenKeys(loadLocale('en.yml'))
+      .filter((k) => k.startsWith('errors.'))
+      .map((k) => k.slice('errors.'.length))
+      .sort();
+    const mappedKeys = [...new Set(Object.values(CODE_TO_KEY))].sort();
+    expect(mappedKeys).toEqual(enErrorKeys);
+  });
 });

@@ -50,7 +50,7 @@ common:
 errors:
   network: Nätverksfel — kontrollera din anslutning och försök igen.
   unauthorized: Din session har gått ut — logga in igen.
-  rate-limited: Kick begränsar just nu antalet förfrågningar — vänta en stund och försök igen.
+  rateLimited: Kick begränsar just nu antalet förfrågningar — vänta en stund och försök igen.
   other: Något gick fel med Kick. Försök igen.
   cancelled: Inloggningen avbröts.
   oauth_rejected: Kick avvisade inloggningsförsöket.

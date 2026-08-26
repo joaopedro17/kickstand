@@ -50,7 +50,7 @@ common:
 errors:
   network: Error de red — comprueba tu conexión e inténtalo de nuevo.
   unauthorized: Tu sesión ha caducado — inicia sesión de nuevo.
-  rate-limited: Kick está limitando las solicitudes — espera un momento e inténtalo de nuevo.
+  rateLimited: Kick está limitando las solicitudes — espera un momento e inténtalo de nuevo.
   other: Algo salió mal al comunicarse con Kick. Inténtalo de nuevo.
   cancelled: Se canceló el inicio de sesión.
   oauth_rejected: Kick rechazó la solicitud de inicio de sesión.

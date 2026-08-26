@@ -21,7 +21,7 @@ describe('translateErrorCode', () => {
   });
 
   it('translates the rate-limited kind (hyphenated key)', () => {
-    expect(translateErrorCode('rate-limited')).toBe('[errors_rate-limited]');
+    expect(translateErrorCode('rate-limited')).toBe('[errors_rateLimited]');
   });
 
   it('falls back to errors.unknown for an unrecognized code', () => {

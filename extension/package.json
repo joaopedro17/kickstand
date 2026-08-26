@@ -21,7 +21,6 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@wxt-dev/i18n": "^0.2.7",
