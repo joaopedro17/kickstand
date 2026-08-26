@@ -247,6 +247,7 @@ describe('logout', () => {
 describe('startLoginFlow', () => {
   beforeEach(() => {
     fakeBrowser.reset();
+    
     // fakeBrowser doesn't implement browser.identity.getRedirectURL either
     // (it throws "not implemented" like launchWebAuthFlow), so every test
     // in this block needs it stubbed regardless of which OAuth outcome
