@@ -1,10 +1,6 @@
-export type TabName = 'following' | 'browse' | 'categories';
+import { i18n } from '#i18n';
 
-const TABS: { name: TabName; label: string }[] = [
-  { name: 'following', label: 'Following' },
-  { name: 'browse', label: 'Browse' },
-  { name: 'categories', label: 'Categories' },
-];
+export type TabName = 'following' | 'browse' | 'categories';
 
 export function TabBar({
   active,
@@ -13,9 +9,15 @@ export function TabBar({
   active: TabName;
   onChange: (tab: TabName) => void;
 }) {
+  const tabs: { name: TabName; label: string }[] = [
+    { name: 'following', label: i18n.t('tabs.following') },
+    { name: 'browse', label: i18n.t('tabs.browse') },
+    { name: 'categories', label: i18n.t('tabs.categories') },
+  ];
+
   return (
     <div style={{ display: 'flex', borderBottom: '1px solid #ddd' }}>
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <button
           key={tab.name}
           onClick={() => onChange(tab.name)}
