@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { i18n } from '#i18n';
+import { translateErrorCode } from '@/lib/error-messages';
 
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [error, setError] = useState<string | null>(null);
@@ -17,17 +19,17 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
     if (result?.success) {
       onLoggedIn();
     } else {
-      setError(result?.error ?? 'Login failed');
+      setError(translateErrorCode(result?.error ?? 'unknown'));
       setLoading(false);
     }
   }
 
   return (
     <div style={{ width: 320, padding: 24, fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h1>Kickstand</h1>
-      <p>Track Kick channels and see who's live.</p>
+      <h1>{i18n.t('login.title')}</h1>
+      <p>{i18n.t('login.subtitle')}</p>
       <button onClick={handleLogin} disabled={loading}>
-        {loading ? 'Logging in…' : 'Log in with Kick'}
+        {loading ? i18n.t('login.buttonLoading') : i18n.t('login.button')}
       </button>
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
     </div>

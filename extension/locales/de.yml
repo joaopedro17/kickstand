@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Verfolge Kick.com-Kanäle, sieh wer live ist, und entdecke Streams.
+
+tabs:
+  following: Verfolgt
+  browse: Entdecken
+  categories: Kategorien
+
+login:
+  title: Kickstand
+  subtitle: Verfolge Kick-Kanäle und sieh, wer live ist.
+  button: Mit Kick anmelden
+  buttonLoading: Anmeldung läuft…
+
+app:
+  settingsTitle: Einstellungen
+
+following:
+  slugPlaceholder: kanal-slug
+  addButton: Hinzufügen
+  addButtonLoading: Wird hinzugefügt…
+  slugHelp1: Kickstand kann Kanäle nicht nach Namen suchen — Kicks API unterstützt nur die Suche über den exakten Slug, also musst du ihn selbst eingeben.
+  slugHelp2Prefix: "Der Slug ist der Teil der Kanal-URL nach kick.com/ — bei kick.com/xqc lautet er"
+  emptyState: Noch keine verfolgten Kanäle. Füge oben einen per Slug hinzu.
+  mute: Stummschalten
+  unmute: Stummschaltung aufheben
+  channelNotFound: 'Kein Kanal für „{slug}“ gefunden'
+  alreadyTracked: '„{slug}“ wird bereits verfolgt'
+
+settings:
+  title: Einstellungen
+  pollingInterval: Abfrageintervall
+  every1Minute: Alle 1 Minute
+  every1HalfMinutes: Alle 1,5 Minuten
+  notifyToggle: Benachrichtigen, wenn ein verfolgter Kanal live geht
+  trackedChannels: Verfolgte Kanäle
+  logout: Abmelden
+
+notifications:
+  liveTitle: '{slug} ist live!'
+  liveDefaultMessage: Streamt jetzt auf Kick
+
+common:
+  loading: Wird geladen…
+  loadMore: Mehr laden
+  retry: Erneut versuchen
+  viewers: Zuschauer
+  remove: Entfernen
+
+errors:
+  network: Netzwerkfehler — überprüfe deine Verbindung und versuche es erneut.
+  unauthorized: Deine Sitzung ist abgelaufen — bitte melde dich erneut an.
+  rateLimited: Kick begrenzt gerade die Anfragen — bitte warte einen Moment und versuche es erneut.
+  other: Bei der Kommunikation mit Kick ist etwas schiefgelaufen. Bitte versuche es erneut.
+  cancelled: Die Anmeldung wurde abgebrochen.
+  oauth_rejected: Kick hat die Anmeldeanfrage abgelehnt.
+  no_code: Die Anmeldung wurde nicht abgeschlossen — es wurde kein Autorisierungscode zurückgegeben.
+  state_mismatch: Die Anmeldung konnte nicht verifiziert werden — bitte versuche es erneut.
+  exchange_failed: Die Anmeldung bei Kick konnte nicht abgeschlossen werden. Bitte versuche es erneut.
+  not_logged_in: Du bist nicht angemeldet.
+  unknown: Etwas ist schiefgelaufen. Bitte versuche es erneut.

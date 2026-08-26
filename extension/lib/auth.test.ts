@@ -6,6 +6,8 @@ import {
   getValidAccessToken,
   withAuthRetry,
   logout,
+  startLoginFlow,
+  AuthError,
 } from './auth';
 import { authTokensStorage, type AuthTokens } from './storage';
 import { KickApiError } from './kick-api';
@@ -239,5 +241,54 @@ describe('logout', () => {
     await authTokensStorage.setValue(tokens());
     await logout();
     expect(await authTokensStorage.getValue()).toBeNull();
+  });
+});
+
+describe('startLoginFlow', () => {
+  beforeEach(() => {
+    fakeBrowser.reset();
+    
+    // fakeBrowser doesn't implement browser.identity.getRedirectURL either
+    // (it throws "not implemented" like launchWebAuthFlow), so every test
+    // in this block needs it stubbed regardless of which OAuth outcome
+    // it's exercising.
+    vi.spyOn(browser.identity, 'getRedirectURL').mockReturnValue(
+      'https://extension-id.chromiumapp.org/'
+    );
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('throws AuthError with code "cancelled" when the auth flow returns no URL', async () => {
+    vi.spyOn(browser.identity, 'launchWebAuthFlow').mockImplementation(async () => undefined);
+
+    const error = await startLoginFlow().catch((e) => e);
+
+    expect(error).toBeInstanceOf(AuthError);
+    expect((error as AuthError).code).toBe('cancelled');
+  });
+
+  it('throws AuthError with code "state_mismatch" when the returned state does not match', async () => {
+    vi.spyOn(browser.identity, 'launchWebAuthFlow').mockImplementation(
+      async () => 'https://example.com/?code=abc123&state=wrong-state'
+    );
+
+    const error = await startLoginFlow().catch((e) => e);
+
+    expect(error).toBeInstanceOf(AuthError);
+    expect((error as AuthError).code).toBe('state_mismatch');
+  });
+
+  it('throws AuthError with code "oauth_rejected" when Kick returns an OAuth error', async () => {
+    vi.spyOn(browser.identity, 'launchWebAuthFlow').mockImplementation(
+      async () => 'https://example.com/?error=access_denied&error_description=User+declined'
+    );
+
+    const error = await startLoginFlow().catch((e) => e);
+
+    expect(error).toBeInstanceOf(AuthError);
+    expect((error as AuthError).code).toBe('oauth_rejected');
+    expect((error as AuthError).detail).toBe('User declined');
   });
 });

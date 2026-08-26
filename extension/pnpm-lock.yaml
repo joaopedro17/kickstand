@@ -21,9 +21,15 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.17)
+      '@wxt-dev/i18n':
+        specifier: ^0.2.7
+        version: 0.2.7(wxt@0.20.27(@types/node@26.1.1)(jiti@2.7.0)(rolldown@1.1.5))
       '@wxt-dev/module-react':
         specifier: ^1.1.5
         version: 1.2.2(vite@8.1.5(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0))(wxt@0.20.27(@types/node@26.1.1)(jiti@2.7.0)(rolldown@1.1.5))
+      js-yaml:
+        specifier: ^5.4.0
+        version: 5.4.0
       sharp:
         specifier: ^0.35.3
         version: 0.35.3(@types/node@26.1.1)
@@ -650,6 +656,14 @@ packages:
   '@wxt-dev/browser@0.2.2':
     resolution: {integrity: sha512-QqLOdEE1UQxieRuMbv9rwczD+xUv45fy+i5gw1eo+/vlPtGX+/rBd6tlIfLFCU3xAN/UTH57bxqOeU2IZg7dEg==}
 
+  '@wxt-dev/i18n@0.2.7':
+    resolution: {integrity: sha512-aBhWJ2GFMtjyWK8Qcq83pf7WA88Iu6SwRWdZl7TrDM6lAC0RV5uLuFUrX72GwO1ZuZHuN80FQVVGnK1MHDTjcA==}
+    peerDependencies:
+      wxt: '>=0.19.7'
+    peerDependenciesMeta:
+      wxt:
+        optional: true
+
   '@wxt-dev/module-react@1.2.2':
     resolution: {integrity: sha512-+lRLi1r9dAXpLySWSIWHLJ1h/nFzR20iQnx3RNrKyA6oJg4+ClOluVXozHjfPg9Okfy/umtffiOopGayASrg6w==}
     peerDependencies:
@@ -690,6 +704,9 @@ packages:
   ansi-styles@6.2.3:
     resolution: {integrity: sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==}
     engines: {node: '>=12'}
+
+  argparse@2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   array-differ@4.0.0:
     resolution: {integrity: sha512-Q6VPTLMsmXZ47ENG3V+wQyZS1ZxXMxFyYzA+Z/GMrJ6yIutAIEf9wTyroTzmGjNfox9/h3GdGBCVh43GVFx4Uw==}
@@ -1232,6 +1249,10 @@ packages:
 
   js-tokens@9.0.1:
     resolution: {integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ==}
+
+  js-yaml@5.4.0:
+    resolution: {integrity: sha512-jE7vUJIebKzYQI5xu4co5CRBDlDEYnHrdzsxs4O2giCz4v2SbVMYKpmt1D9L38OKQAeCWmrOTRiCV93u0UkaJA==}
+    hasBin: true
 
   json-parse-even-better-errors@3.0.2:
     resolution: {integrity: sha512-fi0NG4bPjCHunUJffmLd0gxssIgkNmArMvis4iNah6Owg1MCJjWhEcDLmsK6iGkJq3tHwbDkTlce70/tmXN4cQ==}
@@ -2532,6 +2553,15 @@ snapshots:
       '@types/filesystem': 0.0.36
       '@types/har-format': 1.2.16
 
+  '@wxt-dev/i18n@0.2.7(wxt@0.20.27(@types/node@26.1.1)(jiti@2.7.0)(rolldown@1.1.5))':
+    dependencies:
+      '@wxt-dev/browser': 0.2.2
+      chokidar: 5.0.0
+      confbox: 0.2.4
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      wxt: 0.20.27(@types/node@26.1.1)(jiti@2.7.0)(rolldown@1.1.5)
+
   '@wxt-dev/module-react@1.2.2(vite@8.1.5(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0))(wxt@0.20.27(@types/node@26.1.1)(jiti@2.7.0)(rolldown@1.1.5))':
     dependencies:
       '@vitejs/plugin-react': 6.0.4(vite@8.1.5(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0))
@@ -2568,6 +2598,8 @@ snapshots:
       color-convert: 2.0.1
 
   ansi-styles@6.2.3: {}
+
+  argparse@2.0.1: {}
 
   array-differ@4.0.0: {}
 
@@ -3033,6 +3065,10 @@ snapshots:
   js-tokens@4.0.0: {}
 
   js-tokens@9.0.1: {}
+
+  js-yaml@5.4.0:
+    dependencies:
+      argparse: 2.0.1
 
   json-parse-even-better-errors@3.0.2: {}
 

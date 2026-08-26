@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { i18n } from '#i18n';
 import { logout } from '@/lib/auth';
 import {
   settingsStorage,
@@ -41,16 +42,16 @@ export function SettingsPanel() {
 
   return (
     <div>
-      <h3>Settings</h3>
+      <h3>{i18n.t('settings.title')}</h3>
 
       <label>
-        Polling interval
+        {i18n.t('settings.pollingInterval')}
         <select
           value={settings.pollingIntervalMinutes}
           onChange={(e) => updateInterval(Number(e.target.value))}
         >
-          <option value={1}>Every 1 minute</option>
-          <option value={1.5}>Every 1.5 minutes</option>
+          <option value={1}>{i18n.t('settings.every1Minute')}</option>
+          <option value={1.5}>{i18n.t('settings.every1HalfMinutes')}</option>
         </select>
       </label>
 
@@ -61,20 +62,22 @@ export function SettingsPanel() {
             checked={settings.notificationsEnabled}
             onChange={toggleNotifications}
           />
-          Notify when a tracked channel goes live
+          {i18n.t('settings.notifyToggle')}
         </label>
       </div>
 
-      <h4>Tracked channels</h4>
+      <h4>{i18n.t('settings.trackedChannels')}</h4>
       {channels.map((channel) => (
         <div key={channel.broadcasterUserId} style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span>{channel.slug}</span>
-          <button onClick={() => removeChannel(channel.broadcasterUserId)}>Remove</button>
+          <button onClick={() => removeChannel(channel.broadcasterUserId)}>
+            {i18n.t('common.remove')}
+          </button>
         </div>
       ))}
 
       <button onClick={() => logout()} style={{ marginTop: 12 }}>
-        Log out
+        {i18n.t('settings.logout')}
       </button>
     </div>
   );

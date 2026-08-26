@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Acompanhe canais do Kick.com, veja quem está ao vivo e explore transmissões.
+
+tabs:
+  following: Seguindo
+  browse: Explorar
+  categories: Categorias
+
+login:
+  title: Kickstand
+  subtitle: Acompanhe canais do Kick e veja quem está ao vivo.
+  button: Entrar com o Kick
+  buttonLoading: Entrando…
+
+app:
+  settingsTitle: Configurações
+
+following:
+  slugPlaceholder: slug-do-canal
+  addButton: Adicionar
+  addButtonLoading: Adicionando…
+  slugHelp1: O Kickstand não consegue buscar canais pelo nome — a API do Kick só permite localizar um canal pelo slug exato, então você precisa digitá-lo manualmente.
+  slugHelp2Prefix: "O slug é a parte da URL do canal depois de kick.com/ — para kick.com/xqc, o slug é"
+  emptyState: Nenhum canal acompanhado ainda. Adicione um pelo slug acima.
+  mute: Silenciar
+  unmute: Reativar
+  channelNotFound: 'Nenhum canal encontrado para "{slug}"'
+  alreadyTracked: '"{slug}" já está sendo acompanhado'
+
+settings:
+  title: Configurações
+  pollingInterval: Intervalo de verificação
+  every1Minute: A cada 1 minuto
+  every1HalfMinutes: A cada 1,5 minuto
+  notifyToggle: Notificar quando um canal acompanhado entrar ao vivo
+  trackedChannels: Canais acompanhados
+  logout: Sair
+
+notifications:
+  liveTitle: '{slug} está ao vivo!'
+  liveDefaultMessage: Transmitindo agora no Kick
+
+common:
+  loading: Carregando…
+  loadMore: Carregar mais
+  retry: Tentar novamente
+  viewers: espectadores
+  remove: Remover
+
+errors:
+  network: Erro de rede — verifique sua conexão e tente novamente.
+  unauthorized: Sua sessão expirou — faça login novamente.
+  rateLimited: O Kick está limitando as requisições — aguarde um momento e tente novamente.
+  other: Algo deu errado ao falar com o Kick. Tente novamente.
+  cancelled: O login foi cancelado.
+  oauth_rejected: O Kick recusou o pedido de login.
+  no_code: O login não foi concluído — nenhum código de autorização foi retornado.
+  state_mismatch: Não foi possível verificar o login — tente novamente.
+  exchange_failed: Não foi possível concluir o login com o Kick. Tente novamente.
+  not_logged_in: Você não está conectado.
+  unknown: Algo deu errado. Tente novamente.
