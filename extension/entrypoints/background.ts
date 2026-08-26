@@ -1,3 +1,4 @@
+import { i18n } from '#i18n';
 import { startLoginFlow, withAuthRetry, AuthError } from '@/lib/auth';
 import { fetchLivestreamsForUsers, chunk } from '@/lib/kick-api';
 import {
@@ -93,8 +94,8 @@ export async function pollNow(): Promise<void> {
         await browser.notifications.create(`kickstand-live-${id}`, {
           type: 'basic',
           iconUrl: browser.runtime.getURL('/icons/128.png'),
-          title: `${channel.slug} is live!`,
-          message: next[id].category?.name ?? 'Streaming now on Kick',
+          title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
+          message: next[id].category?.name ?? i18n.t('notifications.liveDefaultMessage'),
         });
       }
     }
