@@ -1,4 +1,4 @@
-import { startLoginFlow, withAuthRetry } from '@/lib/auth';
+import { startLoginFlow, withAuthRetry, AuthError } from '@/lib/auth';
 import { fetchLivestreamsForUsers, chunk } from '@/lib/kick-api';
 import {
   trackedChannelsStorage,
@@ -111,12 +111,17 @@ export async function pollNow(): Promise<void> {
 // completes. The background service worker persists across that focus
 // change, so it's the only place this can reliably finish. The popup picks
 // up the result via authTokensStorage.watch() once it's next opened.
-async function login(): Promise<{ success: true } | { success: false; error: string }> {
+async function login(): Promise<
+  { success: true } | { success: false; error: string; detail?: string }
+> {
   try {
     await startLoginFlow();
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Login failed' };
+    if (err instanceof AuthError) {
+      return { success: false, error: err.code, detail: err.detail };
+    }
+    return { success: false, error: 'unknown' };
   }
 }
 
