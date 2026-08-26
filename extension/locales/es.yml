@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Sigue canales de Kick.com, mira quién está en directo y explora transmisiones.
+
+tabs:
+  following: Siguiendo
+  browse: Explorar
+  categories: Categorías
+
+login:
+  title: Kickstand
+  subtitle: Sigue canales de Kick y mira quién está en directo.
+  button: Iniciar sesión con Kick
+  buttonLoading: Iniciando sesión…
+
+app:
+  settingsTitle: Configuración
+
+following:
+  slugPlaceholder: slug-del-canal
+  addButton: Añadir
+  addButtonLoading: Añadiendo…
+  slugHelp1: Kickstand no puede buscar canales por nombre — la API de Kick solo permite encontrar un canal por su slug exacto, así que tendrás que escribirlo tú mismo.
+  slugHelp2Prefix: "El slug es la parte de la URL del canal después de kick.com/ — para kick.com/xqc es"
+  emptyState: Aún no sigues ningún canal. Añade uno por su slug arriba.
+  mute: Silenciar
+  unmute: Activar sonido
+  channelNotFound: 'No se encontró ningún canal para "{slug}"'
+  alreadyTracked: '"{slug}" ya se está siguiendo'
+
+settings:
+  title: Configuración
+  pollingInterval: Intervalo de verificación
+  every1Minute: Cada 1 minuto
+  every1HalfMinutes: Cada 1,5 minutos
+  notifyToggle: Notificar cuando un canal seguido empiece a transmitir en directo
+  trackedChannels: Canales seguidos
+  logout: Cerrar sesión
+
+notifications:
+  liveTitle: '¡{slug} está en directo!'
+  liveDefaultMessage: Transmitiendo ahora en Kick
+
+common:
+  loading: Cargando…
+  loadMore: Cargar más
+  retry: Reintentar
+  viewers: espectadores
+  remove: Eliminar
+
+errors:
+  network: Error de red — comprueba tu conexión e inténtalo de nuevo.
+  unauthorized: Tu sesión ha caducado — inicia sesión de nuevo.
+  rate-limited: Kick está limitando las solicitudes — espera un momento e inténtalo de nuevo.
+  other: Algo salió mal al comunicarse con Kick. Inténtalo de nuevo.
+  cancelled: Se canceló el inicio de sesión.
+  oauth_rejected: Kick rechazó la solicitud de inicio de sesión.
+  no_code: El inicio de sesión no se completó — no se recibió ningún código de autorización.
+  state_mismatch: No se pudo verificar el inicio de sesión — inténtalo de nuevo.
+  exchange_failed: No se pudo completar el inicio de sesión con Kick. Inténtalo de nuevo.
+  not_logged_in: No has iniciado sesión.
+  unknown: Algo salió mal. Inténtalo de nuevo.

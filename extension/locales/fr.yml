@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Suivez des chaînes Kick.com, voyez qui est en direct et explorez les streams.
+
+tabs:
+  following: Suivis
+  browse: Découvrir
+  categories: Catégories
+
+login:
+  title: Kickstand
+  subtitle: Suivez des chaînes Kick et voyez qui est en direct.
+  button: Se connecter avec Kick
+  buttonLoading: Connexion en cours…
+
+app:
+  settingsTitle: Paramètres
+
+following:
+  slugPlaceholder: slug-de-la-chaîne
+  addButton: Ajouter
+  addButtonLoading: Ajout en cours…
+  slugHelp1: Kickstand ne peut pas rechercher des chaînes par leur nom — l'API de Kick ne permet de trouver une chaîne que par son slug exact, vous devrez donc le saisir vous-même.
+  slugHelp2Prefix: "Le slug est la partie de l'URL de la chaîne après kick.com/ — pour kick.com/xqc, c'est"
+  emptyState: Aucune chaîne suivie pour l'instant. Ajoutez-en une par son slug ci-dessus.
+  mute: Muet
+  unmute: Réactiver le son
+  channelNotFound: 'Aucune chaîne trouvée pour « {slug} »'
+  alreadyTracked: '« {slug} » est déjà suivi'
+
+settings:
+  title: Paramètres
+  pollingInterval: Intervalle de vérification
+  every1Minute: Toutes les 1 minute
+  every1HalfMinutes: Toutes les 1,5 minute
+  notifyToggle: Notifier quand une chaîne suivie passe en direct
+  trackedChannels: Chaînes suivies
+  logout: Se déconnecter
+
+notifications:
+  liveTitle: '{slug} est en direct !'
+  liveDefaultMessage: En direct maintenant sur Kick
+
+common:
+  loading: Chargement…
+  loadMore: Charger plus
+  retry: Réessayer
+  viewers: spectateurs
+  remove: Supprimer
+
+errors:
+  network: Erreur réseau — vérifiez votre connexion et réessayez.
+  unauthorized: Votre session a expiré — veuillez vous reconnecter.
+  rate-limited: Kick limite actuellement les requêtes — veuillez patienter un instant et réessayer.
+  other: Une erreur s'est produite avec Kick. Veuillez réessayer.
+  cancelled: La connexion a été annulée.
+  oauth_rejected: Kick a rejeté la demande de connexion.
+  no_code: La connexion n'a pas abouti — aucun code d'autorisation n'a été renvoyé.
+  state_mismatch: La connexion n'a pas pu être vérifiée — veuillez réessayer.
+  exchange_failed: Impossible de terminer la connexion avec Kick. Veuillez réessayer.
+  not_logged_in: Vous n'êtes pas connecté.
+  unknown: Une erreur s'est produite. Veuillez réessayer.

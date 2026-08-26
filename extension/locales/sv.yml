@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Följ Kick.com-kanaler, se vem som sänder live och utforska streams.
+
+tabs:
+  following: Följer
+  browse: Utforska
+  categories: Kategorier
+
+login:
+  title: Kickstand
+  subtitle: Följ Kick-kanaler och se vem som sänder live.
+  button: Logga in med Kick
+  buttonLoading: Loggar in…
+
+app:
+  settingsTitle: Inställningar
+
+following:
+  slugPlaceholder: kanal-slug
+  addButton: Lägg till
+  addButtonLoading: Lägger till…
+  slugHelp1: Kickstand kan inte söka efter kanaler via namn — Kicks API stöder bara att hitta en kanal via dess exakta slug, så du behöver skriva in den själv.
+  slugHelp2Prefix: "Slugen är den del av kanalens URL som kommer efter kick.com/ — för kick.com/xqc är den"
+  emptyState: Inga följda kanaler än. Lägg till en via slug ovan.
+  mute: Tysta
+  unmute: Sluta tysta
+  channelNotFound: 'Ingen kanal hittades för "{slug}"'
+  alreadyTracked: '"{slug}" följs redan'
+
+settings:
+  title: Inställningar
+  pollingInterval: Uppdateringsintervall
+  every1Minute: Var 1:a minut
+  every1HalfMinutes: Var 1,5:e minut
+  notifyToggle: Meddela när en följd kanal sänder live
+  trackedChannels: Följda kanaler
+  logout: Logga ut
+
+notifications:
+  liveTitle: '{slug} sänder live!'
+  liveDefaultMessage: Sänder live nu på Kick
+
+common:
+  loading: Laddar…
+  loadMore: Ladda fler
+  retry: Försök igen
+  viewers: tittare
+  remove: Ta bort
+
+errors:
+  network: Nätverksfel — kontrollera din anslutning och försök igen.
+  unauthorized: Din session har gått ut — logga in igen.
+  rate-limited: Kick begränsar just nu antalet förfrågningar — vänta en stund och försök igen.
+  other: Något gick fel med Kick. Försök igen.
+  cancelled: Inloggningen avbröts.
+  oauth_rejected: Kick avvisade inloggningsförsöket.
+  no_code: Inloggningen slutfördes inte — ingen auktoriseringskod returnerades.
+  state_mismatch: Inloggningen kunde inte verifieras — försök igen.
+  exchange_failed: Det gick inte att slutföra inloggningen med Kick. Försök igen.
+  not_logged_in: Du är inte inloggad.
+  unknown: Något gick fel. Försök igen.

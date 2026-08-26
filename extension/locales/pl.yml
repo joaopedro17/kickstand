@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Śledź kanały Kick.com, sprawdzaj kto jest na żywo i przeglądaj transmisje.
+
+tabs:
+  following: Obserwowane
+  browse: Przeglądaj
+  categories: Kategorie
+
+login:
+  title: Kickstand
+  subtitle: Śledź kanały Kick i sprawdzaj, kto jest na żywo.
+  button: Zaloguj się przez Kick
+  buttonLoading: Logowanie…
+
+app:
+  settingsTitle: Ustawienia
+
+following:
+  slugPlaceholder: slug-kanału
+  addButton: Dodaj
+  addButtonLoading: Dodawanie…
+  slugHelp1: Kickstand nie może wyszukiwać kanałów po nazwie — API Kicka pozwala znaleźć kanał wyłącznie po dokładnym slugu, więc musisz wpisać go samodzielnie.
+  slugHelp2Prefix: "Slug to część adresu URL kanału po kick.com/ — dla kick.com/xqc to"
+  emptyState: Nie obserwujesz jeszcze żadnych kanałów. Dodaj jeden, wpisując slug powyżej.
+  mute: Wycisz
+  unmute: Wyłącz wyciszenie
+  channelNotFound: 'Nie znaleziono kanału dla "{slug}"'
+  alreadyTracked: '"{slug}" jest już obserwowany'
+
+settings:
+  title: Ustawienia
+  pollingInterval: Częstotliwość odpytywania
+  every1Minute: Co 1 minutę
+  every1HalfMinutes: Co 1,5 minuty
+  notifyToggle: Powiadamiaj, gdy obserwowany kanał wejdzie na żywo
+  trackedChannels: Obserwowane kanały
+  logout: Wyloguj się
+
+notifications:
+  liveTitle: '{slug} jest na żywo!'
+  liveDefaultMessage: Transmituje teraz na Kick
+
+common:
+  loading: Ładowanie…
+  loadMore: Załaduj więcej
+  retry: Spróbuj ponownie
+  viewers: widzów
+  remove: Usuń
+
+errors:
+  network: Błąd sieci — sprawdź połączenie i spróbuj ponownie.
+  unauthorized: Twoja sesja wygasła — zaloguj się ponownie.
+  rate-limited: Kick tymczasowo ogranicza liczbę żądań — poczekaj chwilę i spróbuj ponownie.
+  other: Coś poszło nie tak podczas komunikacji z Kick. Spróbuj ponownie.
+  cancelled: Logowanie zostało anulowane.
+  oauth_rejected: Kick odrzucił próbę logowania.
+  no_code: Logowanie nie zostało zakończone — nie zwrócono kodu autoryzacyjnego.
+  state_mismatch: Nie udało się zweryfikować logowania — spróbuj ponownie.
+  exchange_failed: Nie udało się zakończyć logowania w Kick. Spróbuj ponownie.
+  not_logged_in: Nie jesteś zalogowany.
+  unknown: Coś poszło nie tak. Spróbuj ponownie.
