@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
 import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
+import { translateErrorCode } from '@/lib/error-messages';
 import type { KickLivestream } from '@/lib/types';
 
 // Kick's API returns livestreams oldest-first with no sort option, so a
@@ -29,7 +31,10 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
           accessToken
         )
       );
-      if (!res) throw new Error('Not logged in');
+      if (!res) {
+        setError(translateErrorCode('not_logged_in'));
+        return;
+      }
       setStreams((prev) => {
         const merged = reset ? res.data : [...prev, ...res.data];
         return [...merged].sort((a, b) => b.viewer_count - a.viewer_count);
@@ -37,7 +42,7 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
       setCursor(res.pagination.next_cursor);
     } catch (err) {
       setError(
-        err instanceof KickApiError ? `Kick API error: ${err.message}` : 'Failed to load streams'
+        err instanceof KickApiError ? translateErrorCode(err.kind) : translateErrorCode('unknown')
       );
     } finally {
       setLoading(false);
@@ -57,13 +62,13 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
     <div>
       {error && (
         <div style={{ color: 'crimson', fontSize: 12, marginBottom: 8 }}>
-          {error} <button onClick={() => load(true)}>Retry</button>
+          {error} <button onClick={() => load(true)}>{i18n.t('common.retry')}</button>
         </div>
       )}
 
       {loading && streams.length === 0 && (
         <div style={{ color: '#666', fontSize: 12, padding: '8px 0' }}>
-          Loading…
+          {i18n.t('common.loading')}
         </div>
       )}
 
@@ -78,7 +83,8 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
             <div style={{ fontWeight: 'bold' }}>{stream.broadcaster_user.username}</div>
             <div style={{ fontSize: 12, color: '#666' }}>{stream.title}</div>
             <div style={{ fontSize: 12, color: '#666' }}>
-              {stream.viewer_count.toLocaleString()} viewers · {stream.category?.name ?? ''}
+              {stream.viewer_count.toLocaleString()} {i18n.t('common.viewers')} ·{' '}
+              {stream.category?.name ?? ''}
             </div>
           </div>
         </div>
@@ -86,7 +92,7 @@ export function BrowseTab({ categoryId }: { categoryId?: number } = {}) {
 
       {cursor && (
         <button onClick={() => load(false)} disabled={loading} style={{ width: '100%', marginTop: 8 }}>
-          {loading ? 'Loading…' : 'Load more'}
+          {loading ? i18n.t('common.loading') : i18n.t('common.loadMore')}
         </button>
       )}
     </div>

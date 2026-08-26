@@ -1,0 +1,61 @@
+extName: Kickstand
+extDescription: Segui i canali di Kick.com, scopri chi è in diretta ed esplora gli stream.
+
+tabs:
+  following: Seguiti
+  browse: Esplora
+  categories: Categorie
+
+login:
+  title: Kickstand
+  subtitle: Segui i canali Kick e scopri chi è in diretta.
+  button: Accedi con Kick
+  buttonLoading: Accesso in corso…
+
+app:
+  settingsTitle: Impostazioni
+
+following:
+  slugPlaceholder: slug-del-canale
+  addButton: Aggiungi
+  addButtonLoading: Aggiunta in corso…
+  slugHelp1: Kickstand non può cercare i canali per nome — l'API di Kick permette di trovare un canale solo tramite il suo slug esatto, quindi dovrai digitarlo tu stesso.
+  slugHelp2Prefix: "Lo slug è la parte dell'URL del canale dopo kick.com/ — per kick.com/xqc è"
+  emptyState: Nessun canale seguito ancora. Aggiungine uno tramite slug qui sopra.
+  mute: Disattiva audio
+  unmute: Riattiva audio
+  channelNotFound: 'Nessun canale trovato per "{slug}"'
+  alreadyTracked: '"{slug}" è già seguito'
+
+settings:
+  title: Impostazioni
+  pollingInterval: Intervallo di controllo
+  every1Minute: Ogni 1 minuto
+  every1HalfMinutes: Ogni 1,5 minuti
+  notifyToggle: Notifica quando un canale seguito va in diretta
+  trackedChannels: Canali seguiti
+  logout: Esci
+
+notifications:
+  liveTitle: '{slug} è in diretta!'
+  liveDefaultMessage: In diretta ora su Kick
+
+common:
+  loading: Caricamento…
+  loadMore: Carica altri
+  retry: Riprova
+  viewers: spettatori
+  remove: Rimuovi
+
+errors:
+  network: Errore di rete — controlla la connessione e riprova.
+  unauthorized: La tua sessione è scaduta — accedi di nuovo.
+  rateLimited: Kick sta limitando le richieste — attendi un momento e riprova.
+  other: Qualcosa è andato storto nel comunicare con Kick. Riprova.
+  cancelled: L'accesso è stato annullato.
+  oauth_rejected: Kick ha rifiutato la richiesta di accesso.
+  no_code: L'accesso non è stato completato — non è stato restituito alcun codice di autorizzazione.
+  state_mismatch: Non è stato possibile verificare l'accesso — riprova.
+  exchange_failed: Non è stato possibile completare l'accesso con Kick. Riprova.
+  not_logged_in: Non hai effettuato l'accesso.
+  unknown: Qualcosa è andato storto. Riprova.

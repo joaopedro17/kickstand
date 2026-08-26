@@ -1,4 +1,4 @@
-import { startLoginFlow, withAuthRetry } from '@/lib/auth';
+import { startLoginFlow, withAuthRetry, AuthError } from '@/lib/auth';
 import { fetchLivestreamsForUsers, chunk } from '@/lib/kick-api';
 import {
   trackedChannelsStorage,
@@ -10,6 +10,22 @@ import {
 } from '@/lib/storage';
 
 const POLL_ALARM = 'kickstand-poll';
+
+// Dynamic import, not a static top-level one: WXT's entrypoint-scanning pass
+// (which runs on every `wxt prepare`/`wxt build`, including from a clean
+// `.wxt/` directory — e.g. a fresh clone or CI) directly executes this file
+// via a module runner to inspect it for `defineBackground()`, and does so
+// before `@wxt-dev/i18n`'s `#i18n` alias target has been written to disk.
+// A static `import { i18n } from '#i18n'` here fails that scan with
+// "Cannot find module '#i18n'" — reproduced locally against wxt@0.20.27 and
+// wxt@0.21.4, so it's an upstream ordering issue, not a config mistake. The
+// same static import works fine in every popup component, which WXT bundles
+// through its normal HTML-entrypoint pipeline instead of this direct-execute
+// scan. Deferring the import until it's actually needed at runtime (inside
+// `pollNow()`, well after the scan has finished) sidesteps it entirely.
+async function getI18n() {
+  return (await import('#i18n')).i18n;
+}
 
 function emptyEntry(): LiveStatusEntry {
   return {
@@ -86,15 +102,16 @@ export async function pollNow(): Promise<void> {
 
   const wentLive = diffLiveTransitions(previous, next);
   const settings = await settingsStorage.getValue();
-  if (settings.notificationsEnabled) {
+  if (settings.notificationsEnabled && wentLive.length > 0) {
+    const i18n = await getI18n();
     for (const id of wentLive) {
       const channel = tracked.find((c) => c.broadcasterUserId === id);
       if (channel && !channel.muted) {
         await browser.notifications.create(`kickstand-live-${id}`, {
           type: 'basic',
           iconUrl: browser.runtime.getURL('/icons/128.png'),
-          title: `${channel.slug} is live!`,
-          message: next[id].category?.name ?? 'Streaming now on Kick',
+          title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
+          message: next[id].category?.name ?? i18n.t('notifications.liveDefaultMessage'),
         });
       }
     }
@@ -111,12 +128,17 @@ export async function pollNow(): Promise<void> {
 // completes. The background service worker persists across that focus
 // change, so it's the only place this can reliably finish. The popup picks
 // up the result via authTokensStorage.watch() once it's next opened.
-async function login(): Promise<{ success: true } | { success: false; error: string }> {
+async function login(): Promise<
+  { success: true } | { success: false; error: string; detail?: string }
+> {
   try {
     await startLoginFlow();
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Login failed' };
+    if (err instanceof AuthError) {
+      return { success: false, error: err.code, detail: err.detail };
+    }
+    return { success: false, error: 'unknown' };
   }
 }
 

@@ -8,6 +8,24 @@ import { authTokensStorage, type AuthTokens } from './storage';
 import type { TokenResponse } from './types';
 import { KickApiError } from './kick-api';
 
+export type AuthErrorCode =
+  | 'cancelled'
+  | 'oauth_rejected'
+  | 'no_code'
+  | 'state_mismatch'
+  | 'exchange_failed';
+
+export class AuthError extends Error {
+  code: AuthErrorCode;
+  detail?: string;
+
+  constructor(code: AuthErrorCode, message: string, detail?: string) {
+    super(message);
+    this.code = code;
+    this.detail = detail;
+  }
+}
+
 function base64UrlEncode(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -47,7 +65,9 @@ async function exchangeCodeForTokens(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code, code_verifier: codeVerifier, redirect_uri: redirectUri }),
   });
-  if (!res.ok) throw new Error(`Token exchange failed: ${res.status}`);
+  if (!res.ok) {
+    throw new AuthError('exchange_failed', `Token exchange failed: ${res.status}`, String(res.status));
+  }
   return res.json();
 }
 
@@ -70,7 +90,7 @@ export async function startLoginFlow(): Promise<AuthTokens> {
     url: authUrl.toString(),
     interactive: true,
   });
-  if (!responseUrl) throw new Error('Login was cancelled');
+  if (!responseUrl) throw new AuthError('cancelled', 'Login was cancelled');
 
   const redirected = new URL(responseUrl);
   const code = redirected.searchParams.get('code');
@@ -78,12 +98,20 @@ export async function startLoginFlow(): Promise<AuthTokens> {
   const oauthError = redirected.searchParams.get('error');
   const oauthErrorDescription = redirected.searchParams.get('error_description');
   if (oauthError) {
-    throw new Error(
-      `Kick rejected login: ${oauthError}${oauthErrorDescription ? ` — ${oauthErrorDescription}` : ''}`
+    throw new AuthError(
+      'oauth_rejected',
+      `Kick rejected login: ${oauthError}${oauthErrorDescription ? ` — ${oauthErrorDescription}` : ''}`,
+      oauthErrorDescription ?? oauthError
     );
   }
-  if (!code) throw new Error(`No authorization code returned (${redirected.search || 'empty query string'})`);
-  if (returnedState !== state) throw new Error('OAuth state mismatch');
+  if (!code) {
+    throw new AuthError(
+      'no_code',
+      'No authorization code returned',
+      redirected.search || 'empty query string'
+    );
+  }
+  if (returnedState !== state) throw new AuthError('state_mismatch', 'OAuth state mismatch');
 
   const tokenResponse = await exchangeCodeForTokens(code, verifier, redirectUri);
   const tokens = toAuthTokens(tokenResponse);
