@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
 import { resolveChannelsBySlug, KickApiError } from '@/lib/kick-api';
+import { translateErrorCode } from '@/lib/error-messages';
 import {
   trackedChannelsStorage,
   liveStatusStorage,
@@ -35,13 +37,20 @@ export function FollowingTab() {
       const resolvedChannels = await withAuthRetry((accessToken) =>
         resolveChannelsBySlug([slug], accessToken)
       );
-      if (!resolvedChannels) throw new Error('Not logged in');
+      if (!resolvedChannels) {
+        setAddError(translateErrorCode('not_logged_in'));
+        return;
+      }
       const [resolved] = resolvedChannels;
-      if (!resolved) throw new Error(`No channel found for "${slug}"`);
+      if (!resolved) {
+        setAddError(i18n.t('following.channelNotFound', { slug }));
+        return;
+      }
 
       const current = await trackedChannelsStorage.getValue();
       if (current.some((c) => c.broadcasterUserId === resolved.broadcaster_user_id)) {
-        throw new Error(`"${slug}" is already tracked`);
+        setAddError(i18n.t('following.alreadyTracked', { slug }));
+        return;
       }
 
       const updated: TrackedChannel[] = [
@@ -58,11 +67,7 @@ export function FollowingTab() {
       await browser.runtime.sendMessage({ type: 'poll-now' });
     } catch (err) {
       setAddError(
-        err instanceof KickApiError
-          ? `Kick API error: ${err.message}`
-          : err instanceof Error
-          ? err.message
-          : 'Failed to add channel'
+        err instanceof KickApiError ? translateErrorCode(err.kind) : translateErrorCode('unknown')
       );
     } finally {
       setAdding(false);
@@ -100,24 +105,22 @@ export function FollowingTab() {
         <input
           value={slugInput}
           onChange={(e) => setSlugInput(e.target.value)}
-          placeholder="channel-slug"
+          placeholder={i18n.t('following.slugPlaceholder')}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         />
         <button onClick={handleAdd} disabled={adding}>
-          {adding ? 'Adding…' : 'Add'}
+          {adding ? i18n.t('following.addButtonLoading') : i18n.t('following.addButton')}
         </button>
       </div>
       <p style={{ color: '#666', fontSize: 12, marginTop: -8, marginBottom: 4 }}>
-        Kickstand can't look channels up by name — Kick's API only supports finding a
-        channel by its exact slug, so you'll need to type it in yourself.
+        {i18n.t('following.slugHelp1')}
       </p>
       <p style={{ color: '#666', fontSize: 12, marginTop: 0, marginBottom: 12 }}>
-        The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's{' '}
-        <code>xqc</code>.
+        {i18n.t('following.slugHelp2Prefix')} <code>xqc</code>.
       </p>
       {addError && <p style={{ color: 'crimson', fontSize: 12 }}>{addError}</p>}
 
-      {sorted.length === 0 && <p>No tracked channels yet. Add one by slug above.</p>}
+      {sorted.length === 0 && <p>{i18n.t('following.emptyState')}</p>}
 
       {sorted.map((channel) => {
         const status = liveStatus[channel.broadcasterUserId];
@@ -135,14 +138,17 @@ export function FollowingTab() {
               </div>
               {status?.isLive && (
                 <div style={{ fontSize: 12, color: '#666' }}>
-                  {status.viewerCount.toLocaleString()} viewers · {status.category?.name ?? ''}
+                  {status.viewerCount.toLocaleString()} {i18n.t('common.viewers')} ·{' '}
+                  {status.category?.name ?? ''}
                 </div>
               )}
             </div>
             <button onClick={() => handleToggleMute(channel.broadcasterUserId)}>
-              {channel.muted ? 'Unmute' : 'Mute'}
+              {channel.muted ? i18n.t('following.unmute') : i18n.t('following.mute')}
             </button>
-            <button onClick={() => handleRemove(channel.broadcasterUserId)}>Remove</button>
+            <button onClick={() => handleRemove(channel.broadcasterUserId)}>
+              {i18n.t('common.remove')}
+            </button>
           </div>
         );
       })}
