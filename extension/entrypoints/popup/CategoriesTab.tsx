@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
 import { fetchCategories, KickApiError } from '@/lib/kick-api';
+import { translateErrorCode } from '@/lib/error-messages';
 import type { KickCategoryWithTags } from '@/lib/types';
 
 export function CategoriesTab({
@@ -23,12 +25,15 @@ export function CategoriesTab({
           accessToken
         )
       );
-      if (!res) throw new Error('Not logged in');
+      if (!res) {
+        setError(translateErrorCode('not_logged_in'));
+        return;
+      }
       setCategories((prev) => (reset ? res.data : [...prev, ...res.data]));
       setCursor(res.pagination.next_cursor);
     } catch (err) {
       setError(
-        err instanceof KickApiError ? `Kick API error: ${err.message}` : 'Failed to load categories'
+        err instanceof KickApiError ? translateErrorCode(err.kind) : translateErrorCode('unknown')
       );
     } finally {
       setLoading(false);
@@ -44,13 +49,13 @@ export function CategoriesTab({
     <div>
       {error && (
         <div style={{ color: 'crimson', fontSize: 12, marginBottom: 8 }}>
-          {error} <button onClick={() => load(true)}>Retry</button>
+          {error} <button onClick={() => load(true)}>{i18n.t('common.retry')}</button>
         </div>
       )}
 
       {loading && categories.length === 0 && (
         <div style={{ color: '#666', fontSize: 12, padding: '8px 0' }}>
-          Loading…
+          {i18n.t('common.loading')}
         </div>
       )}
 
@@ -69,7 +74,7 @@ export function CategoriesTab({
 
       {cursor && (
         <button onClick={() => load(false)} disabled={loading} style={{ width: '100%', marginTop: 8 }}>
-          {loading ? 'Loading…' : 'Load more'}
+          {loading ? i18n.t('common.loading') : i18n.t('common.loadMore')}
         </button>
       )}
     </div>
