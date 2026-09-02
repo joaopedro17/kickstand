@@ -1,7 +1,11 @@
 import { defineConfig } from 'wxt';
 import { readFileSync } from 'node:fs';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  vite: () => ({
+    plugins: [tailwindcss()],
+  }),
   modules: ['@wxt-dev/module-react', '@wxt-dev/i18n/module'],
   manifest: (env) => {
     // Pins the Chrome extension ID (see extension/.secrets/extension-id.txt)

@@ -7,6 +7,13 @@ import {
   type Settings,
   type TrackedChannel,
 } from '@/lib/storage';
+import {
+  EmptyState,
+  GhostButton,
+  Icon,
+  SectionHeader,
+  Select,
+} from './components/ui';
 
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -26,7 +33,10 @@ export function SettingsPanel() {
   if (!settings) return null;
 
   async function updateInterval(minutes: number) {
-    await settingsStorage.setValue({ ...settings!, pollingIntervalMinutes: minutes });
+    await settingsStorage.setValue({
+      ...settings!,
+      pollingIntervalMinutes: minutes,
+    });
   }
 
   async function toggleNotifications() {
@@ -37,46 +47,110 @@ export function SettingsPanel() {
   }
 
   async function removeChannel(id: number) {
-    await trackedChannelsStorage.setValue(channels.filter((c) => c.broadcasterUserId !== id));
+    await trackedChannelsStorage.setValue(
+      channels.filter((c) => c.broadcasterUserId !== id)
+    );
   }
 
   return (
     <div>
-      <h3>{i18n.t('settings.title')}</h3>
-
-      <label>
-        {i18n.t('settings.pollingInterval')}
-        <select
+      <section
+        className="mb-5 rounded-2xl border border-white/[0.06] bg-panel p-4 shadow-lg shadow-black/10"
+        aria-labelledby="notifications-heading"
+      >
+        <SectionHeader
+          icon="lucide:bell"
+          title="Notifications"
+          kicker="Stay in the loop"
+        />
+        <label
+          htmlFor="polling-interval"
+          className="mb-2 block text-xs font-semibold text-muted"
+        >
+          {i18n.t('settings.pollingInterval')}
+        </label>
+        <Select
+          id="polling-interval"
           value={settings.pollingIntervalMinutes}
           onChange={(e) => updateInterval(Number(e.target.value))}
         >
           <option value={1}>{i18n.t('settings.every1Minute')}</option>
           <option value={1.5}>{i18n.t('settings.every1HalfMinutes')}</option>
-        </select>
-      </label>
+        </Select>
 
-      <div>
-        <label>
+        <label
+          htmlFor="live-notifications"
+          className="mt-4 flex cursor-pointer items-center gap-2 text-xs text-white transition hover:text-lime"
+        >
           <input
+            id="live-notifications"
             type="checkbox"
             checked={settings.notificationsEnabled}
             onChange={toggleNotifications}
+            className="h-4 w-4 cursor-pointer accent-[#b8f34a]"
           />
-          {i18n.t('settings.notifyToggle')}
+          <span>{i18n.t('settings.notifyToggle')}</span>
         </label>
-      </div>
+      </section>
 
-      <h4>{i18n.t('settings.trackedChannels')}</h4>
-      {channels.map((channel) => (
-        <div key={channel.broadcasterUserId} style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>{channel.slug}</span>
-          <button onClick={() => removeChannel(channel.broadcasterUserId)}>
-            {i18n.t('common.remove')}
-          </button>
+      <section
+        className="mb-5 rounded-2xl border border-white/[0.06] bg-panel p-4 shadow-lg shadow-black/10"
+        aria-labelledby="tracked-heading"
+      >
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div>
+            <h2
+              id="tracked-heading"
+              className="text-sm font-extrabold tracking-tight"
+            >
+              {i18n.t('settings.trackedChannels')}
+            </h2>
+            <p className="mt-1 text-xs text-muted">
+              {channels.length === 1
+                ? '1 channel in your radar'
+                : `${channels.length} channels in your radar`}
+            </p>
+          </div>
+          <span className="rounded-lg bg-lime/10 px-2 py-1 text-[10px] font-bold text-lime">
+            {channels.length} TOTAL
+          </span>
         </div>
-      ))}
 
-      <button onClick={() => logout()} style={{ marginTop: 12 }}>
+        {channels.length === 0 ? (
+          <EmptyState
+            icon="lucide:list"
+            title="No channels tracked yet."
+            hint="Add one from the Following tab."
+          />
+        ) : (
+          <ul className="divide-y divide-white/[0.06]">
+            {channels.map((channel) => (
+              <li
+                key={channel.broadcasterUserId}
+                className="flex min-h-12 items-center justify-between gap-3 py-2 first:pt-0 last:pb-0"
+              >
+                <span className="truncate text-sm font-semibold">
+                  {channel.slug}
+                </span>
+                <GhostButton
+                  type="button"
+                  onClick={() => removeChannel(channel.broadcasterUserId)}
+                >
+                  <Icon icon="lucide:x" className="text-sm" />
+                  {i18n.t('common.remove')}
+                </GhostButton>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <button
+        type="button"
+        onClick={() => logout()}
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-panel px-4 text-sm font-bold text-white transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 active:scale-95"
+      >
+        <Icon icon="lucide:log-out" className="text-base" />
         {i18n.t('settings.logout')}
       </button>
     </div>

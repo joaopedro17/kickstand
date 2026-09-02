@@ -1,66 +1,49 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  --color-lime: #b8f34a;
+  --color-lime-soft: #c8ff68;
+  --color-ink: #171817;
+  --color-panel: #202220;
+  --color-panel-hover: #272a27;
+  --color-muted: #8f9690;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  html,
+  body,
+  #root {
+    background-color: var(--color-ink);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  a:hover {
-    color: #747bff;
+
+  body {
+    margin: 0;
   }
+
+  /* Native form-control theming so <select>/<input>/<checkbox> pick up the
+     dark surface without every callsite re-declaring it. */
+  input,
+  select,
+  textarea,
   button {
-    background-color: #f9f9f9;
+    font-family: inherit;
+  }
+
+  /* Tailwind v4 ships without a preflight reset for scrollbars; make popup
+     scrollbars match the ink palette so they don't punch a light stripe. */
+  * {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-width: thin;
   }
 }
