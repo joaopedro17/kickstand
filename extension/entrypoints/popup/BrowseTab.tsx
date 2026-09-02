@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
 import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
@@ -10,7 +10,6 @@ import {
   ErrorBanner,
   GhostButton,
   Icon,
-  IconButton,
   LiveBadge,
   PrimaryButton,
   ViewerCount,
@@ -35,7 +34,6 @@ export function BrowseTab({
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
 
   async function load(reset: boolean) {
     setLoading(true);
@@ -80,83 +78,39 @@ export function BrowseTab({
     browser.tabs.create({ url: `https://kick.com/${slug}` });
   }
 
-  // Client-side filter across everything already fetched. The Kick livestream
-  // endpoint has no text search — see DESIGN_DECISIONS.md.
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return streams;
-    return streams.filter(
-      (s) =>
-        s.channel.slug.toLowerCase().includes(q) ||
-        s.title.toLowerCase().includes(q) ||
-        s.category?.name.toLowerCase().includes(q)
-    );
-  }, [query, streams]);
-
   return (
     <div>
-      <form
-        className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-panel p-2 transition hover:border-white/20 focus-within:border-lime/70 focus-within:ring-2 focus-within:ring-lime/10"
-        role="search"
-        onSubmit={(e) => e.preventDefault()}
-      >
-        <Icon icon="lucide:search" className="ml-1 text-base text-muted" />
-        <label htmlFor="browse-search" className="sr-only">
-          Search channels
-        </label>
-        <input
-          id="browse-search"
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search channels, titles, categories"
-          className="min-w-0 flex-1 bg-transparent px-1 py-1.5 text-sm text-white outline-none placeholder:text-muted/70"
-        />
-        {query && (
-          <IconButton
-            type="button"
-            aria-label="Clear search"
-            onClick={() => setQuery('')}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-muted hover:bg-white/[0.08]"
-          >
-            <Icon icon="lucide:x" />
-          </IconButton>
-        )}
-      </form>
-
       {categoryId && categoryName && (
         <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-lime/20 bg-lime/5 px-3 py-2 text-xs">
           <span className="flex items-center gap-1.5 text-white">
             <Icon icon="lucide:filter" className="text-lime" />
-            Filtered by{' '}
+            {i18n.t('browse.filteredByPrefix')}{' '}
             <span className="font-bold text-lime">{categoryName}</span>
           </span>
           {onClearCategory && (
-            <GhostButton type="button" onClick={onClearCategory} className="min-h-8 px-2 py-0">
+            <GhostButton
+              type="button"
+              onClick={onClearCategory}
+              className="min-h-8 px-2 py-0"
+            >
               <Icon icon="lucide:x" className="text-sm" />
-              Clear
+              {i18n.t('browse.clearFilter')}
             </GhostButton>
           )}
         </div>
       )}
 
-      {error && (
-        <ErrorBanner message={error} onRetry={() => load(true)} />
-      )}
+      {error && <ErrorBanner message={error} onRetry={() => load(true)} />}
 
       {loading && streams.length === 0 && <StreamGridSkeleton />}
 
-      {!loading && filtered.length === 0 && !error && (
-        <EmptyState
-          icon={query ? 'lucide:search-x' : 'lucide:tv-off'}
-          title={query ? 'No matches for that search.' : 'No live streams right now.'}
-          hint={query ? 'Try a different slug or title.' : undefined}
-        />
+      {!loading && streams.length === 0 && !error && (
+        <EmptyState icon="lucide:tv-off" title={i18n.t('browse.emptyLive')} />
       )}
 
-      {filtered.length > 0 && (
+      {streams.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          {filtered.map((stream) => (
+          {streams.map((stream) => (
             <StreamCard
               key={stream.id}
               stream={stream}
@@ -187,7 +141,11 @@ function StreamCard({
   onOpen: () => void;
 }) {
   return (
-    <Card interactive className="group cursor-pointer overflow-hidden" onClick={onOpen}>
+    <Card
+      interactive
+      className="group cursor-pointer overflow-hidden"
+      onClick={onOpen}
+    >
       <div className="relative h-28 overflow-hidden bg-neutral-800">
         {stream.thumbnail ? (
           <img

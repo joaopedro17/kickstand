@@ -99,14 +99,20 @@ export function FollowingTab() {
     browser.tabs.create({ url: `https://kick.com/${slug}` });
   }
 
-  const sorted = [...channels].sort((a, b) => {
-    const aLive = liveStatus[a.broadcasterUserId]?.isLive ?? false;
-    const bLive = liveStatus[b.broadcasterUserId]?.isLive ?? false;
-    if (aLive !== bLive) return aLive ? -1 : 1;
-    const aViewers = liveStatus[a.broadcasterUserId]?.viewerCount ?? 0;
-    const bViewers = liveStatus[b.broadcasterUserId]?.viewerCount ?? 0;
-    return bViewers - aViewers;
+  const live: TrackedChannel[] = [];
+  const offline: TrackedChannel[] = [];
+  for (const c of channels) {
+    (liveStatus[c.broadcasterUserId]?.isLive ? live : offline).push(c);
+  }
+  live.sort((a, b) => {
+    const av = liveStatus[a.broadcasterUserId]?.viewerCount ?? 0;
+    const bv = liveStatus[b.broadcasterUserId]?.viewerCount ?? 0;
+    return bv - av;
   });
+  // Preserve add-order for offline — no viewer signal to sort on, and
+  // stable ordering keeps the collapsible section from reshuffling every
+  // poll cycle.
+  offline.sort((a, b) => a.addedAt - b.addedAt);
 
   return (
     <div>
@@ -123,10 +129,10 @@ export function FollowingTab() {
               id="add-channel-heading"
               className="text-sm font-extrabold tracking-tight"
             >
-              Add a channel
+              {i18n.t('following.addChannelTitle')}
             </h2>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-              Follow by exact slug
+              {i18n.t('following.addChannelKicker')}
             </p>
           </div>
         </div>
@@ -169,25 +175,37 @@ export function FollowingTab() {
         )}
       </section>
 
-      {sorted.length === 0 ? (
+      {channels.length === 0 ? (
         <EmptyState
           icon="lucide:radio"
           title={i18n.t('following.emptyState')}
-          hint="Paste a slug above to start tracking."
+          hint={i18n.t('following.emptyStateHint')}
         />
       ) : (
-        <ul className="space-y-2">
-          {sorted.map((channel) => (
-            <li key={channel.broadcasterUserId}>
-              <ChannelRow
-                channel={channel}
-                status={liveStatus[channel.broadcasterUserId]}
-                onOpen={() => openChannel(channel.slug)}
-                onToggleMute={() => handleToggleMute(channel.broadcasterUserId)}
-              />
-            </li>
-          ))}
-        </ul>
+        <>
+          {live.length > 0 && (
+            <ul className="space-y-2">
+              {live.map((channel) => (
+                <li key={channel.broadcasterUserId}>
+                  <ChannelRow
+                    channel={channel}
+                    status={liveStatus[channel.broadcasterUserId]}
+                    onOpen={() => openChannel(channel.slug)}
+                    onToggleMute={() => handleToggleMute(channel.broadcasterUserId)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          {offline.length > 0 && (
+            <OfflineGroup
+              channels={offline}
+              onOpen={openChannel}
+              onToggleMute={handleToggleMute}
+              liveStatus={liveStatus}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -264,10 +282,64 @@ function ChannelRow({
           </>
         ) : (
           <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-muted">
-            Offline
+            {i18n.t('following.offline')}
           </p>
         )}
       </div>
     </Card>
+  );
+}
+
+function OfflineGroup({
+  channels,
+  liveStatus,
+  onOpen,
+  onToggleMute,
+}: {
+  channels: TrackedChannel[];
+  liveStatus: LiveStatusCache;
+  onOpen: (slug: string) => void;
+  onToggleMute: (id: number) => void;
+}) {
+  // Collapsed by default: the point of surfacing offline is to reassure the
+  // user their tracking is intact, not to distract from currently-live cards.
+  const [expanded, setExpanded] = useState(false);
+  const label =
+    channels.length === 1
+      ? i18n.t('following.offlineGroupOne')
+      : i18n.t('following.offlineGroupOther', { count: String(channels.length) });
+
+  return (
+    <section className="mt-4">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted transition hover:text-white"
+      >
+        <span>{label}</span>
+        <span className="flex items-center gap-1">
+          {expanded ? i18n.t('following.hideOffline') : i18n.t('following.showOffline')}
+          <Icon
+            icon={expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'}
+            className="text-sm"
+          />
+        </span>
+      </button>
+      {expanded && (
+        <ul className="mt-2 space-y-2">
+          {channels.map((channel) => (
+            <li key={channel.broadcasterUserId}>
+              <ChannelRow
+                channel={channel}
+                status={liveStatus[channel.broadcasterUserId]}
+                onOpen={() => onOpen(channel.slug)}
+                onToggleMute={() => onToggleMute(channel.broadcasterUserId)}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

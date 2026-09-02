@@ -19,21 +19,48 @@ following:
   slugPlaceholder: channel-slug
   addButton: Add
   addButtonLoading: Adding…
+  addChannelTitle: Add a channel
+  addChannelKicker: Follow by exact slug
   slugHelp1: Kickstand can't look channels up by name — Kick's API only supports finding a channel by its exact slug, so you'll need to type it in yourself.
   slugHelp2Prefix: "The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's"
-  emptyState: No tracked channels yet. Add one by slug above.
+  emptyState: No tracked channels yet.
+  emptyStateHint: Paste a slug above to start tracking.
   mute: Mute
   unmute: Unmute
+  offline: Offline
+  offlineGroupOne: Offline (1)
+  offlineGroupOther: 'Offline ({count})'
+  showOffline: Show offline
+  hideOffline: Hide offline
   channelNotFound: 'No channel found for "{slug}"'
   alreadyTracked: '"{slug}" is already tracked'
+
+browse:
+  emptyLive: No live streams right now.
+  filteredByPrefix: Filtered by
+  clearFilter: Clear
+
+categories:
+  searchPlaceholder: Search categories
+  clearSearch: Clear search
+  emptyMatches: No matching categories.
+  emptyAll: No categories available.
 
 settings:
   title: Settings
   pollingInterval: Polling interval
   every1Minute: Every 1 minute
-  every1HalfMinutes: Every 1.5 minutes
+  every2Minutes: Every 2 minutes
+  every5Minutes: Every 5 minutes
   notifyToggle: Notify when a tracked channel goes live
+  notificationsTitle: Notifications
+  notificationsKicker: Stay in the loop
   trackedChannels: Tracked channels
+  trackedCountOne: 1 channel in your radar
+  trackedCountOther: '{count} channels in your radar'
+  totalBadge: TOTAL
+  emptyTrackedTitle: No channels tracked yet.
+  emptyTrackedHint: Add one from the Following tab.
   logout: Log out
 
 notifications:

@@ -19,21 +19,48 @@ following:
   slugPlaceholder: kanal-slug
   addButton: Hinzufügen
   addButtonLoading: Wird hinzugefügt…
+  addChannelTitle: Kanal hinzufügen
+  addChannelKicker: Per exaktem Slug folgen
   slugHelp1: Kickstand kann Kanäle nicht nach Namen suchen — Kicks API unterstützt nur die Suche über den exakten Slug, also musst du ihn selbst eingeben.
   slugHelp2Prefix: "Der Slug ist der Teil der Kanal-URL nach kick.com/ — bei kick.com/xqc lautet er"
-  emptyState: Noch keine verfolgten Kanäle. Füge oben einen per Slug hinzu.
+  emptyState: Noch keine verfolgten Kanäle.
+  emptyStateHint: Füge oben einen Slug ein, um mit dem Verfolgen zu starten.
   mute: Stummschalten
   unmute: Stummschaltung aufheben
+  offline: Offline
+  offlineGroupOne: Offline (1)
+  offlineGroupOther: 'Offline ({count})'
+  showOffline: Offline anzeigen
+  hideOffline: Offline ausblenden
   channelNotFound: 'Kein Kanal für „{slug}“ gefunden'
   alreadyTracked: '„{slug}“ wird bereits verfolgt'
+
+browse:
+  emptyLive: Momentan keine Live-Streams.
+  filteredByPrefix: Gefiltert nach
+  clearFilter: Zurücksetzen
+
+categories:
+  searchPlaceholder: Kategorien suchen
+  clearSearch: Suche zurücksetzen
+  emptyMatches: Keine passenden Kategorien.
+  emptyAll: Keine Kategorien verfügbar.
 
 settings:
   title: Einstellungen
   pollingInterval: Abfrageintervall
   every1Minute: Alle 1 Minute
-  every1HalfMinutes: Alle 1,5 Minuten
+  every2Minutes: Alle 2 Minuten
+  every5Minutes: Alle 5 Minuten
   notifyToggle: Benachrichtigen, wenn ein verfolgter Kanal live geht
+  notificationsTitle: Benachrichtigungen
+  notificationsKicker: Immer auf dem Laufenden
   trackedChannels: Verfolgte Kanäle
+  trackedCountOne: 1 Kanal auf deinem Radar
+  trackedCountOther: '{count} Kanäle auf deinem Radar'
+  totalBadge: GESAMT
+  emptyTrackedTitle: Noch keine Kanäle verfolgt.
+  emptyTrackedHint: Füge einen im Tab „Verfolgt“ hinzu.
   logout: Abmelden
 
 notifications:

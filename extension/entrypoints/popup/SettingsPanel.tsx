@@ -15,6 +15,18 @@ import {
   Select,
 } from './components/ui';
 
+// Users who saved the retired 1.5-minute option before this UI shipped keep
+// their polling behavior intact — the background alarm still honors any
+// numeric value stored under pollingIntervalMinutes. Only the <select>
+// coerces to a supported option so the dropdown never shows a blank slot.
+const SUPPORTED_INTERVALS = [1, 2, 5] as const;
+
+function normalizeInterval(minutes: number): number {
+  return SUPPORTED_INTERVALS.includes(minutes as (typeof SUPPORTED_INTERVALS)[number])
+    ? minutes
+    : 1;
+}
+
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [channels, setChannels] = useState<TrackedChannel[]>([]);
@@ -60,8 +72,8 @@ export function SettingsPanel() {
       >
         <SectionHeader
           icon="lucide:bell"
-          title="Notifications"
-          kicker="Stay in the loop"
+          title={i18n.t('settings.notificationsTitle')}
+          kicker={i18n.t('settings.notificationsKicker')}
         />
         <label
           htmlFor="polling-interval"
@@ -71,11 +83,12 @@ export function SettingsPanel() {
         </label>
         <Select
           id="polling-interval"
-          value={settings.pollingIntervalMinutes}
+          value={normalizeInterval(settings.pollingIntervalMinutes)}
           onChange={(e) => updateInterval(Number(e.target.value))}
         >
           <option value={1}>{i18n.t('settings.every1Minute')}</option>
-          <option value={1.5}>{i18n.t('settings.every1HalfMinutes')}</option>
+          <option value={2}>{i18n.t('settings.every2Minutes')}</option>
+          <option value={5}>{i18n.t('settings.every5Minutes')}</option>
         </Select>
 
         <label
@@ -107,20 +120,20 @@ export function SettingsPanel() {
             </h2>
             <p className="mt-1 text-xs text-muted">
               {channels.length === 1
-                ? '1 channel in your radar'
-                : `${channels.length} channels in your radar`}
+                ? i18n.t('settings.trackedCountOne')
+                : i18n.t('settings.trackedCountOther', { count: String(channels.length) })}
             </p>
           </div>
           <span className="rounded-lg bg-lime/10 px-2 py-1 text-[10px] font-bold text-lime">
-            {channels.length} TOTAL
+            {channels.length} {i18n.t('settings.totalBadge')}
           </span>
         </div>
 
         {channels.length === 0 ? (
           <EmptyState
             icon="lucide:list"
-            title="No channels tracked yet."
-            hint="Add one from the Following tab."
+            title={i18n.t('settings.emptyTrackedTitle')}
+            hint={i18n.t('settings.emptyTrackedHint')}
           />
         ) : (
           <ul className="divide-y divide-white/[0.06]">

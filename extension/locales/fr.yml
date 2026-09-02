@@ -19,21 +19,48 @@ following:
   slugPlaceholder: slug-de-la-chaîne
   addButton: Ajouter
   addButtonLoading: Ajout en cours…
+  addChannelTitle: Ajouter une chaîne
+  addChannelKicker: Suivre par slug exact
   slugHelp1: Kickstand ne peut pas rechercher des chaînes par leur nom — l'API de Kick ne permet de trouver une chaîne que par son slug exact, vous devrez donc le saisir vous-même.
   slugHelp2Prefix: "Le slug est la partie de l'URL de la chaîne après kick.com/ — pour kick.com/xqc, c'est"
-  emptyState: Aucune chaîne suivie pour l'instant. Ajoutez-en une par son slug ci-dessus.
+  emptyState: Aucune chaîne suivie pour l'instant.
+  emptyStateHint: Collez un slug ci-dessus pour commencer le suivi.
   mute: Muet
   unmute: Réactiver le son
+  offline: Hors ligne
+  offlineGroupOne: Hors ligne (1)
+  offlineGroupOther: 'Hors ligne ({count})'
+  showOffline: Afficher hors ligne
+  hideOffline: Masquer hors ligne
   channelNotFound: 'Aucune chaîne trouvée pour « {slug} »'
   alreadyTracked: '« {slug} » est déjà suivi'
+
+browse:
+  emptyLive: Aucun stream en direct pour le moment.
+  filteredByPrefix: Filtré par
+  clearFilter: Réinitialiser
+
+categories:
+  searchPlaceholder: Rechercher des catégories
+  clearSearch: Effacer la recherche
+  emptyMatches: Aucune catégorie correspondante.
+  emptyAll: Aucune catégorie disponible.
 
 settings:
   title: Paramètres
   pollingInterval: Intervalle de vérification
   every1Minute: Toutes les 1 minute
-  every1HalfMinutes: Toutes les 1,5 minute
+  every2Minutes: Toutes les 2 minutes
+  every5Minutes: Toutes les 5 minutes
   notifyToggle: Notifier quand une chaîne suivie passe en direct
+  notificationsTitle: Notifications
+  notificationsKicker: Restez au courant
   trackedChannels: Chaînes suivies
+  trackedCountOne: 1 chaîne sur votre radar
+  trackedCountOther: '{count} chaînes sur votre radar'
+  totalBadge: TOTAL
+  emptyTrackedTitle: Aucune chaîne suivie pour l'instant.
+  emptyTrackedHint: Ajoutez-en une depuis l'onglet Suivis.
   logout: Se déconnecter
 
 notifications:

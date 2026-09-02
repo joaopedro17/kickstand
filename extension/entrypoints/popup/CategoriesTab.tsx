@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
 import { fetchCategories, KickApiError } from '@/lib/kick-api';
@@ -13,6 +13,10 @@ import {
   PrimaryButton,
 } from './components/ui';
 
+// A single load() drives both modes:
+//   - activeQuery === null → browse (paginated via cursor)
+//   - activeQuery === string → server-side search via name[]= (no cursor,
+//     Kick's search endpoint returns a single page)
 export function CategoriesTab({
   onSelectCategory,
 }: {
@@ -22,15 +26,26 @@ export function CategoriesTab({
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
+  const [queryInput, setQueryInput] = useState('');
+  const [activeQuery, setActiveQuery] = useState<string | null>(null);
 
-  async function load(reset: boolean) {
+  async function load(
+    reset: boolean,
+    override?: { query: string | null }
+  ) {
+    // Resolve mode from override → local state on the very first call, so a
+    // submit and its state update don't race the fetch.
+    const query = override ? override.query : activeQuery;
     setLoading(true);
     setError(null);
     try {
       const res = await withAuthRetry((accessToken) =>
         fetchCategories(
-          { cursor: reset ? undefined : cursor ?? undefined, limit: 25 },
+          {
+            cursor: reset || query !== null ? undefined : cursor ?? undefined,
+            limit: 25,
+            name: query ? [query] : undefined,
+          },
           accessToken
         )
       );
@@ -39,7 +54,9 @@ export function CategoriesTab({
         return;
       }
       setCategories((prev) => (reset ? res.data : [...prev, ...res.data]));
-      setCursor(res.pagination.next_cursor);
+      // Search mode returns everything in one page — pin cursor to null so
+      // we never fall into paginate-then-search-then-paginate confusion.
+      setCursor(query !== null ? null : res.pagination.next_cursor);
     } catch (err) {
       setError(
         err instanceof KickApiError
@@ -56,40 +73,49 @@ export function CategoriesTab({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return categories;
-    return categories.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.tags.some((t) => t.toLowerCase().includes(q))
-    );
-  }, [query, categories]);
+  function submitSearch() {
+    const q = queryInput.trim();
+    const next = q.length > 0 ? q : null;
+    setActiveQuery(next);
+    load(true, { query: next });
+  }
+
+  function clearSearch() {
+    if (activeQuery === null && queryInput === '') return;
+    setQueryInput('');
+    setActiveQuery(null);
+    load(true, { query: null });
+  }
+
+  const isSearching = activeQuery !== null;
 
   return (
     <div>
       <form
         className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-panel p-2 transition hover:border-white/20 focus-within:border-lime/70 focus-within:ring-2 focus-within:ring-lime/10"
         role="search"
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitSearch();
+        }}
       >
         <Icon icon="lucide:search" className="ml-1 text-base text-muted" />
         <label htmlFor="category-search" className="sr-only">
-          Search categories
+          {i18n.t('categories.searchPlaceholder')}
         </label>
         <input
           id="category-search"
           type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search categories"
+          value={queryInput}
+          onChange={(e) => setQueryInput(e.target.value)}
+          placeholder={i18n.t('categories.searchPlaceholder')}
           className="min-w-0 flex-1 bg-transparent px-1 py-1.5 text-sm text-white outline-none placeholder:text-muted/70"
         />
-        {query && (
+        {(isSearching || queryInput) && (
           <IconButton
             type="button"
-            aria-label="Clear search"
-            onClick={() => setQuery('')}
+            aria-label={i18n.t('categories.clearSearch')}
+            onClick={clearSearch}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-muted hover:bg-white/[0.08]"
           >
             <Icon icon="lucide:x" />
@@ -101,16 +127,20 @@ export function CategoriesTab({
 
       {loading && categories.length === 0 && <CategoryGridSkeleton />}
 
-      {!loading && filtered.length === 0 && !error && (
+      {!loading && categories.length === 0 && !error && (
         <EmptyState
           icon="lucide:layout-grid"
-          title={query ? 'No matching categories.' : 'No categories available.'}
+          title={
+            isSearching
+              ? i18n.t('categories.emptyMatches')
+              : i18n.t('categories.emptyAll')
+          }
         />
       )}
 
-      {filtered.length > 0 && (
+      {categories.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          {filtered.map((category) => (
+          {categories.map((category) => (
             <CategoryCard
               key={category.id}
               category={category}
