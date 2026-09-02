@@ -1,6 +1,6 @@
 # Kickstand Privacy Policy
 
-_Last updated: 2026-07-24_
+_Last updated: 2026-09-02_
 
 Kickstand is a browser extension that lets you track Kick.com channels, see
 who's live, and browse Kick's live streams and categories. This policy
@@ -12,8 +12,8 @@ explains what data it handles.
   locally on your device (`chrome.storage.local`) so you stay signed in.
   Never transmitted anywhere except to Kick's own servers to authenticate
   API requests, and to refresh the token when it expires.
-- **Your tracked channel list and settings** (polling interval, notification
-  preferences) — stored via your browser's built-in sync storage
+- **Your tracked channel list and settings** (notification preferences) —
+  stored via your browser's built-in sync storage
   (`chrome.storage.sync`). If you have Chrome Sync or Firefox Sync enabled,
   this syncs across your own devices through Google's or Mozilla's sync
   infrastructure — Kickstand does not operate any server that receives or

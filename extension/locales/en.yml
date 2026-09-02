@@ -48,10 +48,6 @@ categories:
 
 settings:
   title: Settings
-  pollingInterval: Polling interval
-  every1Minute: Every 1 minute
-  every2Minutes: Every 2 minutes
-  every5Minutes: Every 5 minutes
   notifyToggle: Notify when a tracked channel goes live
   notificationsTitle: Notifications
   notificationsKicker: Stay in the loop

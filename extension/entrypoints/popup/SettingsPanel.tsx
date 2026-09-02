@@ -12,20 +12,7 @@ import {
   GhostButton,
   Icon,
   SectionHeader,
-  Select,
 } from './components/ui';
-
-// Users who saved the retired 1.5-minute option before this UI shipped keep
-// their polling behavior intact — the background alarm still honors any
-// numeric value stored under pollingIntervalMinutes. Only the <select>
-// coerces to a supported option so the dropdown never shows a blank slot.
-const SUPPORTED_INTERVALS = [1, 2, 5] as const;
-
-function normalizeInterval(minutes: number): number {
-  return SUPPORTED_INTERVALS.includes(minutes as (typeof SUPPORTED_INTERVALS)[number])
-    ? minutes
-    : 1;
-}
 
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -43,13 +30,6 @@ export function SettingsPanel() {
   }, []);
 
   if (!settings) return null;
-
-  async function updateInterval(minutes: number) {
-    await settingsStorage.setValue({
-      ...settings!,
-      pollingIntervalMinutes: minutes,
-    });
-  }
 
   async function toggleNotifications() {
     await settingsStorage.setValue({
@@ -76,24 +56,8 @@ export function SettingsPanel() {
           kicker={i18n.t('settings.notificationsKicker')}
         />
         <label
-          htmlFor="polling-interval"
-          className="mb-2 block text-xs font-semibold text-muted"
-        >
-          {i18n.t('settings.pollingInterval')}
-        </label>
-        <Select
-          id="polling-interval"
-          value={normalizeInterval(settings.pollingIntervalMinutes)}
-          onChange={(e) => updateInterval(Number(e.target.value))}
-        >
-          <option value={1}>{i18n.t('settings.every1Minute')}</option>
-          <option value={2}>{i18n.t('settings.every2Minutes')}</option>
-          <option value={5}>{i18n.t('settings.every5Minutes')}</option>
-        </Select>
-
-        <label
           htmlFor="live-notifications"
-          className="mt-4 flex cursor-pointer items-center gap-2 text-xs text-white transition hover:text-lime"
+          className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-white transition hover:text-lime"
         >
           <input
             id="live-notifications"

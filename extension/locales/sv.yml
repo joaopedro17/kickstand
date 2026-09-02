@@ -48,10 +48,6 @@ categories:
 
 settings:
   title: Inställningar
-  pollingInterval: Uppdateringsintervall
-  every1Minute: Var 1:a minut
-  every2Minutes: Var 2:a minut
-  every5Minutes: Var 5:e minut
   notifyToggle: Meddela när en följd kanal sänder live
   notificationsTitle: Aviseringar
   notificationsKicker: Håll dig uppdaterad

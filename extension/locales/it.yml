@@ -48,10 +48,6 @@ categories:
 
 settings:
   title: Impostazioni
-  pollingInterval: Intervallo di controllo
-  every1Minute: Ogni 1 minuto
-  every2Minutes: Ogni 2 minuti
-  every5Minutes: Ogni 5 minuti
   notifyToggle: Notifica quando un canale seguito va in diretta
   notificationsTitle: Notifiche
   notificationsKicker: Resta aggiornato

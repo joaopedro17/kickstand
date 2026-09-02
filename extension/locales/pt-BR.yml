@@ -48,10 +48,6 @@ categories:
 
 settings:
   title: Configurações
-  pollingInterval: Intervalo de verificação
-  every1Minute: A cada 1 minuto
-  every2Minutes: A cada 2 minutos
-  every5Minutes: A cada 5 minutos
   notifyToggle: Notificar quando um canal acompanhado entrar ao vivo
   notificationsTitle: Notificações
   notificationsKicker: Fique por dentro

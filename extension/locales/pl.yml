@@ -48,10 +48,6 @@ categories:
 
 settings:
   title: Ustawienia
-  pollingInterval: Częstotliwość odpytywania
-  every1Minute: Co 1 minutę
-  every2Minutes: Co 2 minuty
-  every5Minutes: Co 5 minut
   notifyToggle: Powiadamiaj, gdy obserwowany kanał wejdzie na żywo
   notificationsTitle: Powiadomienia
   notificationsKicker: Bądź na bieżąco

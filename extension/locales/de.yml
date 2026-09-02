@@ -48,10 +48,6 @@ categories:
 
 settings:
   title: Einstellungen
-  pollingInterval: Abfrageintervall
-  every1Minute: Alle 1 Minute
-  every2Minutes: Alle 2 Minuten
-  every5Minutes: Alle 5 Minuten
   notifyToggle: Benachrichtigen, wenn ein verfolgter Kanal live geht
   notificationsTitle: Benachrichtigungen
   notificationsKicker: Immer auf dem Laufenden
