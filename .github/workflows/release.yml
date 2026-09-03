@@ -53,9 +53,15 @@ jobs:
 
       - name: Zip extensions
         run: |
+          set -x
           pnpm zip
           pnpm zip:firefox
-          ls -la .output/
+          echo "--- .output tree ---"
+          find .output -maxdepth 3 -type f | sort
+          echo "--- searching entire workspace for *.zip ---"
+          find "$GITHUB_WORKSPACE" -name '*.zip' -not -path '*/node_modules/*' | sort
+          echo "--- verifying expected zips exist ---"
+          ls -la .output/*.zip
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
