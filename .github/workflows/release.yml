@@ -56,14 +56,22 @@ jobs:
           pnpm zip
           pnpm zip:firefox
 
+      # `actions/upload-artifact@v4` uses `@actions/glob`, which refuses to
+      # descend into dot-directories. WXT drops its output in `.output/`, so
+      # patterns like `extension/.output/*.zip` silently match nothing. Stage
+      # the zips into a non-hidden `dist-zips/` before upload; the submit
+      # jobs move them back into `.output/` where `wxt submit` expects them.
+      - name: Stage zips for upload
+        run: |
+          mkdir -p ../dist-zips
+          cp .output/*.zip ../dist-zips/
+          ls -la ../dist-zips/
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: extension-zips
-          path: |
-            extension/.output/*-chrome.zip
-            extension/.output/*-firefox.zip
-            extension/.output/*-sources.zip
+          path: dist-zips/*.zip
           if-no-files-found: error
           retention-days: 30
 
@@ -73,7 +81,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload "${{ github.event.release.tag_name }}" \
-            .output/*-chrome.zip .output/*-firefox.zip .output/*-sources.zip \
+            ../dist-zips/*-chrome.zip ../dist-zips/*-firefox.zip ../dist-zips/*-sources.zip \
             --repo "${{ github.repository }}" --clobber
 
   submit-chrome:
