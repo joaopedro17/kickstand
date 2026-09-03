@@ -5,4 +5,9 @@ dist/
 .dev.vars
 .gstack/
 docs/
-.env.submit
+.env
+.env.*
+!.env.example
+coverage/
+*.tsbuildinfo
+.DS_Store

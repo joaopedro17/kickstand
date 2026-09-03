@@ -38,10 +38,11 @@ function emptyEntry(): LiveStatusEntry {
   };
 }
 
+const POLL_PERIOD_MINUTES = 5;
+
 async function setupAlarm(): Promise<void> {
-  const settings = await settingsStorage.getValue();
   await browser.alarms.create(POLL_ALARM, {
-    periodInMinutes: settings.pollingIntervalMinutes,
+    periodInMinutes: POLL_PERIOD_MINUTES,
   });
 }
 
@@ -145,7 +146,6 @@ async function login(): Promise<
 export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(() => setupAlarm());
   browser.runtime.onStartup.addListener(() => setupAlarm());
-  settingsStorage.watch(() => setupAlarm());
 
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === POLL_ALARM) pollNow();

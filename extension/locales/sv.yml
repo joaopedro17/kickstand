@@ -19,21 +19,44 @@ following:
   slugPlaceholder: kanal-slug
   addButton: Lägg till
   addButtonLoading: Lägger till…
+  addChannelTitle: Lägg till en kanal
+  addChannelKicker: Följ via exakt slug
   slugHelp1: Kickstand kan inte söka efter kanaler via namn — Kicks API stöder bara att hitta en kanal via dess exakta slug, så du behöver skriva in den själv.
   slugHelp2Prefix: "Slugen är den del av kanalens URL som kommer efter kick.com/ — för kick.com/xqc är den"
-  emptyState: Inga följda kanaler än. Lägg till en via slug ovan.
+  emptyState: Inga följda kanaler än.
+  emptyStateHint: Klistra in en slug ovan för att börja följa.
   mute: Tysta
   unmute: Sluta tysta
+  offline: Offline
+  offlineGroupOne: Offline (1)
+  offlineGroupOther: 'Offline ({count})'
+  showOffline: Visa offline
+  hideOffline: Dölj offline
   channelNotFound: 'Ingen kanal hittades för "{slug}"'
   alreadyTracked: '"{slug}" följs redan'
 
+browse:
+  emptyLive: Inga live-sändningar just nu.
+  filteredByPrefix: Filtrerat på
+  clearFilter: Rensa
+
+categories:
+  searchPlaceholder: Sök kategorier
+  clearSearch: Rensa sökning
+  emptyMatches: Inga matchande kategorier.
+  emptyAll: Inga kategorier tillgängliga.
+
 settings:
   title: Inställningar
-  pollingInterval: Uppdateringsintervall
-  every1Minute: Var 1:a minut
-  every1HalfMinutes: Var 1,5:e minut
   notifyToggle: Meddela när en följd kanal sänder live
+  notificationsTitle: Aviseringar
+  notificationsKicker: Håll dig uppdaterad
   trackedChannels: Följda kanaler
+  trackedCountOne: 1 kanal på din radar
+  trackedCountOther: '{count} kanaler på din radar'
+  totalBadge: TOTALT
+  emptyTrackedTitle: Inga följda kanaler än.
+  emptyTrackedHint: Lägg till en från fliken Följer.
   logout: Logga ut
 
 notifications:

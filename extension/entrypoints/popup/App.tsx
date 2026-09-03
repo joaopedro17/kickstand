@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react';
-import { i18n } from '#i18n';
 import { authTokensStorage } from '@/lib/storage';
 import { withAuthRetry } from '@/lib/auth';
 import { fetchCurrentUser } from '@/lib/kick-api';
 import { LoginScreen } from './LoginScreen';
-import { TabBar, type TabName } from './TabBar';
+import { Header, type TabName } from './components/Header';
 import { FollowingTab } from './FollowingTab';
 import { BrowseTab } from './BrowseTab';
 import { CategoriesTab } from './CategoriesTab';
 import { SettingsPanel } from './SettingsPanel';
 
 const POPUP_WIDTH = 380;
-const POPUP_HEIGHT = 520;
+const POPUP_HEIGHT = 560;
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState<TabName>('following');
-  const [browseCategory, setBrowseCategory] = useState<{ id: number; name: string } | null>(null);
+  const [browseCategory, setBrowseCategory] = useState<
+    { id: number; name: string } | null
+  >(null);
   const [showSettings, setShowSettings] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -37,74 +38,41 @@ export default function App() {
 
   return (
     <div
-      style={{
-        width: POPUP_WIDTH,
-        height: POPUP_HEIGHT,
-        fontFamily: 'sans-serif',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
+      className="flex flex-col overflow-hidden bg-ink text-white"
+      style={{ width: POPUP_WIDTH, height: POPUP_HEIGHT }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '4px 8px',
-          flexShrink: 0,
-          borderBottom: '1px solid #333',
+      <Header
+        activeTab={activeTab}
+        onChange={(tab) => {
+          setActiveTab(tab);
+          setShowSettings(false);
+          if (tab !== 'browse') setBrowseCategory(null);
         }}
-      >
-        <div style={{ flex: 1 }}>
-          <TabBar
-            active={activeTab}
-            onChange={(tab) => {
-              setActiveTab(tab);
-              setShowSettings(false);
-              if (tab !== 'browse') setBrowseCategory(null);
-            }}
-          />
-        </div>
-        <button
-          onClick={() => setShowSettings((v) => !v)}
-          title={i18n.t('app.settingsTitle')}
-          style={{
-            width: 28,
-            height: 28,
-            padding: 0,
-            borderRadius: '50%',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={i18n.t('app.settingsTitle')} width={28} height={28} style={{ objectFit: 'cover' }} />
-          ) : (
-            '⚙️'
-          )}
-        </button>
-      </div>
+        onProfileClick={() => setShowSettings((v) => !v)}
+        avatarUrl={avatarUrl}
+        settingsOpen={showSettings}
+      />
 
-      <div style={{ padding: 12, overflowY: 'auto', flex: 1 }}>
+      <main className="flex-1 overflow-y-auto px-3 py-4">
         {showSettings ? (
           <SettingsPanel />
+        ) : activeTab === 'following' ? (
+          <FollowingTab />
+        ) : activeTab === 'browse' ? (
+          <BrowseTab
+            categoryId={browseCategory?.id}
+            categoryName={browseCategory?.name}
+            onClearCategory={() => setBrowseCategory(null)}
+          />
         ) : (
-          <>
-            {activeTab === 'following' && <FollowingTab />}
-            {activeTab === 'browse' && <BrowseTab categoryId={browseCategory?.id} />}
-            {activeTab === 'categories' && (
-              <CategoriesTab
-                onSelectCategory={(id, name) => {
-                  setBrowseCategory({ id, name });
-                  setActiveTab('browse');
-                }}
-              />
-            )}
-          </>
+          <CategoriesTab
+            onSelectCategory={(id, name) => {
+              setBrowseCategory({ id, name });
+              setActiveTab('browse');
+            }}
+          />
         )}
-      </div>
+      </main>
     </div>
   );
 }
