@@ -19,21 +19,44 @@ following:
   slugPlaceholder: slug-del-canal
   addButton: Añadir
   addButtonLoading: Añadiendo…
+  addChannelTitle: Añadir un canal
+  addChannelKicker: Sigue por el slug exacto
   slugHelp1: Kickstand no puede buscar canales por nombre — la API de Kick solo permite encontrar un canal por su slug exacto, así que tendrás que escribirlo tú mismo.
   slugHelp2Prefix: "El slug es la parte de la URL del canal después de kick.com/ — para kick.com/xqc es"
-  emptyState: Aún no sigues ningún canal. Añade uno por su slug arriba.
+  emptyState: Aún no sigues ningún canal.
+  emptyStateHint: Pega un slug arriba para empezar a seguir.
   mute: Silenciar
   unmute: Activar sonido
+  offline: Offline
+  offlineGroupOne: Offline (1)
+  offlineGroupOther: 'Offline ({count})'
+  showOffline: Mostrar offline
+  hideOffline: Ocultar offline
   channelNotFound: 'No se encontró ningún canal para "{slug}"'
   alreadyTracked: '"{slug}" ya se está siguiendo'
 
+browse:
+  emptyLive: No hay transmisiones en directo ahora mismo.
+  filteredByPrefix: Filtrado por
+  clearFilter: Quitar
+
+categories:
+  searchPlaceholder: Buscar categorías
+  clearSearch: Borrar búsqueda
+  emptyMatches: No hay categorías que coincidan.
+  emptyAll: No hay categorías disponibles.
+
 settings:
   title: Configuración
-  pollingInterval: Intervalo de verificación
-  every1Minute: Cada 1 minuto
-  every1HalfMinutes: Cada 1,5 minutos
   notifyToggle: Notificar cuando un canal seguido empiece a transmitir en directo
+  notificationsTitle: Notificaciones
+  notificationsKicker: Mantente al día
   trackedChannels: Canales seguidos
+  trackedCountOne: 1 canal en tu radar
+  trackedCountOther: '{count} canales en tu radar'
+  totalBadge: TOTAL
+  emptyTrackedTitle: Aún no sigues ningún canal.
+  emptyTrackedHint: Añade uno desde la pestaña Siguiendo.
   logout: Cerrar sesión
 
 notifications:

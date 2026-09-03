@@ -33,6 +33,12 @@ sliding window that resets on every successful refresh. As long as you open
 the extension at least once a month, you effectively stay logged in
 indefinitely.
 
+## Support
+
+Kickstand is free and always will be. If it's saved you a few tab-switches
+and you feel like saying thanks, you can [buy me a coffee](https://buymeacoffee.com/joaopedro.luz17)
+— entirely optional, hugely appreciated.
+
 ## Credits
 
 Kickstand was inspired by [Gumbo](https://github.com/Seldszar/Gumbo), Alexandre

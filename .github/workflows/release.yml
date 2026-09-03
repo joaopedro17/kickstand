@@ -9,7 +9,11 @@ permissions:
   contents: write # needed to attach zips to the GitHub Release
 
 jobs:
-  submit:
+  # Builds once, uploads the zips as a workflow artifact, and (on a real
+  # release) attaches them to the GitHub Release. The submit-* jobs below
+  # consume the same artifact so a store rejection never re-triggers a
+  # rebuild — just re-run the failed submit job from the Actions UI.
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -52,6 +56,17 @@ jobs:
           pnpm zip
           pnpm zip:firefox
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-zips
+          path: |
+            extension/.output/*-chrome.zip
+            extension/.output/*-firefox.zip
+            extension/.output/*-sources.zip
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Attach zips to the GitHub Release
         if: github.event_name == 'release'
         env:
@@ -59,18 +74,78 @@ jobs:
         run: |
           gh release upload "${{ github.event.release.tag_name }}" \
             .output/*-chrome.zip .output/*-firefox.zip .output/*-sources.zip \
-            --repo "${{ github.repository }}"
+            --repo "${{ github.repository }}" --clobber
 
-      - name: Submit to stores
-        run: |
-          pnpm wxt submit \
-            --chrome-zip .output/*-chrome.zip \
-            --firefox-zip .output/*-firefox.zip --firefox-sources-zip .output/*-sources.zip
+  submit-chrome:
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: extension/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-zips
+          path: extension/.output
+
+      - name: Submit to Chrome Web Store
+        run: pnpm wxt submit --chrome-zip .output/*-chrome.zip
         env:
           CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
           CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
           CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
           CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+  submit-firefox:
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: extension/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-zips
+          path: extension/.output
+
+      - name: Submit to Firefox Add-ons
+        run: |
+          pnpm wxt submit \
+            --firefox-zip .output/*-firefox.zip \
+            --firefox-sources-zip .output/*-sources.zip
+        env:
           FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
           FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
           FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}

@@ -8,7 +8,6 @@ export interface TrackedChannel {
 }
 
 export interface Settings {
-  pollingIntervalMinutes: number;
   notificationsEnabled: boolean;
 }
 
@@ -32,7 +31,6 @@ export interface AuthTokens {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  pollingIntervalMinutes: 1,
   notificationsEnabled: true,
 };
 
