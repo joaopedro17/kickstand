@@ -34,6 +34,7 @@ function emptyEntry(): LiveStatusEntry {
     category: null,
     thumbnail: null,
     title: '',
+    avatarUrl: null,
     lastCheckedAt: 0,
   };
 }
@@ -82,6 +83,7 @@ export async function pollNow(): Promise<void> {
               category: stream.category,
               thumbnail: stream.thumbnail,
               title: stream.title,
+              avatarUrl: stream.broadcaster_user.profile_picture,
               lastCheckedAt: Date.now(),
             }
           : {
@@ -110,9 +112,9 @@ export async function pollNow(): Promise<void> {
       if (channel && !channel.muted) {
         await browser.notifications.create(`kickstand-live-${id}`, {
           type: 'basic',
-          iconUrl: browser.runtime.getURL('/icons/128.png'),
+          iconUrl: next[id].avatarUrl || browser.runtime.getURL('/icons/128.png'),
           title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
-          message: next[id].category?.name ?? i18n.t('notifications.liveDefaultMessage'),
+          message: next[id].title || i18n.t('notifications.liveDefaultMessage'),
         });
       }
     }
@@ -154,5 +156,17 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((message) => {
     if (message?.type === 'poll-now') return pollNow();
     if (message?.type === 'login') return login();
+  });
+
+  browser.notifications.onClicked.addListener(async (notificationId) => {
+    const match = notificationId.match(/^kickstand-live-(\d+)$/);
+    if (!match) return;
+    const id = Number(match[1]);
+    const tracked = await trackedChannelsStorage.getValue();
+    const channel = tracked.find((c) => c.broadcasterUserId === id);
+    if (channel) {
+      browser.tabs.create({ url: `https://kick.com/${channel.slug}` });
+    }
+    browser.notifications.clear(notificationId);
   });
 });

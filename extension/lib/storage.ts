@@ -17,6 +17,7 @@ export interface LiveStatusEntry {
   category: { id: number; name: string } | null;
   thumbnail: string | null;
   title: string;
+  avatarUrl: string | null;
   lastCheckedAt: number;
   lastError?: string;
 }

@@ -8,6 +8,7 @@ function entry(isLive: boolean): LiveStatusCache[number] {
     category: null,
     thumbnail: null,
     title: '',
+    avatarUrl: null,
     lastCheckedAt: Date.now(),
   };
 }
