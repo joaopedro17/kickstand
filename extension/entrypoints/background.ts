@@ -146,6 +146,12 @@ async function login(): Promise<
 }
 
 export default defineBackground(() => {
+  // Explicit colors instead of the browser default: the default badge
+  // background is theme-dependent and, on a dark toolbar theme, renders as a
+  // dark badge with dark text — nearly unreadable.
+  browser.action.setBadgeBackgroundColor({ color: '#2121214b' });
+  browser.action.setBadgeTextColor({ color: '#FFFFFF' });
+
   browser.runtime.onInstalled.addListener(() => setupAlarm());
   browser.runtime.onStartup.addListener(() => setupAlarm());
 
