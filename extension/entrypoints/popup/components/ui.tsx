@@ -32,63 +32,36 @@ type Div = ComponentPropsWithoutRef<'div'>;
 type Btn = ComponentPropsWithoutRef<'button'>;
 type Input = ComponentPropsWithoutRef<'input'>;
 
-export function Card({
-  className = '',
-  interactive = false,
-  ...props
-}: Div & { interactive?: boolean }) {
-  const base =
-    'rounded-2xl border border-white/[0.06] bg-panel shadow-lg shadow-black/10';
-  const hover = interactive
-    ? ' transition duration-200 hover:-translate-y-0.5 hover:border-lime/40 hover:bg-panel-hover hover:shadow-[0_10px_28px_rgba(0,0,0,.3)]'
-    : '';
-  return <div className={`${base}${hover} ${className}`} {...props} />;
-}
-
-export function PrimaryButton({ className = '', children, ...props }: Btn) {
+/** A clickable card that lifts and highlights on hover. */
+export function Card({ className = '', ...props }: Div) {
   return (
-    <button
+    <div
+      className={`rounded-2xl border border-white/[0.06] bg-panel shadow-lg shadow-black/10 transition duration-200 hover:-translate-y-0.5 hover:border-lime/40 hover:bg-panel-hover hover:shadow-[0_10px_28px_rgba(0,0,0,.3)] ${className}`}
       {...props}
-      className={
-        'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-lime px-4 text-sm font-extrabold text-ink transition hover:bg-lime-soft hover:shadow-[0_0_20px_rgba(184,243,74,.2)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none ' +
-        className
-      }
-    >
-      {children}
-    </button>
+    />
   );
 }
 
-export function GhostButton({ className = '', children, ...props }: Btn) {
-  return (
-    <button
-      {...props}
-      className={
-        'inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-ink px-3 text-xs font-bold text-muted transition hover:border-lime/50 hover:bg-lime hover:text-ink active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-ink disabled:hover:text-muted ' +
-        className
-      }
-    >
-      {children}
-    </button>
-  );
+/** A <button> with `base` classes, plus any the caller adds. */
+function buttonWith(base: string) {
+  return function StyledButton({ className = '', children, ...props }: Btn) {
+    return (
+      <button {...props} className={`${base} ${className}`}>
+        {children}
+      </button>
+    );
+  };
 }
 
-export function IconButton({
-  className = '',
-  children,
-  ...props
-}: Btn) {
-  return (
-    <button
-      {...props}
-      className={
-        'text-muted transition hover:text-lime disabled:opacity-60 ' + className
-      }
-    >
-      {children}
-    </button>
-  );
-}
+export const PrimaryButton = buttonWith(
+  'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-lime px-4 text-sm font-extrabold text-ink transition hover:bg-lime-soft hover:shadow-[0_0_20px_rgba(184,243,74,.2)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none'
+);
+
+export const GhostButton = buttonWith(
+  'inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-ink px-3 text-xs font-bold text-muted transition hover:border-lime/50 hover:bg-lime hover:text-ink active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-ink disabled:hover:text-muted'
+);
+
+export const IconButton = buttonWith('text-muted transition hover:text-lime disabled:opacity-60');
 
 export function TextInput({ className = '', ...props }: Input) {
   return (
@@ -241,8 +214,11 @@ export function Icon({ icon, className = '' }: { icon: IconName; className?: str
   );
 }
 
+// Each unit starts where the smaller one would round up into it, so 999,999
+// is "1.0M", not "1000K", and 9,960 is "10K", not "10.0K".
 export function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}K`;
+  if (n >= 999_500) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 9_950) return `${Math.round(n / 1_000)}K`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return n.toLocaleString();
 }

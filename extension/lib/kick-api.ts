@@ -130,14 +130,28 @@ export async function fetchCurrentUser(accessToken: string): Promise<CurrentUser
   return kickFetch('/public/v1/users', {}, accessToken, parseCurrentUser);
 }
 
-export async function fetchCategories(
-  params: { cursor?: string; limit?: number; name?: string[] },
+const CATEGORY_PAGE_SIZE = 25;
+
+/** One page of every category, in Kick's order. */
+export async function fetchCategoryPage(
+  cursor: string | undefined,
   accessToken: string
 ): Promise<Page<Category>> {
   return kickFetch(
     '/public/v2/categories',
-    { cursor: params.cursor, limit: params.limit, name: params.name },
+    { cursor, limit: CATEGORY_PAGE_SIZE },
     accessToken,
     parseCategoryPage
   );
+}
+
+/** Categories whose name matches `name`. Kick answers a search in a single page. */
+export async function searchCategories(name: string, accessToken: string): Promise<Category[]> {
+  const found = await kickFetch(
+    '/public/v2/categories',
+    { name: [name], limit: CATEGORY_PAGE_SIZE },
+    accessToken,
+    parseCategoryPage
+  );
+  return found.items;
 }

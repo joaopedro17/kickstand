@@ -84,7 +84,6 @@ function StreamCard({
 }) {
   return (
     <Card
-      interactive
       className="group cursor-pointer overflow-hidden"
       onClick={onOpen}
     >

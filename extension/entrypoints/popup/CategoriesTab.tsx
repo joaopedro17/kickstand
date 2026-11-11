@@ -1,25 +1,21 @@
 import { useState } from 'react';
 import { i18n } from '#i18n';
-import { fetchCategories } from '@/lib/kick-api';
+import { fetchCategoryPage, searchCategories } from '@/lib/kick-api';
 import { Card, EmptyState, Icon, IconButton } from './components/ui';
 import type { Category } from '@/lib/types';
 import { PagedListBody } from './components/PagedListBody';
 import { usePagedList, type FetchPage } from './usePagedList';
 
-const PAGE_SIZE = 25;
-
 /**
- * Browsing pages through all categories. Searching asks Kick by name
- * (`name[]=`), which answers in a single page, so a search never paginates.
+ * Browsing pages through all categories; a search is answered in one page,
+ * so it never offers "Load more".
  */
 function categoriesFor(query: string | null): FetchPage<Category> {
-  if (query === null) {
-    return (cursor, accessToken) => fetchCategories({ cursor, limit: PAGE_SIZE }, accessToken);
-  }
-  return async (_cursor, accessToken) => {
-    const found = await fetchCategories({ limit: PAGE_SIZE, name: [query] }, accessToken);
-    return { items: found.items, nextCursor: null };
-  };
+  if (query === null) return fetchCategoryPage;
+  return async (_cursor, accessToken) => ({
+    items: await searchCategories(query, accessToken),
+    nextCursor: null,
+  });
 }
 
 export function CategoriesTab({
@@ -126,7 +122,6 @@ function CategoryCard({
 }) {
   return (
     <Card
-      interactive
       className="group cursor-pointer overflow-hidden"
       onClick={onOpen}
     >

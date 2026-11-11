@@ -255,7 +255,6 @@ function ChannelRow({
 }) {
   return (
     <Card
-      interactive
       className="group flex cursor-pointer gap-3 p-3"
       onClick={() => openChannel(channel.slug)}
     >
