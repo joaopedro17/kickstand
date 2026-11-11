@@ -4,7 +4,7 @@ import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/session-client';
 import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
 import { translateErrorCode } from '@/lib/error-messages';
-import type { KickLivestream } from '@/lib/types';
+import type { Livestream } from '@/lib/types';
 import {
   Card,
   EmptyState,
@@ -31,7 +31,7 @@ export function BrowseTab({
   categoryName?: string;
   onClearCategory?: () => void;
 } = {}) {
-  const [streams, setStreams] = useState<KickLivestream[]>([]);
+  const [streams, setStreams] = useState<Livestream[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,10 +55,10 @@ export function BrowseTab({
         return;
       }
       setStreams((prev) => {
-        const merged = reset ? res.data : [...prev, ...res.data];
-        return [...merged].sort((a, b) => b.viewer_count - a.viewer_count);
+        const merged = reset ? res.items : [...prev, ...res.items];
+        return [...merged].sort((a, b) => b.viewerCount - a.viewerCount);
       });
-      setCursor(res.pagination.next_cursor);
+      setCursor(res.nextCursor);
     } catch (err) {
       setError(
         err instanceof KickApiError
@@ -115,7 +115,7 @@ export function BrowseTab({
             <StreamCard
               key={stream.id}
               stream={stream}
-              onOpen={() => openStream(stream.channel.slug)}
+              onOpen={() => openStream(stream.slug)}
             />
           ))}
         </div>
@@ -138,7 +138,7 @@ function StreamCard({
   stream,
   onOpen,
 }: {
-  stream: KickLivestream;
+  stream: Livestream;
   onOpen: () => void;
 }) {
   return (
@@ -164,7 +164,7 @@ function StreamCard({
       <div className="p-3">
         <div className="flex items-center justify-between gap-2">
           <h3 className="truncate text-sm font-extrabold">
-            {stream.channel.slug}
+            {stream.slug}
           </h3>
           <span className="text-muted transition group-hover:text-lime">
             <Icon icon="external-link" className="text-sm" />
@@ -174,7 +174,7 @@ function StreamCard({
           {stream.title || '—'}
         </p>
         <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted">
-          <ViewerCount count={stream.viewer_count} />
+          <ViewerCount count={stream.viewerCount} />
           {stream.category?.name && (
             <span className="max-w-[55%] truncate rounded-lg bg-ink px-2 py-1">
               {stream.category.name}

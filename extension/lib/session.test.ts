@@ -94,6 +94,15 @@ describe('refreshTokens', () => {
     expect(await refreshTokens(tokens())).toEqual({ ok: false, reason: 'transient' });
   });
 
+  it('reports a 200 without usable tokens as transient, keeping the session', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ error: 'weird' }) })
+    );
+
+    expect(await refreshTokens(tokens())).toEqual({ ok: false, reason: 'transient' });
+  });
+
   it('reports a network failure as transient', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
 
@@ -489,6 +498,20 @@ describe('startLoginFlow', () => {
     expect(error).toBeInstanceOf(AuthError);
     expect((error as AuthError).code).toBe('exchange_failed');
     expect((error as AuthError).detail).toBe('502');
+    expect(await authTokensStorage.getValue()).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it('throws "exchange_failed" when the proxy answers 200 without usable tokens', async () => {
+    kickRedirectsWith((state) => `?code=abc123&state=${state}`);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ access_token: 'a' }) })
+    );
+
+    const error = await startLoginFlow().catch((e) => e);
+
+    expect((error as AuthError).code).toBe('exchange_failed');
     expect(await authTokensStorage.getValue()).toBeNull();
     vi.unstubAllGlobals();
   });

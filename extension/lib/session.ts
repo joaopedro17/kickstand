@@ -6,7 +6,8 @@ import {
   WORKER_BASE_URL,
 } from './config';
 import { authTokensStorage, type AuthTokens } from './storage';
-import type { TokenResponse } from './types';
+import type { TokenGrant } from './types';
+import { parseTokenResponse } from './kick-parse';
 import { KickApiError } from './kick-api';
 import { retryOnUnauthorized, type TokenSource } from './auth-retry';
 import type { TokenReply } from './messages';
@@ -48,21 +49,30 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   return base64UrlEncode(digest);
 }
 
-function toAuthTokens(response: TokenResponse): AuthTokens {
+function toAuthTokens(grant: TokenGrant): AuthTokens {
   const now = Date.now();
   return {
-    accessToken: response.access_token,
-    refreshToken: response.refresh_token,
-    expiresAt: now + response.expires_in * 1000,
-    refreshExpiresAt: now + response.refresh_expires_in * 1000,
+    accessToken: grant.accessToken,
+    refreshToken: grant.refreshToken,
+    expiresAt: now + grant.expiresInSeconds * 1000,
+    refreshExpiresAt: now + grant.refreshExpiresInSeconds * 1000,
   };
+}
+
+/** The token proxy's answer as a grant, or null when it isn't a usable one. */
+async function readGrant(res: Response): Promise<TokenGrant | null> {
+  try {
+    return parseTokenResponse(await res.json());
+  } catch {
+    return null;
+  }
 }
 
 async function exchangeCodeForTokens(
   code: string,
   codeVerifier: string,
   redirectUri: string
-): Promise<TokenResponse> {
+): Promise<TokenGrant> {
   const res = await fetch(`${WORKER_BASE_URL}/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -71,7 +81,9 @@ async function exchangeCodeForTokens(
   if (!res.ok) {
     throw new AuthError('exchange_failed', `Token exchange failed: ${res.status}`, String(res.status));
   }
-  return res.json();
+  const grant = await readGrant(res);
+  if (!grant) throw new AuthError('exchange_failed', 'Token exchange returned no usable tokens', 'malformed');
+  return grant;
 }
 
 export async function startLoginFlow(): Promise<AuthTokens> {
@@ -116,8 +128,8 @@ export async function startLoginFlow(): Promise<AuthTokens> {
   }
   if (returnedState !== state) throw new AuthError('state_mismatch', 'OAuth state mismatch');
 
-  const tokenResponse = await exchangeCodeForTokens(code, verifier, redirectUri);
-  const tokens = toAuthTokens(tokenResponse);
+  const grant = await exchangeCodeForTokens(code, verifier, redirectUri);
+  const tokens = toAuthTokens(grant);
   await authTokensStorage.setValue(tokens);
   return tokens;
 }
@@ -154,7 +166,11 @@ export async function refreshTokens(tokens: AuthTokens): Promise<RefreshResult> 
   if (!res.ok) {
     return { ok: false, reason: REJECTED_STATUSES.has(res.status) ? 'rejected' : 'transient' };
   }
-  const refreshed = toAuthTokens((await res.json()) as TokenResponse);
+  // A 200 without usable tokens says nothing about the refresh token itself,
+  // so it must not end the session.
+  const grant = await readGrant(res);
+  if (!grant) return { ok: false, reason: 'transient' };
+  const refreshed = toAuthTokens(grant);
   await authTokensStorage.setValue(refreshed);
   return { ok: true, tokens: refreshed };
 }

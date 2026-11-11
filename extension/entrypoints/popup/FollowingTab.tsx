@@ -94,7 +94,7 @@ async function trackBySlug(slug: string): Promise<string | null> {
   if (!resolved) return i18n.t('following.channelNotFound', { slug });
 
   const outcome = await addTracked({
-    broadcasterUserId: resolved.broadcaster_user_id,
+    broadcasterUserId: resolved.broadcasterUserId,
     slug: resolved.slug,
     addedAt: Date.now(),
     muted: false,

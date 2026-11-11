@@ -32,9 +32,10 @@ export function SettingsPanel() {
   if (!settings) return null;
 
   async function toggleNotifications() {
+    const current = await settingsStorage.getValue();
     await settingsStorage.setValue({
-      ...settings!,
-      notificationsEnabled: !settings!.notificationsEnabled,
+      ...current,
+      notificationsEnabled: !current.notificationsEnabled,
     });
   }
 

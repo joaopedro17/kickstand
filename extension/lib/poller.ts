@@ -1,9 +1,9 @@
 import type { ChannelStatus, LiveStatusCache, TrackedChannel } from './storage';
-import type { KickLivestream } from './types';
+import type { Livestream } from './types';
 
 /** What one request for a batch of tracked channels came back with. */
 export type BatchOutcome =
-  | { ids: number[]; livestreams: KickLivestream[] }
+  | { ids: number[]; livestreams: Livestream[] }
   | { ids: number[]; error: string };
 
 type Polled = { id: number; entry: ChannelStatus; wentLive: boolean };
@@ -22,21 +22,21 @@ function isNewStream(previous: ChannelStatus | undefined, startedAt: string | nu
 
 function liveEntry(
   previous: ChannelStatus | undefined,
-  stream: KickLivestream,
+  stream: Livestream,
   now: number
 ): ChannelStatus {
-  const startedAt = stream.started_at ?? null;
+  const { startedAt } = stream;
   return {
     status: {
       kind: 'live',
       startedAt,
-      viewerCount: stream.viewer_count,
+      viewerCount: stream.viewerCount,
       title: stream.title,
       category: stream.category,
       thumbnail: stream.thumbnail,
     },
     notifiedStartedAt: startedAt ?? previous?.notifiedStartedAt ?? null,
-    avatarUrl: stream.broadcaster_user.profile_picture,
+    avatarUrl: stream.broadcaster.profilePicture,
     lastCheckedAt: now,
   };
 }
@@ -71,14 +71,14 @@ function pollBatch(previous: LiveStatusCache, batch: BatchOutcome, now: number):
         wentLive: false,
       }));
   }
-  const streamByUser = new Map(batch.livestreams.map((s) => [s.broadcaster_user.id, s]));
+  const streamByUser = new Map(batch.livestreams.map((s) => [s.broadcaster.id, s]));
   return batch.ids.map((id) => {
     const stream = streamByUser.get(id);
     return stream
       ? {
           id,
           entry: liveEntry(previous[id], stream, now),
-          wentLive: isNewStream(previous[id], stream.started_at ?? null),
+          wentLive: isNewStream(previous[id], stream.startedAt),
         }
       : { id, entry: offlineEntry(previous[id], now), wentLive: false };
   });

@@ -118,4 +118,28 @@ describe('kick-api requests', () => {
       kind: 'network',
     });
   });
+
+  it('turns a reply that is not JSON into an "other" error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new SyntaxError('Unexpected token <');
+        },
+      })
+    );
+
+    await expect(fetchLivestreamsForUsers([1], 'token')).rejects.toMatchObject({ kind: 'other' });
+  });
+
+  it('turns a reply of the wrong shape into an "other" error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ message: 'hi' }) })
+    );
+
+    await expect(fetchLivestreamsForUsers([1], 'token')).rejects.toMatchObject({ kind: 'other' });
+  });
 });

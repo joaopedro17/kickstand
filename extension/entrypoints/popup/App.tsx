@@ -29,7 +29,7 @@ export default function App() {
   useEffect(() => {
     if (!loggedIn) return;
     withAuthRetry((accessToken) => fetchCurrentUser(accessToken)).then(
-      (user) => user && setAvatarUrl(user.profile_picture)
+      (user) => user && setAvatarUrl(user.profilePicture)
     );
   }, [loggedIn]);
 

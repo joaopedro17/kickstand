@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { load } from 'js-yaml';
-import { CODE_TO_KEY } from './lib/error-messages';
+import { ERROR_CODES, translateErrorCode } from './lib/error-messages';
 
 const LOCALES_DIR = join(__dirname, 'locales');
 
@@ -51,12 +51,19 @@ describe('locale files', () => {
     }
   });
 
-  it('error-messages.ts CODE_TO_KEY values stay in sync with en.yml errors.* keys', () => {
+  it('every errors.* string in en.yml is shown for some error code', () => {
     const enErrorKeys = flattenKeys(loadLocale('en.yml'))
       .filter((k) => k.startsWith('errors.'))
-      .map((k) => k.slice('errors.'.length))
+      .map((k) => k.replace('.', '_'))
       .sort();
-    const mappedKeys = [...new Set(Object.values(CODE_TO_KEY))].sort();
-    expect(mappedKeys).toEqual(enErrorKeys);
+    const asked: string[] = [];
+    vi.spyOn(browser.i18n, 'getMessage').mockImplementation((name: string) => {
+      asked.push(name);
+      return name;
+    });
+
+    ERROR_CODES.forEach(translateErrorCode);
+
+    expect([...new Set(asked)].sort()).toEqual(enErrorKeys);
   });
 });

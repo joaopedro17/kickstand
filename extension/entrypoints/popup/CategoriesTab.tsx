@@ -3,7 +3,7 @@ import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/session-client';
 import { fetchCategories, KickApiError } from '@/lib/kick-api';
 import { translateErrorCode } from '@/lib/error-messages';
-import type { KickCategoryWithTags } from '@/lib/types';
+import type { Category } from '@/lib/types';
 import {
   Card,
   EmptyState,
@@ -22,7 +22,7 @@ export function CategoriesTab({
 }: {
   onSelectCategory: (id: number, name: string) => void;
 }) {
-  const [categories, setCategories] = useState<KickCategoryWithTags[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,10 +53,10 @@ export function CategoriesTab({
         setError(translateErrorCode('not_logged_in'));
         return;
       }
-      setCategories((prev) => (reset ? res.data : [...prev, ...res.data]));
+      setCategories((prev) => (reset ? res.items : [...prev, ...res.items]));
       // Search mode returns everything in one page — pin cursor to null so
       // we never fall into paginate-then-search-then-paginate confusion.
-      setCursor(query !== null ? null : res.pagination.next_cursor);
+      setCursor(query !== null ? null : res.nextCursor);
     } catch (err) {
       setError(
         err instanceof KickApiError
@@ -167,7 +167,7 @@ function CategoryCard({
   category,
   onOpen,
 }: {
-  category: KickCategoryWithTags;
+  category: Category;
   onOpen: () => void;
 }) {
   return (
