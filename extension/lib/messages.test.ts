@@ -1,22 +1,16 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
+import { deliver } from '@/test/fake-background';
 import { listenForRequests, sendRequest, type RequestHandlers } from './messages';
 
 function handlers(overrides: Partial<RequestHandlers> = {}): RequestHandlers {
   return {
     'poll-now': vi.fn().mockResolvedValue(undefined),
     login: vi.fn().mockResolvedValue({ success: true }),
+    'get-access-token': vi.fn().mockResolvedValue({ status: 'logged-out' }),
+    logout: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
-}
-
-/** Delivers `message` to the listener the way the browser does and waits for the reply. */
-function deliver(listener: ReturnType<typeof listenForRequests>, message: unknown) {
-  return new Promise<{ keptOpen: unknown; reply: unknown }>((resolve) => {
-    // The browser calls sendResponse later, after the listener has returned.
-    const keptOpen = listener(message, {}, (reply) => resolve({ keptOpen, reply }));
-    if (keptOpen !== true) resolve({ keptOpen, reply: undefined });
-  });
 }
 
 describe('listenForRequests', () => {

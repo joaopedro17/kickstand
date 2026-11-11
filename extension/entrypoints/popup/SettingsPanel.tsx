@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
-import { logout } from '@/lib/auth';
+import { requestLogout } from '@/lib/session-client';
 import {
   settingsStorage,
   trackedChannelsStorage,
@@ -124,7 +124,7 @@ export function SettingsPanel() {
 
       <button
         type="button"
-        onClick={() => logout()}
+        onClick={() => requestLogout()}
         className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-panel px-4 text-sm font-bold text-white transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 active:scale-95"
       >
         <Icon icon="lucide:log-out" className="text-base" />

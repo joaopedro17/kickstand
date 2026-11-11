@@ -7,9 +7,24 @@ import { browser } from 'wxt/browser';
  */
 export type LoginResult = { success: true } | { success: false; error: string; detail?: string };
 
+/**
+ * The background's answer to a token request. `unavailable` means a needed
+ * refresh failed for a transient reason: the session is intact, but there is
+ * no usable token right now.
+ */
+export type TokenReply =
+  | { status: 'ok'; accessToken: string }
+  | { status: 'logged-out' }
+  | { status: 'unavailable' };
+
 interface Protocol {
   'poll-now': { request: { type: 'poll-now' }; reply: void };
   login: { request: { type: 'login' }; reply: LoginResult };
+  'get-access-token': {
+    request: { type: 'get-access-token'; rejectedToken?: string };
+    reply: TokenReply;
+  };
+  logout: { request: { type: 'logout' }; reply: void };
 }
 
 type RequestType = keyof Protocol;
@@ -23,7 +38,12 @@ export type RequestHandlers = {
 /** What actually crosses the message channel, so failures survive the trip. */
 type Envelope<T> = { ok: true; value: T } | { ok: false; error: string };
 
-const REQUEST_TYPES: ReadonlySet<string> = new Set<RequestType>(['poll-now', 'login']);
+const REQUEST_TYPES: ReadonlySet<string> = new Set<RequestType>([
+  'poll-now',
+  'login',
+  'get-access-token',
+  'logout',
+]);
 
 function parseRequest(raw: unknown): Request | null {
   if (typeof raw !== 'object' || raw === null) return null;

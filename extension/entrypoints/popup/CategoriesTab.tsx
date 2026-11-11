@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
-import { withAuthRetry } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/session-client';
 import { fetchCategories, KickApiError } from '@/lib/kick-api';
 import { translateErrorCode } from '@/lib/error-messages';
 import type { KickCategoryWithTags } from '@/lib/types';

@@ -1,6 +1,12 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser } from 'wxt/browser';
-import { startLoginFlow, withAuthRetry, AuthError } from '@/lib/auth';
+import {
+  startLoginFlow,
+  withAuthRetry,
+  AuthError,
+  answerTokenRequest,
+  logout,
+} from '@/lib/session';
 import {
   fetchLivestreamsForUsers,
   chunk,
@@ -143,6 +149,8 @@ export default defineBackground(() => {
     listenForRequests({
       'poll-now': () => pollNow(),
       login: () => login(),
+      'get-access-token': answerTokenRequest,
+      logout: () => logout(),
     })
   );
 

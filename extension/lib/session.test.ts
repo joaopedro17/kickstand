@@ -8,7 +8,9 @@ import {
   logout,
   startLoginFlow,
   AuthError,
-} from './auth';
+  tokenAfterRejection,
+  answerTokenRequest,
+} from './session';
 import { authTokensStorage, type AuthTokens } from './storage';
 import { KickApiError } from './kick-api';
 
@@ -296,6 +298,98 @@ describe('withAuthRetry', () => {
 
     await expect(withAuthRetry(fn)).rejects.toThrow('Network request failed');
     expect(fn).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('tokenAfterRejection', () => {
+  beforeEach(() => {
+    fakeBrowser.reset();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('hands out the stored token without refreshing when the rejected one was already replaced', async () => {
+    await authTokensStorage.setValue(tokens({ accessToken: 'already-new' }));
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await tokenAfterRejection('stale')).toBe('already-new');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('refreshes when the stored token is the one that was rejected', async () => {
+    await authTokensStorage.setValue(tokens());
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(refreshResponse('access-new')));
+
+    expect(await tokenAfterRejection('access-1')).toBe('access-new');
+  });
+
+  it('refreshes only once when several callers report the same rejected token at the same time', async () => {
+    await authTokensStorage.setValue(tokens());
+    const fetchMock = vi.fn().mockResolvedValue(refreshResponse('access-new'));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await Promise.all([
+      tokenAfterRejection('access-1'),
+      tokenAfterRejection('access-1'),
+      tokenAfterRejection('access-1'),
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(results).toEqual(['access-new', 'access-new', 'access-new']);
+  });
+
+  it('returns null when logged out', async () => {
+    expect(await tokenAfterRejection('anything')).toBeNull();
+  });
+});
+
+describe('answerTokenRequest', () => {
+  beforeEach(() => {
+    fakeBrowser.reset();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('hands out a valid access token', async () => {
+    await authTokensStorage.setValue(tokens());
+
+    expect(await answerTokenRequest({ type: 'get-access-token' })).toEqual({
+      status: 'ok',
+      accessToken: 'access-1',
+    });
+  });
+
+  it('says logged-out when there is no session', async () => {
+    expect(await answerTokenRequest({ type: 'get-access-token' })).toEqual({ status: 'logged-out' });
+  });
+
+  it('says logged-out when Kick rejects the refresh', async () => {
+    await authTokensStorage.setValue(tokens());
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401 }));
+
+    expect(
+      await answerTokenRequest({ type: 'get-access-token', rejectedToken: 'access-1' })
+    ).toEqual({ status: 'logged-out' });
+  });
+
+  it('says unavailable, keeping the session, when a needed refresh fails transiently', async () => {
+    await authTokensStorage.setValue(tokens({ expiresAt: Date.now() - 1000 }));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+
+    expect(await answerTokenRequest({ type: 'get-access-token' })).toEqual({ status: 'unavailable' });
+    expect(await authTokensStorage.getValue()).not.toBeNull();
+  });
+
+  it('refreshes when told which token was rejected', async () => {
+    await authTokensStorage.setValue(tokens());
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(refreshResponse('access-new')));
+
+    expect(
+      await answerTokenRequest({ type: 'get-access-token', rejectedToken: 'access-1' })
+    ).toEqual({ status: 'ok', accessToken: 'access-new' });
   });
 });
 

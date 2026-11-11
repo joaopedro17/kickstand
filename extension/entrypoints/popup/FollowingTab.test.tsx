@@ -3,9 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
+import { fakeBackground } from '@/test/fake-background';
+import type { Request } from '@/lib/messages';
 import { FollowingTab } from './FollowingTab';
 import {
-  authTokensStorage,
   liveStatusStorage,
   trackedChannelsStorage,
   type LiveStatusEntry,
@@ -39,24 +40,16 @@ function live(title: string, viewerCount: number): LiveStatusEntry {
 }
 
 describe('FollowingTab', () => {
-  const backgroundMessages: unknown[] = [];
+  let backgroundReceived: Request[];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     fakeBrowser.reset();
-    backgroundMessages.length = 0;
-    fakeBrowser.runtime.onMessage.addListener((message: unknown) => {
-      backgroundMessages.push(message);
-    });
-    await authTokensStorage.setValue({
-      accessToken: 'access',
-      refreshToken: 'refresh',
-      expiresAt: Date.now() + 60 * 60 * 1000,
-      refreshExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-    });
+    backgroundReceived = fakeBackground().received;
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('tracks a channel the user adds by slug and asks the background to poll', async () => {
@@ -70,7 +63,7 @@ describe('FollowingTab', () => {
     expect(await trackedChannelsStorage.getValue()).toEqual([
       expect.objectContaining({ broadcasterUserId: 42, slug: 'xqc', muted: false }),
     ]);
-    expect(backgroundMessages).toEqual([{ type: 'poll-now' }]);
+    expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
     expect(screen.getByRole('textbox')).toHaveValue('');
   });
 

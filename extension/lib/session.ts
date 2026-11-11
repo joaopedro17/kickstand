@@ -8,6 +8,8 @@ import {
 import { authTokensStorage, type AuthTokens } from './storage';
 import type { TokenResponse } from './types';
 import { KickApiError } from './kick-api';
+import { retryOnUnauthorized, type TokenSource } from './auth-retry';
+import type { TokenReply } from './messages';
 
 export type AuthErrorCode =
   | 'cancelled'
@@ -205,47 +207,47 @@ export async function getValidAccessToken(): Promise<string | null> {
   return resolveRefresh(await refreshTokensSingleFlight(tokens), stillValid);
 }
 
-function isUnauthorized(err: unknown): boolean {
-  return err instanceof KickApiError && err.kind === 'unauthorized';
-}
-
 /**
- * Runs `fn` with a valid access token, transparently recovering from a
- * reactive 401: calls `fn`, and if it throws a `KickApiError` with
- * `kind === 'unauthorized'`, forces one refresh and retries `fn` once with
- * the new token.
- *
- * Returns null when there is no session: not logged in, Kick rejected the
- * refresh token, or the retry was rejected too. In those cases auth state
- * is cleared, the popup bounces to the login screen via
- * `authTokensStorage.watch()`, and background polling stops trying.
- *
- * A refresh that fails for a transient reason (offline, Kick or the proxy
- * down) keeps the session and throws a `network` `KickApiError` instead.
+ * A replacement for an access token Kick just rejected. If the stored token
+ * is no longer the rejected one, another caller already refreshed, so the
+ * stored token is handed out without spending the refresh token again.
  */
-export async function withAuthRetry<T>(
-  fn: (accessToken: string) => Promise<T>
-): Promise<T | null> {
-  const accessToken = await getValidAccessToken();
-  if (!accessToken) return null;
-
-  try {
-    return await fn(accessToken);
-  } catch (err) {
-    if (!isUnauthorized(err)) throw err;
-  }
-
+export async function tokenAfterRejection(rejectedToken: string): Promise<string | null> {
   const tokens = await authTokensStorage.getValue();
   if (!tokens) return null;
-  const retryToken = await resolveRefresh(await refreshTokensSingleFlight(tokens), null);
-  if (!retryToken) return null;
+  if (tokens.accessToken !== rejectedToken) return tokens.accessToken;
+  return resolveRefresh(await refreshTokensSingleFlight(tokens), null);
+}
 
+/** The background's tokens: read and written here and nowhere else. */
+const backgroundTokens: TokenSource = {
+  current: getValidAccessToken,
+  afterRejection: tokenAfterRejection,
+  endSession: () => logout(),
+};
+
+/** `retryOnUnauthorized` for code running in the background. */
+export function withAuthRetry<T>(fn: (accessToken: string) => Promise<T>): Promise<T | null> {
+  return retryOnUnauthorized(backgroundTokens, fn);
+}
+
+async function tokenFor(request: { rejectedToken?: string }): Promise<string | null> {
+  return request.rejectedToken
+    ? tokenAfterRejection(request.rejectedToken)
+    : getValidAccessToken();
+}
+
+/** Answers a popup's request for an access token. */
+export async function answerTokenRequest(request: {
+  type: 'get-access-token';
+  rejectedToken?: string;
+}): Promise<TokenReply> {
   try {
-    return await fn(retryToken);
-  } catch (retryErr) {
-    if (!isUnauthorized(retryErr)) throw retryErr;
-    await authTokensStorage.setValue(null);
-    return null;
+    const accessToken = await tokenFor(request);
+    return accessToken ? { status: 'ok', accessToken } : { status: 'logged-out' };
+  } catch (err) {
+    if (err instanceof TransientRefreshFailure) return { status: 'unavailable' };
+    throw err;
   }
 }
 
