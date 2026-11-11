@@ -1,3 +1,4 @@
+import { browser } from 'wxt/browser';
 import {
   KICK_AUTHORIZE_URL,
   KICK_CLIENT_ID,

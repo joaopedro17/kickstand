@@ -15,7 +15,8 @@
     "postinstall": "wxt prepare",
     "generate-icons": "node scripts/generate-icons.mjs",
     "test": "vitest run",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
@@ -29,6 +30,7 @@
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-istanbul": "4.1.10",
     "@wxt-dev/i18n": "^0.2.7",
     "@wxt-dev/module-react": "^1.1.5",
     "eslint": "^10.14.0",

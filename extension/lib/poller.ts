@@ -11,17 +11,15 @@ export type BatchOutcome =
   | { ids: number[]; livestreams: KickLivestream[] }
   | { ids: number[]; error: string };
 
-function emptyEntry(): LiveStatusEntry {
-  return {
-    isLive: false,
-    viewerCount: 0,
-    category: null,
-    thumbnail: null,
-    title: '',
-    avatarUrl: null,
-    lastCheckedAt: 0,
-  };
-}
+/** What is known about a channel that has never been seen live. */
+const NEVER_SEEN = {
+  isLive: false,
+  viewerCount: 0,
+  category: null,
+  thumbnail: null,
+  title: '',
+  avatarUrl: null,
+} satisfies Omit<LiveStatusEntry, 'lastCheckedAt'>;
 
 function liveEntry(stream: KickLivestream, now: number): LiveStatusEntry {
   return {
@@ -43,7 +41,7 @@ function entriesForBatch(
   if ('error' in batch) {
     return batch.ids.map((id) => [
       id,
-      { ...(previous[id] ?? emptyEntry()), lastError: batch.error, lastCheckedAt: now },
+      { ...NEVER_SEEN, ...previous[id], lastError: batch.error, lastCheckedAt: now },
     ]);
   }
   const streamByUser = new Map(batch.livestreams.map((s) => [s.broadcaster_user.id, s]));
@@ -53,7 +51,7 @@ function entriesForBatch(
       id,
       stream
         ? liveEntry(stream, now)
-        : { ...(previous[id] ?? emptyEntry()), isLive: false, lastCheckedAt: now },
+        : { ...NEVER_SEEN, ...previous[id], isLive: false, lastCheckedAt: now },
     ];
   });
 }
