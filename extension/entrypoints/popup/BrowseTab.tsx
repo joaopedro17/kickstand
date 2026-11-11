@@ -1,26 +1,23 @@
 import { browser } from 'wxt/browser';
-import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
-import { withAuthRetry } from '@/lib/session-client';
-import { fetchLivestreams, KickApiError } from '@/lib/kick-api';
-import { translateErrorCode } from '@/lib/error-messages';
+import { fetchLivestreams } from '@/lib/kick-api';
 import type { Livestream } from '@/lib/types';
-import {
-  Card,
-  EmptyState,
-  ErrorBanner,
-  GhostButton,
-  Icon,
-  LiveBadge,
-  PrimaryButton,
-  ViewerCount,
-} from './components/ui';
+import { Card, EmptyState, GhostButton, Icon, LiveBadge, ViewerCount } from './components/ui';
+import { PagedListBody } from './components/PagedListBody';
+import { usePagedList } from './usePagedList';
 
 // Kick's API returns livestreams oldest-first with no sort option, so a
 // small page would mostly surface long-running low-viewer streams. Fetching
 // a much bigger batch per page makes the client-side viewer-count sort
 // actually representative of what's live right now.
 const FETCH_LIMIT = 100;
+
+const byViewersDesc = (page: Livestream[]) =>
+  [...page].sort((a, b) => b.viewerCount - a.viewerCount);
+
+function openStream(slug: string) {
+  browser.tabs.create({ url: `https://kick.com/${slug}` });
+}
 
 export function BrowseTab({
   categoryId,
@@ -31,104 +28,48 @@ export function BrowseTab({
   categoryName?: string;
   onClearCategory?: () => void;
 } = {}) {
-  const [streams, setStreams] = useState<Livestream[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function load(reset: boolean) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await withAuthRetry((accessToken) =>
-        fetchLivestreams(
-          {
-            cursor: reset ? undefined : cursor ?? undefined,
-            limit: FETCH_LIMIT,
-            categoryId: categoryId ? [categoryId] : undefined,
-          },
-          accessToken
-        )
-      );
-      if (!res) {
-        setError(translateErrorCode('not_logged_in'));
-        return;
-      }
-      setStreams((prev) => {
-        const merged = reset ? res.items : [...prev, ...res.items];
-        return [...merged].sort((a, b) => b.viewerCount - a.viewerCount);
-      });
-      setCursor(res.nextCursor);
-    } catch (err) {
-      setError(
-        err instanceof KickApiError
-          ? translateErrorCode(err.kind)
-          : translateErrorCode('unknown')
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId]);
-
-  function openStream(slug: string) {
-    browser.tabs.create({ url: `https://kick.com/${slug}` });
-  }
+  const list = usePagedList(
+    String(categoryId ?? ''),
+    (cursor, accessToken) =>
+      fetchLivestreams(
+        { cursor, limit: FETCH_LIMIT, categoryId: categoryId ? [categoryId] : undefined },
+        accessToken
+      ),
+    byViewersDesc
+  );
 
   return (
     <div>
       {categoryId && categoryName && (
-        <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-lime/20 bg-lime/5 px-3 py-2 text-xs">
-          <span className="flex items-center gap-1.5 text-white">
-            <Icon icon="filter" className="text-lime" />
-            {i18n.t('browse.filteredByPrefix')}{' '}
-            <span className="font-bold text-lime">{categoryName}</span>
-          </span>
-          {onClearCategory && (
-            <GhostButton
-              type="button"
-              onClick={onClearCategory}
-              className="min-h-8 px-2 py-0"
-            >
-              <Icon icon="x" className="text-sm" />
-              {i18n.t('browse.clearFilter')}
-            </GhostButton>
-          )}
-        </div>
+        <CategoryFilter name={categoryName} onClear={onClearCategory} />
       )}
-
-      {error && <ErrorBanner message={error} onRetry={() => load(true)} />}
-
-      {loading && streams.length === 0 && <StreamGridSkeleton />}
-
-      {!loading && streams.length === 0 && !error && (
-        <EmptyState icon="tv-off" title={i18n.t('browse.emptyLive')} />
-      )}
-
-      {streams.length > 0 && (
+      <PagedListBody
+        list={list}
+        skeleton={<StreamGridSkeleton />}
+        empty={<EmptyState icon="tv-off" title={i18n.t('browse.emptyLive')} />}
+      >
         <div className="grid grid-cols-2 gap-2">
-          {streams.map((stream) => (
-            <StreamCard
-              key={stream.id}
-              stream={stream}
-              onOpen={() => openStream(stream.slug)}
-            />
+          {list.items.map((stream) => (
+            <StreamCard key={stream.id} stream={stream} onOpen={() => openStream(stream.slug)} />
           ))}
         </div>
-      )}
+      </PagedListBody>
+    </div>
+  );
+}
 
-      {cursor && (
-        <PrimaryButton
-          onClick={() => load(false)}
-          disabled={loading}
-          className="mt-4 w-full"
-        >
-          {loading ? i18n.t('common.loading') : i18n.t('common.loadMore')}
-        </PrimaryButton>
+function CategoryFilter({ name, onClear }: { name: string; onClear?: () => void }) {
+  return (
+    <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-lime/20 bg-lime/5 px-3 py-2 text-xs">
+      <span className="flex items-center gap-1.5 text-white">
+        <Icon icon="filter" className="text-lime" />
+        {i18n.t('browse.filteredByPrefix')} <span className="font-bold text-lime">{name}</span>
+      </span>
+      {onClear && (
+        <GhostButton type="button" onClick={onClear} className="min-h-8 px-2 py-0">
+          <Icon icon="x" className="text-sm" />
+          {i18n.t('browse.clearFilter')}
+        </GhostButton>
       )}
     </div>
   );

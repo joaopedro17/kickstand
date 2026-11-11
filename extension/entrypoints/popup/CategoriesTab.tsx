@@ -1,146 +1,61 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { i18n } from '#i18n';
-import { withAuthRetry } from '@/lib/session-client';
-import { fetchCategories, KickApiError } from '@/lib/kick-api';
-import { translateErrorCode } from '@/lib/error-messages';
+import { fetchCategories } from '@/lib/kick-api';
+import { Card, EmptyState, Icon, IconButton } from './components/ui';
 import type { Category } from '@/lib/types';
-import {
-  Card,
-  EmptyState,
-  ErrorBanner,
-  Icon,
-  IconButton,
-  PrimaryButton,
-} from './components/ui';
+import { PagedListBody } from './components/PagedListBody';
+import { usePagedList, type FetchPage } from './usePagedList';
 
-// A single load() drives both modes:
-//   - activeQuery === null → browse (paginated via cursor)
-//   - activeQuery === string → server-side search via name[]= (no cursor,
-//     Kick's search endpoint returns a single page)
+const PAGE_SIZE = 25;
+
+/**
+ * Browsing pages through all categories. Searching asks Kick by name
+ * (`name[]=`), which answers in a single page, so a search never paginates.
+ */
+function categoriesFor(query: string | null): FetchPage<Category> {
+  if (query === null) {
+    return (cursor, accessToken) => fetchCategories({ cursor, limit: PAGE_SIZE }, accessToken);
+  }
+  return async (_cursor, accessToken) => {
+    const found = await fetchCategories({ limit: PAGE_SIZE, name: [query] }, accessToken);
+    return { items: found.items, nextCursor: null };
+  };
+}
+
 export function CategoriesTab({
   onSelectCategory,
 }: {
   onSelectCategory: (id: number, name: string) => void;
 }) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [queryInput, setQueryInput] = useState('');
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
+  const list = usePagedList(JSON.stringify(activeQuery), categoriesFor(activeQuery));
 
-  async function load(
-    reset: boolean,
-    override?: { query: string | null }
-  ) {
-    // Resolve mode from override → local state on the very first call, so a
-    // submit and its state update don't race the fetch.
-    const query = override ? override.query : activeQuery;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await withAuthRetry((accessToken) =>
-        fetchCategories(
-          {
-            cursor: reset || query !== null ? undefined : cursor ?? undefined,
-            limit: 25,
-            name: query ? [query] : undefined,
-          },
-          accessToken
-        )
-      );
-      if (!res) {
-        setError(translateErrorCode('not_logged_in'));
-        return;
-      }
-      setCategories((prev) => (reset ? res.items : [...prev, ...res.items]));
-      // Search mode returns everything in one page — pin cursor to null so
-      // we never fall into paginate-then-search-then-paginate confusion.
-      setCursor(query !== null ? null : res.nextCursor);
-    } catch (err) {
-      setError(
-        err instanceof KickApiError
-          ? translateErrorCode(err.kind)
-          : translateErrorCode('unknown')
-      );
-    } finally {
-      setLoading(false);
-    }
+  function search(input: string) {
+    const query = input.trim() || null;
+    // Submitting the same search again refreshes it.
+    if (query === activeQuery) list.reload();
+    else setActiveQuery(query);
   }
-
-  useEffect(() => {
-    load(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function submitSearch() {
-    const q = queryInput.trim();
-    const next = q.length > 0 ? q : null;
-    setActiveQuery(next);
-    load(true, { query: next });
-  }
-
-  function clearSearch() {
-    if (activeQuery === null && queryInput === '') return;
-    setQueryInput('');
-    setActiveQuery(null);
-    load(true, { query: null });
-  }
-
-  const isSearching = activeQuery !== null;
 
   return (
     <div>
-      <form
-        className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-panel p-2 transition hover:border-white/20 focus-within:border-lime/70 focus-within:ring-2 focus-within:ring-lime/10"
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submitSearch();
-        }}
+      <CategorySearch isSearching={activeQuery !== null} onSearch={search} />
+      <PagedListBody
+        list={list}
+        skeleton={<CategoryGridSkeleton />}
+        empty={
+          <EmptyState
+            icon="layout-grid"
+            title={
+              activeQuery !== null
+                ? i18n.t('categories.emptyMatches')
+                : i18n.t('categories.emptyAll')
+            }
+          />
+        }
       >
-        <Icon icon="search" className="ml-1 text-base text-muted" />
-        <label htmlFor="category-search" className="sr-only">
-          {i18n.t('categories.searchPlaceholder')}
-        </label>
-        <input
-          id="category-search"
-          type="search"
-          value={queryInput}
-          onChange={(e) => setQueryInput(e.target.value)}
-          placeholder={i18n.t('categories.searchPlaceholder')}
-          className="min-w-0 flex-1 bg-transparent px-1 py-1.5 text-sm text-white outline-none placeholder:text-muted/70"
-        />
-        {(isSearching || queryInput) && (
-          <IconButton
-            type="button"
-            aria-label={i18n.t('categories.clearSearch')}
-            onClick={clearSearch}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-muted hover:bg-white/[0.08]"
-          >
-            <Icon icon="x" />
-          </IconButton>
-        )}
-      </form>
-
-      {error && <ErrorBanner message={error} onRetry={() => load(true)} />}
-
-      {loading && categories.length === 0 && <CategoryGridSkeleton />}
-
-      {!loading && categories.length === 0 && !error && (
-        <EmptyState
-          icon="layout-grid"
-          title={
-            isSearching
-              ? i18n.t('categories.emptyMatches')
-              : i18n.t('categories.emptyAll')
-          }
-        />
-      )}
-
-      {categories.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          {categories.map((category) => (
+          {list.items.map((category) => (
             <CategoryCard
               key={category.id}
               category={category}
@@ -148,18 +63,57 @@ export function CategoriesTab({
             />
           ))}
         </div>
-      )}
-
-      {cursor && (
-        <PrimaryButton
-          onClick={() => load(false)}
-          disabled={loading}
-          className="mt-4 w-full"
-        >
-          {loading ? i18n.t('common.loading') : i18n.t('common.loadMore')}
-        </PrimaryButton>
-      )}
+      </PagedListBody>
     </div>
+  );
+}
+
+function CategorySearch({
+  isSearching,
+  onSearch,
+}: {
+  isSearching: boolean;
+  onSearch: (input: string) => void;
+}) {
+  const [input, setInput] = useState('');
+
+  function clear() {
+    setInput('');
+    if (isSearching) onSearch('');
+  }
+
+  return (
+    <form
+      className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-panel p-2 transition hover:border-white/20 focus-within:border-lime/70 focus-within:ring-2 focus-within:ring-lime/10"
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSearch(input);
+      }}
+    >
+      <Icon icon="search" className="ml-1 text-base text-muted" />
+      <label htmlFor="category-search" className="sr-only">
+        {i18n.t('categories.searchPlaceholder')}
+      </label>
+      <input
+        id="category-search"
+        type="search"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder={i18n.t('categories.searchPlaceholder')}
+        className="min-w-0 flex-1 bg-transparent px-1 py-1.5 text-sm text-white outline-none placeholder:text-muted/70"
+      />
+      {(isSearching || input) && (
+        <IconButton
+          type="button"
+          aria-label={i18n.t('categories.clearSearch')}
+          onClick={clear}
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-muted hover:bg-white/[0.08]"
+        >
+          <Icon icon="x" />
+        </IconButton>
+      )}
+    </form>
   );
 }
 
