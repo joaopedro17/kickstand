@@ -11,3 +11,5 @@ docs/
 coverage/
 *.tsbuildinfo
 .DS_Store
+.metrics/
+target/

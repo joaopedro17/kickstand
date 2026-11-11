@@ -17,7 +17,6 @@ import {
   IconButton,
   LiveBadge,
   PrimaryButton,
-  SectionHeader,
   TextInput,
   ViewerCount,
 } from './components/ui';
