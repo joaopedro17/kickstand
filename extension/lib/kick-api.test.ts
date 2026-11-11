@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   chunk,
-  KickApiError,
   resolveChannelsBySlug,
   fetchLivestreamsForUsers,
   fetchLivestreams,

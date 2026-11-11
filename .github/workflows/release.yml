@@ -45,6 +45,14 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
 
+      # Same gates as CI, so a release can never ship code a branch build
+      # would have rejected.
+      - name: Type-check
+        run: pnpm compile
+
+      - name: Lint
+        run: pnpm lint
+
       - name: Run tests
         run: pnpm test
 
