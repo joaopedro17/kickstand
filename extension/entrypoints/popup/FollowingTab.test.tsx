@@ -6,12 +6,8 @@ import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/test/fake-background';
 import type { Request } from '@/lib/messages';
 import { FollowingTab } from './FollowingTab';
-import {
-  liveStatusStorage,
-  trackedChannelsStorage,
-  type LiveStatusEntry,
-  type TrackedChannel,
-} from '@/lib/storage';
+import { liveStatusStorage, type LiveStatusEntry, type TrackedChannel } from '@/lib/storage';
+import { getTracked, setTracked, MAX_TRACKED } from '@/lib/tracked-channels';
 
 function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -60,7 +56,7 @@ describe('FollowingTab', () => {
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
 
     expect(await screen.findByText('Offline (1)')).toBeInTheDocument();
-    expect(await trackedChannelsStorage.getValue()).toEqual([
+    expect(await getTracked()).toEqual([
       expect.objectContaining({ broadcasterUserId: 42, slug: 'xqc', muted: false }),
     ]);
     expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
@@ -75,11 +71,11 @@ describe('FollowingTab', () => {
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
 
     expect(await screen.findByText('No channel found for "nobody"')).toBeInTheDocument();
-    expect(await trackedChannelsStorage.getValue()).toEqual([]);
+    expect(await getTracked()).toEqual([]);
   });
 
   it('refuses a channel that is already tracked', async () => {
-    await trackedChannelsStorage.setValue([tracked(42, 'xqc')]);
+    await setTracked([tracked(42, 'xqc')]);
     kickReturns([{ broadcaster_user_id: 42, slug: 'xqc' }]);
     render(<FollowingTab />);
 
@@ -87,11 +83,54 @@ describe('FollowingTab', () => {
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
 
     expect(await screen.findByText('"xqc" is already tracked')).toBeInTheDocument();
-    expect(await trackedChannelsStorage.getValue()).toHaveLength(1);
+    expect(await getTracked()).toHaveLength(1);
+  });
+
+  it('tells the user the list is full instead of adding past the maximum', async () => {
+    await setTracked(
+      Array.from({ length: MAX_TRACKED }, (_, i) => tracked(i + 1, `channel${i + 1}`))
+    );
+    kickReturns([{ broadcaster_user_id: 9999, slug: 'newcomer' }]);
+    render(<FollowingTab />);
+
+    await userEvent.type(screen.getByRole('textbox'), 'newcomer');
+    await userEvent.click(screen.getByRole('button', { name: /add/i }));
+
+    expect(
+      await screen.findByText(`You can track up to ${MAX_TRACKED} channels. Remove one to add another.`)
+    ).toBeInTheDocument();
+  });
+
+  it('tells the user when Kick cannot be reached', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+    render(<FollowingTab />);
+
+    await userEvent.type(screen.getByRole('textbox'), 'xqc');
+    await userEvent.click(screen.getByRole('button', { name: /add/i }));
+
+    expect(
+      await screen.findByText('Network error — check your connection and try again.')
+    ).toBeInTheDocument();
+    expect(await getTracked()).toEqual([]);
+  });
+
+  it('tells the user when browser sync storage is full', async () => {
+    kickReturns([{ broadcaster_user_id: 42, slug: 'xqc' }]);
+    vi.spyOn(fakeBrowser.storage.sync, 'set').mockRejectedValue(
+      new Error('QUOTA_BYTES quota exceeded')
+    );
+    render(<FollowingTab />);
+
+    await userEvent.type(screen.getByRole('textbox'), 'xqc');
+    await userEvent.click(screen.getByRole('button', { name: /add/i }));
+
+    expect(
+      await screen.findByText("Your browser's sync storage is full. Remove some channels and try again.")
+    ).toBeInTheDocument();
   });
 
   it('lists live channels by viewer count, highest first, with offline ones collapsed', async () => {
-    await trackedChannelsStorage.setValue([
+    await setTracked([
       tracked(1, 'small'),
       tracked(2, 'big'),
       tracked(3, 'sleeping'),
@@ -109,7 +148,7 @@ describe('FollowingTab', () => {
   });
 
   it('mutes a channel from its row', async () => {
-    await trackedChannelsStorage.setValue([tracked(2, 'big')]);
+    await setTracked([tracked(2, 'big')]);
     await liveStatusStorage.setValue({ 2: live('big stream', 5000) });
     render(<FollowingTab />);
 
@@ -119,12 +158,12 @@ describe('FollowingTab', () => {
       'aria-pressed',
       'true'
     );
-    expect((await trackedChannelsStorage.getValue())[0].muted).toBe(true);
+    expect((await getTracked())[0].muted).toBe(true);
   });
 
   it('opens the channel on kick.com when its row is clicked', async () => {
     const create = vi.spyOn(fakeBrowser.tabs, 'create').mockResolvedValue({} as never);
-    await trackedChannelsStorage.setValue([tracked(2, 'big')]);
+    await setTracked([tracked(2, 'big')]);
     await liveStatusStorage.setValue({ 2: live('big stream', 5000) });
     render(<FollowingTab />);
 

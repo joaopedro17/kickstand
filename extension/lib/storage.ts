@@ -35,11 +35,6 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: true,
 };
 
-export const trackedChannelsStorage = storage.defineItem<TrackedChannel[]>(
-  'sync:trackedChannels',
-  { fallback: [] }
-);
-
 export const settingsStorage = storage.defineItem<Settings>('sync:settings', {
   fallback: DEFAULT_SETTINGS,
 });

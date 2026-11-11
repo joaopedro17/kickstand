@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { requestLogout } from '@/lib/session-client';
+import { getTracked, removeTracked, watchTracked } from '@/lib/tracked-channels';
 import {
   settingsStorage,
-  trackedChannelsStorage,
   type Settings,
   type TrackedChannel,
 } from '@/lib/storage';
@@ -20,9 +20,9 @@ export function SettingsPanel() {
 
   useEffect(() => {
     settingsStorage.getValue().then(setSettings);
-    trackedChannelsStorage.getValue().then(setChannels);
+    getTracked().then(setChannels);
     const unwatchSettings = settingsStorage.watch(setSettings);
-    const unwatchChannels = trackedChannelsStorage.watch(setChannels);
+    const unwatchChannels = watchTracked(setChannels);
     return () => {
       unwatchSettings();
       unwatchChannels();
@@ -39,9 +39,7 @@ export function SettingsPanel() {
   }
 
   async function removeChannel(id: number) {
-    await trackedChannelsStorage.setValue(
-      channels.filter((c) => c.broadcasterUserId !== id)
-    );
+    await removeTracked(id);
   }
 
   return (

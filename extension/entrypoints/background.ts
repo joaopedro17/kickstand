@@ -13,6 +13,7 @@ import {
   MAX_USERS_PER_LIVESTREAM_REQUEST,
 } from '@/lib/kick-api';
 import { listenForRequests, type LoginResult } from '@/lib/messages';
+import { getTracked } from '@/lib/tracked-channels';
 import {
   computeNextStatus,
   channelsToNotify,
@@ -20,7 +21,6 @@ import {
   type BatchOutcome,
 } from '@/lib/poller';
 import {
-  trackedChannelsStorage,
   settingsStorage,
   liveStatusStorage,
   type LiveStatusCache,
@@ -78,7 +78,7 @@ async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): 
 }
 
 export async function pollNow(): Promise<void> {
-  const tracked = await trackedChannelsStorage.getValue();
+  const tracked = await getTracked();
   if (tracked.length === 0) {
     await browser.action.setBadgeText({ text: '' });
     return;
@@ -138,7 +138,12 @@ export default defineBackground(() => {
   browser.action.setBadgeBackgroundColor({ color: '#2121214b' });
   browser.action.setBadgeTextColor({ color: '#FFFFFF' });
 
-  browser.runtime.onInstalled.addListener(() => setupAlarm());
+  browser.runtime.onInstalled.addListener(() => {
+    setupAlarm();
+    // On update from a version that stored the list as one item, move it to
+    // the chunked format now rather than on the next read.
+    getTracked();
+  });
   browser.runtime.onStartup.addListener(() => setupAlarm());
 
   browser.alarms.onAlarm.addListener((alarm) => {
@@ -158,7 +163,7 @@ export default defineBackground(() => {
     const match = notificationId.match(/^kickstand-live-(\d+)$/);
     if (!match) return;
     const id = Number(match[1]);
-    const tracked = await trackedChannelsStorage.getValue();
+    const tracked = await getTracked();
     const channel = tracked.find((c) => c.broadcasterUserId === id);
     if (channel) {
       browser.tabs.create({ url: `https://kick.com/${channel.slug}` });

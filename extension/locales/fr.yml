@@ -34,6 +34,7 @@ following:
   hideOffline: Masquer hors ligne
   channelNotFound: 'Aucune chaîne trouvée pour « {slug} »'
   alreadyTracked: '« {slug} » est déjà suivi'
+  limitReached: 'Vous pouvez suivre jusqu''à {max} chaînes. Supprimez-en une pour en ajouter une autre.'
 
 browse:
   emptyLive: Aucun stream en direct pour le moment.
@@ -75,6 +76,7 @@ errors:
   unauthorized: Votre session a expiré — veuillez vous reconnecter.
   rateLimited: Kick limite actuellement les requêtes — veuillez patienter un instant et réessayer.
   other: Une erreur s'est produite avec Kick. Veuillez réessayer.
+  storageFull: 'Le stockage synchronisé de votre navigateur est plein. Supprimez quelques chaînes et réessayez.'
   cancelled: La connexion a été annulée.
   oauth_rejected: Kick a rejeté la demande de connexion.
   no_code: La connexion n'a pas abouti — aucun code d'autorisation n'a été renvoyé.

@@ -5,6 +5,7 @@ export const CODE_TO_KEY = {
   unauthorized: 'unauthorized',
   'rate-limited': 'rateLimited',
   other: 'other',
+  'storage-full': 'storageFull',
   cancelled: 'cancelled',
   oauth_rejected: 'oauth_rejected',
   no_code: 'no_code',
