@@ -1,12 +1,23 @@
+import { defineBackground } from 'wxt/utils/define-background';
+import { browser } from 'wxt/browser';
 import { startLoginFlow, withAuthRetry, AuthError } from '@/lib/auth';
-import { fetchLivestreamsForUsers, chunk } from '@/lib/kick-api';
+import {
+  fetchLivestreamsForUsers,
+  chunk,
+  MAX_USERS_PER_LIVESTREAM_REQUEST,
+} from '@/lib/kick-api';
+import {
+  computeNextStatus,
+  channelsToNotify,
+  countLive,
+  type BatchOutcome,
+} from '@/lib/poller';
 import {
   trackedChannelsStorage,
   settingsStorage,
   liveStatusStorage,
-  diffLiveTransitions,
   type LiveStatusCache,
-  type LiveStatusEntry,
+  type TrackedChannel,
 } from '@/lib/storage';
 
 const POLL_ALARM = 'kickstand-poll';
@@ -27,24 +38,36 @@ async function getI18n() {
   return (await import('#i18n')).i18n;
 }
 
-function emptyEntry(): LiveStatusEntry {
-  return {
-    isLive: false,
-    viewerCount: 0,
-    category: null,
-    thumbnail: null,
-    title: '',
-    avatarUrl: null,
-    lastCheckedAt: 0,
-  };
-}
-
 const POLL_PERIOD_MINUTES = 5;
 
 async function setupAlarm(): Promise<void> {
   await browser.alarms.create(POLL_ALARM, {
     periodInMinutes: POLL_PERIOD_MINUTES,
   });
+}
+
+async function fetchBatch(ids: number[]): Promise<BatchOutcome | null> {
+  try {
+    const livestreams = await withAuthRetry((accessToken) =>
+      fetchLivestreamsForUsers(ids, accessToken)
+    );
+    return livestreams === null ? null : { ids, livestreams };
+  } catch (err) {
+    return { ids, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): Promise<void> {
+  const i18n = await getI18n();
+  for (const channel of channels) {
+    const entry = status[channel.broadcasterUserId];
+    await browser.notifications.create(`kickstand-live-${channel.broadcasterUserId}`, {
+      type: 'basic',
+      iconUrl: entry.avatarUrl || browser.runtime.getURL('/icons/128.png'),
+      title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
+      message: entry.title || i18n.t('notifications.liveDefaultMessage'),
+    });
+  }
 }
 
 export async function pollNow(): Promise<void> {
@@ -55,73 +78,31 @@ export async function pollNow(): Promise<void> {
   }
 
   const previous = await liveStatusStorage.getValue();
-  // Start empty (not `{ ...previous }`) so entries for channels no longer
-  // tracked are pruned rather than carried forward indefinitely — otherwise
-  // a stale `isLive: true` entry for an untracked channel would inflate the
-  // badge count forever, since the count sums over the whole cache.
-  const next: LiveStatusCache = {};
   const ids = tracked.map((c) => c.broadcasterUserId);
 
-  for (const batch of chunk(ids, 100)) {
-    try {
-      const livestreams = await withAuthRetry((accessToken) =>
-        fetchLivestreamsForUsers(batch, accessToken)
-      );
-      if (livestreams === null) {
-        // Not logged in, or auth failed even after a refresh-and-retry —
-        // stop polling and clear the badge rather than keep hammering a
-        // dead token or displaying stale live status.
-        await browser.action.setBadgeText({ text: '' });
-        return;
-      }
-      for (const id of batch) {
-        const stream = livestreams.find((l) => l.broadcaster_user.id === id);
-        next[id] = stream
-          ? {
-              isLive: true,
-              viewerCount: stream.viewer_count,
-              category: stream.category,
-              thumbnail: stream.thumbnail,
-              title: stream.title,
-              avatarUrl: stream.broadcaster_user.profile_picture,
-              lastCheckedAt: Date.now(),
-            }
-          : {
-              ...(previous[id] ?? emptyEntry()),
-              isLive: false,
-              lastCheckedAt: Date.now(),
-            };
-      }
-    } catch (err) {
-      for (const id of batch) {
-        next[id] = {
-          ...(previous[id] ?? emptyEntry()),
-          lastError: err instanceof Error ? err.message : String(err),
-          lastCheckedAt: Date.now(),
-        };
-      }
+  const batches: BatchOutcome[] = [];
+  for (const batchIds of chunk(ids, MAX_USERS_PER_LIVESTREAM_REQUEST)) {
+    const outcome = await fetchBatch(batchIds);
+    if (outcome === null) {
+      // Not logged in, or auth failed even after a refresh-and-retry —
+      // stop polling and clear the badge rather than keep hammering a
+      // dead token or displaying stale live status.
+      await browser.action.setBadgeText({ text: '' });
+      return;
     }
+    batches.push(outcome);
   }
 
-  const wentLive = diffLiveTransitions(previous, next);
+  const next = computeNextStatus(previous, batches, Date.now());
+
   const settings = await settingsStorage.getValue();
-  if (settings.notificationsEnabled && wentLive.length > 0) {
-    const i18n = await getI18n();
-    for (const id of wentLive) {
-      const channel = tracked.find((c) => c.broadcasterUserId === id);
-      if (channel && !channel.muted) {
-        await browser.notifications.create(`kickstand-live-${id}`, {
-          type: 'basic',
-          iconUrl: next[id].avatarUrl || browser.runtime.getURL('/icons/128.png'),
-          title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
-          message: next[id].title || i18n.t('notifications.liveDefaultMessage'),
-        });
-      }
-    }
+  if (settings.notificationsEnabled) {
+    const toNotify = channelsToNotify(tracked, previous, next);
+    if (toNotify.length > 0) await notifyLive(toNotify, next);
   }
 
   await liveStatusStorage.setValue(next);
-  const liveCount = Object.values(next).filter((e) => e.isLive).length;
+  const liveCount = countLive(next);
   await browser.action.setBadgeText({ text: liveCount > 0 ? String(liveCount) : '' });
 }
 

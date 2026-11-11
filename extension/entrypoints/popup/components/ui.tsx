@@ -7,7 +7,6 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 type Div = ComponentPropsWithoutRef<'div'>;
 type Btn = ComponentPropsWithoutRef<'button'>;
 type Input = ComponentPropsWithoutRef<'input'>;
-type Select = ComponentPropsWithoutRef<'select'>;
 
 export function Card({
   className = '',
@@ -76,26 +75,6 @@ export function TextInput({ className = '', ...props }: Input) {
         className
       }
     />
-  );
-}
-
-export function Select({ className = '', children, ...props }: Select) {
-  return (
-    <div className="relative">
-      <select
-        {...props}
-        className={
-          'w-full appearance-none rounded-xl border border-white/10 bg-ink px-3 py-2.5 pr-10 text-sm text-white outline-none transition hover:border-white/20 focus:border-lime focus:ring-2 focus:ring-lime/20 ' +
-          className
-        }
-      >
-        {children}
-      </select>
-      <Icon
-        icon="lucide:chevron-down"
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"
-      />
-    </div>
   );
 }
 

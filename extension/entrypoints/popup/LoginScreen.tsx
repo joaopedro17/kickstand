@@ -1,3 +1,4 @@
+import { browser } from 'wxt/browser';
 import { useState } from 'react';
 import { i18n } from '#i18n';
 import { translateErrorCode } from '@/lib/error-messages';

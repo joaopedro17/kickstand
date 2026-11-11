@@ -1,3 +1,4 @@
+import { browser } from 'wxt/browser';
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
@@ -17,7 +18,6 @@ import {
   IconButton,
   LiveBadge,
   PrimaryButton,
-  SectionHeader,
   TextInput,
   ViewerCount,
 } from './components/ui';
