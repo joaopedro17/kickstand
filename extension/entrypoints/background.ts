@@ -23,6 +23,7 @@ import {
 import {
   settingsStorage,
   liveStatusStorage,
+  LEGACY_LIVE_STATUS_KEY,
   type LiveStatusCache,
   type TrackedChannel,
 } from '@/lib/storage';
@@ -68,11 +69,12 @@ async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): 
   const i18n = await getI18n();
   for (const channel of channels) {
     const entry = status[channel.broadcasterUserId];
+    const title = entry.status.kind === 'live' ? entry.status.title : '';
     await browser.notifications.create(`kickstand-live-${channel.broadcasterUserId}`, {
       type: 'basic',
       iconUrl: entry.avatarUrl || browser.runtime.getURL('/icons/128.png'),
       title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
-      message: entry.title || i18n.t('notifications.liveDefaultMessage'),
+      message: title || i18n.t('notifications.liveDefaultMessage'),
     });
   }
 }
@@ -100,17 +102,17 @@ export async function pollNow(): Promise<void> {
     batches.push(outcome);
   }
 
-  const next = computeNextStatus(previous, batches, Date.now());
+  const { next, wentLive } = computeNextStatus(previous, batches, Date.now());
 
-  const settings = await settingsStorage.getValue();
-  if (settings.notificationsEnabled) {
-    const toNotify = channelsToNotify(tracked, previous, next);
-    if (toNotify.length > 0) await notifyLive(toNotify, next);
-  }
-
+  // Saved before notifying: if the worker is stopped in between, the next
+  // poll sees these streams as already notified instead of notifying twice.
   await liveStatusStorage.setValue(next);
   const liveCount = countLive(next);
   await browser.action.setBadgeText({ text: liveCount > 0 ? String(liveCount) : '' });
+
+  const settings = await settingsStorage.getValue();
+  const toNotify = settings.notificationsEnabled ? channelsToNotify(tracked, wentLive) : [];
+  if (toNotify.length > 0) await notifyLive(toNotify, next);
 }
 
 // Runs the OAuth flow here rather than in the popup: launchWebAuthFlow opens
@@ -143,6 +145,7 @@ export default defineBackground(() => {
     // On update from a version that stored the list as one item, move it to
     // the chunked format now rather than on the next read.
     getTracked();
+    browser.storage.local.remove(LEGACY_LIVE_STATUS_KEY);
   });
   browser.runtime.onStartup.addListener(() => setupAlarm());
 

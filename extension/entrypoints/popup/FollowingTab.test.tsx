@@ -6,7 +6,7 @@ import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/test/fake-background';
 import type { Request } from '@/lib/messages';
 import { FollowingTab } from './FollowingTab';
-import { liveStatusStorage, type LiveStatusEntry, type TrackedChannel } from '@/lib/storage';
+import { liveStatusStorage, type ChannelStatus, type TrackedChannel } from '@/lib/storage';
 import { getTracked, setTracked, MAX_TRACKED } from '@/lib/tracked-channels';
 
 function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) {
@@ -23,13 +23,17 @@ function tracked(id: number, slug: string): TrackedChannel {
   return { broadcasterUserId: id, slug, addedAt: id, muted: false };
 }
 
-function live(title: string, viewerCount: number): LiveStatusEntry {
+function live(title: string, viewerCount: number): ChannelStatus {
   return {
-    isLive: true,
-    viewerCount,
-    category: { id: 1, name: 'Just Chatting' },
-    thumbnail: null,
-    title,
+    status: {
+      kind: 'live',
+      startedAt: '2026-11-11T10:00:00Z',
+      viewerCount,
+      title,
+      category: { id: 1, name: 'Just Chatting' },
+      thumbnail: null,
+    },
+    notifiedStartedAt: '2026-11-11T10:00:00Z',
     avatarUrl: null,
     lastCheckedAt: 1,
   };

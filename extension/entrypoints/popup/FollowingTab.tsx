@@ -18,7 +18,8 @@ import {
   liveStatusStorage,
   type TrackedChannel,
   type LiveStatusCache,
-  type LiveStatusEntry,
+  type ChannelStatus,
+  type LiveStatus,
 } from '@/lib/storage';
 import {
   Card,
@@ -49,8 +50,12 @@ function openChannel(slug: string) {
  * keeps the collapsible section from reshuffling every poll.
  */
 function partitionByLive(channels: TrackedChannel[], liveStatus: LiveStatusCache) {
-  const viewers = (c: TrackedChannel) => liveStatus[c.broadcasterUserId]?.viewerCount ?? 0;
-  const isLive = (c: TrackedChannel) => liveStatus[c.broadcasterUserId]?.isLive ?? false;
+  const liveOf = (c: TrackedChannel) => {
+    const status = liveStatus[c.broadcasterUserId]?.status;
+    return status?.kind === 'live' ? status : null;
+  };
+  const viewers = (c: TrackedChannel) => liveOf(c)?.viewerCount ?? 0;
+  const isLive = (c: TrackedChannel) => liveOf(c) !== null;
   return {
     live: channels.filter(isLive).sort((a, b) => viewers(b) - viewers(a)),
     offline: channels.filter((c) => !isLive(c)).sort((a, b) => a.addedAt - b.addedAt),
@@ -242,7 +247,7 @@ function ChannelRow({
   status,
 }: {
   channel: TrackedChannel;
-  status: LiveStatusEntry | undefined;
+  status: ChannelStatus | undefined;
 }) {
   return (
     <Card
@@ -250,14 +255,14 @@ function ChannelRow({
       className="group flex cursor-pointer gap-3 p-3"
       onClick={() => openChannel(channel.slug)}
     >
-      <ChannelThumbnail status={status} />
+      <ChannelThumbnail status={status?.status} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <h3 className="truncate text-sm font-extrabold">{channel.slug}</h3>
           <MuteButton channel={channel} />
         </div>
-        {status?.isLive ? (
-          <StreamDetails status={status} />
+        {status?.status.kind === 'live' ? (
+          <StreamDetails stream={status.status} />
         ) : (
           <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-muted">
             {i18n.t('following.offline')}
@@ -268,12 +273,15 @@ function ChannelRow({
   );
 }
 
-function ChannelThumbnail({ status }: { status: LiveStatusEntry | undefined }) {
+type LiveStream = Extract<LiveStatus, { kind: 'live' }>;
+
+function ChannelThumbnail({ status }: { status: LiveStatus | undefined }) {
+  const thumbnail = status?.kind === 'live' ? status.thumbnail : null;
   return (
     <div className="relative h-[72px] w-[104px] shrink-0 overflow-hidden rounded-xl bg-neutral-800">
-      {status?.thumbnail ? (
+      {thumbnail ? (
         <img
-          src={status.thumbnail}
+          src={thumbnail}
           alt=""
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
@@ -282,7 +290,7 @@ function ChannelThumbnail({ status }: { status: LiveStatusEntry | undefined }) {
           <Icon icon="tv-off" className="text-lg" />
         </div>
       )}
-      {status?.isLive && <LiveBadge />}
+      {status?.kind === 'live' && <LiveBadge />}
     </div>
   );
 }
@@ -304,16 +312,16 @@ function MuteButton({ channel }: { channel: TrackedChannel }) {
   );
 }
 
-function StreamDetails({ status }: { status: LiveStatusEntry }) {
+function StreamDetails({ stream }: { stream: LiveStream }) {
   return (
     <>
-      <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{status.title}</p>
+      <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{stream.title}</p>
       <div className="mt-1 flex items-center gap-2 text-[11px] text-muted">
-        <ViewerCount count={status.viewerCount} />
-        {status.category?.name && (
+        <ViewerCount count={stream.viewerCount} />
+        {stream.category?.name && (
           <>
             <span>·</span>
-            <span className="truncate">{status.category.name}</span>
+            <span className="truncate">{stream.category.name}</span>
           </>
         )}
       </div>
