@@ -42,7 +42,7 @@ describe('kick-api requests', () => {
     expect(result).toHaveLength(2);
   });
 
-  it('fetchLivestreamsForUsers batches ids into groups of 100', async () => {
+  it('fetchLivestreamsForUsers asks for every given user in one request', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -50,10 +50,15 @@ describe('kick-api requests', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
+    // Splitting into requests is the caller's job (see MAX_USERS_PER_LIVESTREAM_REQUEST),
+    // so that one failed request only costs the caller that batch.
     const ids = Array.from({ length: 150 }, (_, i) => i);
     await fetchLivestreamsForUsers(ids, 'token');
 
-    expect(fetchMock).toHaveBeenCalledTimes(2); // 150 ids -> batches of 100 + 50
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe('/public/v1/users/livestreams');
+    expect(calledUrl.searchParams.getAll('user_id')).toHaveLength(150);
   });
 
   it('fetchLivestreams passes category/cursor/limit as query params', async () => {

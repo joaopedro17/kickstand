@@ -83,20 +83,19 @@ export async function resolveChannelsBySlug(
   return results;
 }
 
+/** Kick accepts at most this many `user_id` values per livestreams request. */
+export const MAX_USERS_PER_LIVESTREAM_REQUEST = 100;
+
 export async function fetchLivestreamsForUsers(
   userIds: number[],
   accessToken: string
 ): Promise<KickLivestream[]> {
-  const results: KickLivestream[] = [];
-  for (const batch of chunk(userIds, 100)) {
-    const res = await kickFetch<{ data: KickLivestream[] }>(
-      '/public/v1/users/livestreams',
-      { user_id: batch },
-      accessToken
-    );
-    results.push(...res.data);
-  }
-  return results;
+  const res = await kickFetch<{ data: KickLivestream[] }>(
+    '/public/v1/users/livestreams',
+    { user_id: userIds },
+    accessToken
+  );
+  return res.data;
 }
 
 export async function fetchLivestreams(
