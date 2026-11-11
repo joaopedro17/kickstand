@@ -5,6 +5,7 @@ import { withAuthRetry } from '@/lib/session-client';
 import { resolveChannelsBySlug, KickApiError } from '@/lib/kick-api';
 import { translateErrorCode } from '@/lib/error-messages';
 import { sendRequest } from '@/lib/messages';
+import { isStale } from '@/lib/poller';
 import {
   addTracked,
   getTracked,
@@ -67,8 +68,11 @@ function useTrackedChannels() {
   const [liveStatus, setLiveStatus] = useState<LiveStatusCache>({});
 
   useEffect(() => {
-    getTracked().then(setChannels);
-    liveStatusStorage.getValue().then(setLiveStatus);
+    Promise.all([getTracked(), liveStatusStorage.getValue()]).then(([tracked, status]) => {
+      setChannels(tracked);
+      setLiveStatus(status);
+      if (isStale(tracked, status, Date.now())) sendRequest({ type: 'poll-now' }).catch(() => {});
+    });
     const unwatchChannels = watchTracked(setChannels);
     const unwatchStatus = liveStatusStorage.watch(setLiveStatus);
     return () => {

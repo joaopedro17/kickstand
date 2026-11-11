@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeNextStatus, channelsToNotify, countLive } from './poller';
+import { computeNextStatus, channelsToNotify, countLive, isStale, STALE_AFTER_MS } from './poller';
 import type { ChannelStatus, LiveStatusCache, TrackedChannel } from './storage';
 import type { KickLivestream } from './types';
 
@@ -220,5 +220,26 @@ describe('countLive', () => {
 
   it('is zero for an empty cache', () => {
     expect(countLive({})).toBe(0);
+  });
+});
+
+describe('isStale', () => {
+  const at = (lastCheckedAt: number): ChannelStatus => ({ ...offline(null), lastCheckedAt });
+
+  it('is fresh at exactly the limit and stale just after it', () => {
+    expect(isStale([channel(1)], { 1: at(NOW - STALE_AFTER_MS) }, NOW)).toBe(false);
+    expect(isStale([channel(1)], { 1: at(NOW - STALE_AFTER_MS - 1) }, NOW)).toBe(true);
+  });
+
+  it('goes by the most recent check', () => {
+    expect(isStale([channel(1), channel(2)], { 1: at(0), 2: at(NOW - 1000) }, NOW)).toBe(false);
+  });
+
+  it('is stale when a tracked channel was never polled', () => {
+    expect(isStale([channel(1), channel(2)], { 1: at(NOW) }, NOW)).toBe(true);
+  });
+
+  it('is never stale with nothing tracked', () => {
+    expect(isStale([], {}, NOW)).toBe(false);
   });
 });

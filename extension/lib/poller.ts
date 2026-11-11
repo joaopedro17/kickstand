@@ -109,3 +109,14 @@ export function channelsToNotify(tracked: TrackedChannel[], wentLive: number[]):
 export function countLive(cache: LiveStatusCache): number {
   return Object.values(cache).filter((e) => e.status.kind === 'live').length;
 }
+
+/** How old live status can get before opening the popup asks for a fresh poll. */
+export const STALE_AFTER_MS = 60_000;
+
+/** Whether the popup should ask for a poll: some tracked channel was never polled, or the latest poll is too old. */
+export function isStale(tracked: TrackedChannel[], cache: LiveStatusCache, now: number): boolean {
+  if (tracked.length === 0) return false;
+  if (tracked.some((c) => !cache[c.broadcasterUserId])) return true;
+  const newest = Math.max(...Object.values(cache).map((e) => e.lastCheckedAt));
+  return now - newest > STALE_AFTER_MS;
+}

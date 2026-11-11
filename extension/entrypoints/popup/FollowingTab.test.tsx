@@ -52,6 +52,42 @@ describe('FollowingTab', () => {
     vi.restoreAllMocks();
   });
 
+  describe('when opened', () => {
+    it('asks the background to poll when the live status is over a minute old', async () => {
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() - 61_000 } });
+
+      render(<FollowingTab />);
+
+      await expect.poll(() => backgroundReceived).toContainEqual({ type: 'poll-now' });
+    });
+
+    it('asks the background to poll when tracked channels have never been polled', async () => {
+      await setTracked([tracked(1, 'one')]);
+
+      render(<FollowingTab />);
+
+      await expect.poll(() => backgroundReceived).toContainEqual({ type: 'poll-now' });
+    });
+
+    it('does not ask for a poll when the live status is fresh', async () => {
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() - 5_000 } });
+
+      render(<FollowingTab />);
+      await screen.findByText('one');
+
+      expect(backgroundReceived).not.toContainEqual({ type: 'poll-now' });
+    });
+
+    it('does not ask for a poll when nothing is tracked', async () => {
+      render(<FollowingTab />);
+      await screen.findByText('No tracked channels yet.');
+
+      expect(backgroundReceived).not.toContainEqual({ type: 'poll-now' });
+    });
+  });
+
   it('tracks a channel the user adds by slug and asks the background to poll', async () => {
     kickReturns([{ broadcaster_user_id: 42, slug: 'xqc' }]);
     render(<FollowingTab />);
