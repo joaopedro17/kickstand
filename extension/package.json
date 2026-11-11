@@ -28,6 +28,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.9",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-istanbul": "4.1.10",
@@ -36,6 +39,7 @@
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
+    "happy-dom": "^21.0.4",
     "js-yaml": "^5.4.0",
     "sharp": "^0.35.3",
     "typescript": "^5.9.3",
