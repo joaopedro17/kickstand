@@ -73,3 +73,13 @@ export const authTokensStorage = storage.defineItem<AuthTokens | null>(
 export const pollPausedUntilStorage = storage.defineItem<number>('local:pollPausedUntil', {
   fallback: 0,
 });
+
+/** The logged-in user's Kick profile picture, remembered so the popup can show it without asking Kick each time. */
+export interface CachedProfile {
+  avatarUrl: string | null;
+  fetchedAt: number;
+}
+
+export const profileStorage = storage.defineItem<CachedProfile | null>('local:profile', {
+  fallback: null,
+});
