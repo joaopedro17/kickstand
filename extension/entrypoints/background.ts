@@ -6,6 +6,7 @@ import {
   chunk,
   MAX_USERS_PER_LIVESTREAM_REQUEST,
 } from '@/lib/kick-api';
+import { listenForRequests, type LoginResult } from '@/lib/messages';
 import {
   computeNextStatus,
   channelsToNotify,
@@ -112,9 +113,7 @@ export async function pollNow(): Promise<void> {
 // completes. The background service worker persists across that focus
 // change, so it's the only place this can reliably finish. The popup picks
 // up the result via authTokensStorage.watch() once it's next opened.
-async function login(): Promise<
-  { success: true } | { success: false; error: string; detail?: string }
-> {
+async function login(): Promise<LoginResult> {
   try {
     await startLoginFlow();
     return { success: true };
@@ -140,10 +139,12 @@ export default defineBackground(() => {
     if (alarm.name === POLL_ALARM) pollNow();
   });
 
-  browser.runtime.onMessage.addListener((message) => {
-    if (message?.type === 'poll-now') return pollNow();
-    if (message?.type === 'login') return login();
-  });
+  browser.runtime.onMessage.addListener(
+    listenForRequests({
+      'poll-now': () => pollNow(),
+      login: () => login(),
+    })
+  );
 
   browser.notifications.onClicked.addListener(async (notificationId) => {
     const match = notificationId.match(/^kickstand-live-(\d+)$/);

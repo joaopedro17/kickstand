@@ -1,7 +1,7 @@
-import { browser } from 'wxt/browser';
 import { useState } from 'react';
 import { i18n } from '#i18n';
 import { translateErrorCode } from '@/lib/error-messages';
+import { sendRequest } from '@/lib/messages';
 import { Icon, PrimaryButton } from './components/ui';
 
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
@@ -15,9 +15,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
     // OAuth window steals focus and closes this popup mid-flow otherwise.
     // If that happens, this response never arrives, but authTokensStorage's
     // watcher in App.tsx picks up the result next time the popup opens.
-    const result = await browser.runtime
-      .sendMessage({ type: 'login' })
-      .catch(() => null);
+    const result = await sendRequest({ type: 'login' }).catch(() => null);
     if (result?.success) {
       onLoggedIn();
     } else {

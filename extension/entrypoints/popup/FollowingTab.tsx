@@ -4,6 +4,7 @@ import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth';
 import { resolveChannelsBySlug, KickApiError } from '@/lib/kick-api';
 import { translateErrorCode } from '@/lib/error-messages';
+import { sendRequest } from '@/lib/messages';
 import {
   trackedChannelsStorage,
   liveStatusStorage,
@@ -76,7 +77,9 @@ export function FollowingTab() {
       ];
       await trackedChannelsStorage.setValue(updated);
       setSlugInput('');
-      await browser.runtime.sendMessage({ type: 'poll-now' });
+      // The channel is tracked either way; a failed poll shows up as stale
+      // live status, not as a failure to add.
+      sendRequest({ type: 'poll-now' }).catch(() => {});
     } catch (err) {
       setAddError(
         err instanceof KickApiError
