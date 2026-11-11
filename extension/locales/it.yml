@@ -36,6 +36,7 @@ following:
   channelNotFound: 'Nessun canale trovato per "{slug}"'
   alreadyTracked: '"{slug}" è già seguito'
   limitReached: 'Puoi seguire fino a {max} canali. Rimuovine uno per aggiungerne un altro.'
+  refreshFailed: 'Impossibile aggiornare lo stato live. Viene mostrato l''ultimo stato noto.'
 
 browse:
   emptyLive: Nessuno stream in diretta al momento.

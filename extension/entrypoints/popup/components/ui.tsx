@@ -75,14 +75,17 @@ export function TextInput({ className = '', ...props }: Input) {
   );
 }
 
+/** `headingId` is what the surrounding section's aria-labelledby points at. */
 export function SectionHeader({
   icon,
   title,
+  headingId,
   kicker,
   right,
 }: {
   icon: IconName;
   title: string;
+  headingId: string;
   kicker?: string;
   right?: ReactNode;
 }) {
@@ -92,7 +95,9 @@ export function SectionHeader({
         <Icon icon={icon} className="text-base" />
       </span>
       <div className="flex-1">
-        <h2 className="text-sm font-extrabold tracking-tight">{title}</h2>
+        <h2 id={headingId} className="text-sm font-extrabold tracking-tight">
+          {title}
+        </h2>
         {kicker && (
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
             {kicker}

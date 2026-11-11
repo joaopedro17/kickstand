@@ -40,6 +40,13 @@ describe('SettingsPanel', () => {
     await expect.poll(async () => (await settingsStorage.getValue()).notificationsEnabled).toBe(true);
   });
 
+  it('names its sections for screen readers', async () => {
+    render(<SettingsPanel />);
+
+    expect(await screen.findByRole('region', { name: 'Notifications' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Tracked channels' })).toBeInTheDocument();
+  });
+
   it('lists the tracked channels with their count', async () => {
     await setTracked([tracked(1, 'alpha'), tracked(2, 'beta')]);
     render(<SettingsPanel />);

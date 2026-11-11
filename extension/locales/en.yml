@@ -36,6 +36,7 @@ following:
   channelNotFound: 'No channel found for "{slug}"'
   alreadyTracked: '"{slug}" is already tracked'
   limitReached: 'You can track up to {max} channels. Remove one to add another.'
+  refreshFailed: 'Couldn''t refresh live status. Showing the last known state.'
 
 browse:
   emptyLive: No live streams right now.

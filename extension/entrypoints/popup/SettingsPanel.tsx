@@ -52,6 +52,7 @@ export function SettingsPanel() {
         <SectionHeader
           icon="bell"
           title={i18n.t('settings.notificationsTitle')}
+          headingId="notifications-heading"
           kicker={i18n.t('settings.notificationsKicker')}
         />
         <label

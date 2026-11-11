@@ -88,6 +88,39 @@ describe('FollowingTab', () => {
     });
   });
 
+  describe('when the last poll failed', () => {
+    it('says the status is not current and offers a retry that polls', async () => {
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({
+        1: { ...live('t', 1), lastCheckedAt: Date.now(), lastError: 'Network request failed' },
+      });
+      render(<FollowingTab />);
+
+      expect(
+        await screen.findByText("Couldn't refresh live status. Showing the last known state.")
+      ).toBeInTheDocument();
+      backgroundReceived.length = 0;
+      await userEvent.click(screen.getByRole('button', { name: 'Retry' }));
+
+      expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
+    });
+
+    it('shows no warning when the last poll worked', async () => {
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() } });
+      render(<FollowingTab />);
+
+      await screen.findByText('one');
+      expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('names the add-channel section for screen readers', () => {
+    render(<FollowingTab />);
+
+    expect(screen.getByRole('region', { name: 'Add a channel' })).toBeInTheDocument();
+  });
+
   it('tracks a channel the user adds by slug and asks the background to poll', async () => {
     kickReturns([{ broadcaster_user_id: 42, slug: 'xqc' }]);
     render(<FollowingTab />);

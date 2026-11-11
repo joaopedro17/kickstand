@@ -25,10 +25,12 @@ import {
 import {
   Card,
   EmptyState,
+  ErrorBanner,
   Icon,
   IconButton,
   LiveBadge,
   PrimaryButton,
+  SectionHeader,
   TextInput,
   ViewerCount,
 } from './components/ui';
@@ -134,8 +136,16 @@ function useAddChannel() {
 export function FollowingTab() {
   const { channels, liveStatus } = useTrackedChannels();
 
+  const pollFailed = Object.values(liveStatus).some((entry) => entry.lastError);
+
   return (
     <div>
+      {pollFailed && (
+        <ErrorBanner
+          message={i18n.t('following.refreshFailed')}
+          onRetry={() => sendRequest({ type: 'poll-now' }).catch(() => {})}
+        />
+      )}
       <AddChannelSection />
       {channels.length === 0 ? (
         <EmptyState
@@ -158,19 +168,12 @@ function AddChannelSection() {
       className="mb-5 rounded-2xl border border-lime/20 bg-panel p-3 shadow-lg shadow-black/10"
       aria-labelledby="add-channel-heading"
     >
-      <div className="mb-3 flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-lime/10 text-lime">
-          <Icon icon="plus" className="text-base" />
-        </span>
-        <div>
-          <h2 id="add-channel-heading" className="text-sm font-extrabold tracking-tight">
-            {i18n.t('following.addChannelTitle')}
-          </h2>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-            {i18n.t('following.addChannelKicker')}
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        icon="plus"
+        title={i18n.t('following.addChannelTitle')}
+        headingId="add-channel-heading"
+        kicker={i18n.t('following.addChannelKicker')}
+      />
       <form
         className="flex gap-2"
         onSubmit={(e) => {

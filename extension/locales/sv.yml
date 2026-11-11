@@ -36,6 +36,7 @@ following:
   channelNotFound: 'Ingen kanal hittades för "{slug}"'
   alreadyTracked: '"{slug}" följs redan'
   limitReached: 'Du kan följa upp till {max} kanaler. Ta bort en för att lägga till en ny.'
+  refreshFailed: 'Det gick inte att uppdatera livestatus. Visar senast kända läge.'
 
 browse:
   emptyLive: Inga live-sändningar just nu.
