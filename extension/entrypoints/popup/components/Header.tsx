@@ -27,7 +27,7 @@ export function Header({
       <div className="flex items-center justify-between gap-2">
         <nav
           className="grid flex-1 grid-cols-3 items-center gap-1"
-          aria-label="Primary navigation"
+          aria-label={i18n.t('app.primaryNav')}
         >
           {tabs.map((tab) => {
             const active = !settingsOpen && tab.name === activeTab;

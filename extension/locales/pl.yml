@@ -14,6 +14,7 @@ login:
 
 app:
   settingsTitle: Ustawienia
+  primaryNav: Nawigacja główna
 
 following:
   slugPlaceholder: slug-kanału
@@ -48,7 +49,6 @@ categories:
   emptyAll: Brak dostępnych kategorii.
 
 settings:
-  title: Ustawienia
   notifyToggle: Powiadamiaj, gdy obserwowany kanał wejdzie na żywo
   notificationsTitle: Powiadomienia
   notificationsKicker: Bądź na bieżąco
@@ -69,6 +69,7 @@ common:
   loadMore: Załaduj więcej
   retry: Spróbuj ponownie
   viewers: widzów
+  live: Na żywo
   remove: Usuń
 
 errors:

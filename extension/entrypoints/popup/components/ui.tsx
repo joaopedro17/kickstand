@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import { i18n } from '#i18n';
 import {
   Bell,
   BellOff,
@@ -136,7 +137,7 @@ export function LiveBadge({ animated = false }: { animated?: boolean }) {
       {animated && (
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
       )}
-      Live
+      {i18n.t('common.live')}
     </span>
   );
 }
@@ -146,6 +147,7 @@ export function ViewerCount({ count }: { count: number }) {
     <span className="flex items-center gap-1 text-lime">
       <Icon icon="eye" />
       {formatCount(count)}
+      <span className="sr-only">{i18n.t('common.viewers')}</span>
     </span>
   );
 }
@@ -169,7 +171,7 @@ export function ErrorBanner({
           onClick={onRetry}
           className="rounded-md px-2 py-0.5 text-[11px] font-bold text-red-100 transition hover:bg-red-500/20"
         >
-          Retry
+          {i18n.t('common.retry')}
         </button>
       )}
     </div>

@@ -14,6 +14,7 @@ login:
 
 app:
   settingsTitle: Settings
+  primaryNav: Primary navigation
 
 following:
   slugPlaceholder: channel-slug
@@ -48,7 +49,6 @@ categories:
   emptyAll: No categories available.
 
 settings:
-  title: Settings
   notifyToggle: Notify when a tracked channel goes live
   notificationsTitle: Notifications
   notificationsKicker: Stay in the loop
@@ -69,6 +69,7 @@ common:
   loadMore: Load more
   retry: Retry
   viewers: viewers
+  live: Live
   remove: Remove
 
 errors:

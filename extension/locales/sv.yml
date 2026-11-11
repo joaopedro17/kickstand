@@ -14,6 +14,7 @@ login:
 
 app:
   settingsTitle: Inställningar
+  primaryNav: Huvudnavigering
 
 following:
   slugPlaceholder: kanal-slug
@@ -48,7 +49,6 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
-  title: Inställningar
   notifyToggle: Meddela när en följd kanal sänder live
   notificationsTitle: Aviseringar
   notificationsKicker: Håll dig uppdaterad
@@ -69,6 +69,7 @@ common:
   loadMore: Ladda fler
   retry: Försök igen
   viewers: tittare
+  live: Live
   remove: Ta bort
 
 errors:
