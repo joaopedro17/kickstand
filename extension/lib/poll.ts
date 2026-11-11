@@ -10,6 +10,7 @@ import { withAuthRetry } from './session';
 import {
   liveStatusStorage,
   pollPausedUntilStorage,
+  profileStorage,
   settingsStorage,
   type LiveStatusCache,
   type TrackedChannel,
@@ -144,6 +145,13 @@ export async function syncToTracked(tracked: TrackedChannel[]): Promise<void> {
   const kept = Object.fromEntries(Object.entries(current).filter(([id]) => ids.has(Number(id))));
   await liveStatusStorage.setValue(kept);
   await showOnBadge(kept);
+}
+
+/** Forgets what was cached for the logged-out account: live status, badge and profile picture. */
+export async function forgetSessionData(): Promise<void> {
+  await liveStatusStorage.setValue({});
+  await profileStorage.setValue(null);
+  await browser.action.setBadgeText({ text: '' });
 }
 
 /** Opens the channel a live notification was about, and dismisses it. */

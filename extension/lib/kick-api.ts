@@ -1,5 +1,6 @@
 import { KICK_API_BASE } from './config';
 import { KickApiError } from './kick-error';
+import { fetchWithTimeout } from './fetch-timeout';
 import {
   parseCategoryPage,
   parseChannels,
@@ -53,17 +54,6 @@ function errorFor(response: Response): KickApiError {
   return new KickApiError('other', `Request failed with status ${status}`, status);
 }
 
-/** fetch, abandoned after REQUEST_TIMEOUT_MS. */
-async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    return await fetch(url, { ...init, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 /** Requests `path` and returns the body parsed by `parse`, or throws a KickApiError. */
 async function kickFetch<T>(
   path: string,
@@ -73,9 +63,11 @@ async function kickFetch<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetchWithTimeout(buildUrl(path, params), {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    response = await fetchWithTimeout(
+      buildUrl(path, params),
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+      REQUEST_TIMEOUT_MS
+    );
   } catch {
     throw new KickApiError('network', 'Network request failed');
   }
