@@ -1,13 +1,26 @@
 import { browser } from 'wxt/browser';
-import { chunk, fetchLivestreamsForUsers, MAX_USERS_PER_LIVESTREAM_REQUEST } from './kick-api';
+import {
+  chunk,
+  fetchLivestreamsForUsers,
+  KickApiError,
+  MAX_USERS_PER_LIVESTREAM_REQUEST,
+} from './kick-api';
 import { channelsToNotify, computeNextStatus, countLive, type BatchOutcome } from './poller';
 import { withAuthRetry } from './session';
-import { liveStatusStorage, settingsStorage, type LiveStatusCache, type TrackedChannel } from './storage';
+import {
+  liveStatusStorage,
+  pollPausedUntilStorage,
+  settingsStorage,
+  type LiveStatusCache,
+  type TrackedChannel,
+} from './storage';
 import { getTracked } from './tracked-channels';
 
 export const POLL_ALARM = 'kickstand-poll';
 const POLL_PERIOD_MINUTES = 5;
 const NOTIFICATION_PREFIX = 'kickstand-live-';
+/** How long to back off after a 429 that doesn't say how long to wait. */
+const DEFAULT_RATE_LIMIT_WAIT_MS = 60_000;
 
 // Dynamic import, not a static top-level one: WXT's entrypoint-scanning pass
 // (which runs on every `wxt prepare`/`wxt build`, including from a clean
@@ -41,8 +54,19 @@ async function fetchBatch(ids: number[]): Promise<BatchOutcome | null> {
     );
     return livestreams === null ? null : { ids, livestreams };
   } catch (err) {
-    return { ids, error: err instanceof Error ? err.message : String(err) };
+    const error = err instanceof Error ? err.message : String(err);
+    if (err instanceof KickApiError && err.kind === 'rate-limited') {
+      return { ids, error, rateLimitedForMs: err.retryAfterMs ?? DEFAULT_RATE_LIMIT_WAIT_MS };
+    }
+    return { ids, error };
   }
+}
+
+/** After a 429, polls are skipped for as long as Kick asked (the longest, across batches). */
+async function pauseIfRateLimited(batches: BatchOutcome[], now: number): Promise<void> {
+  const waits = batches.map((b) => ('rateLimitedForMs' in b ? (b.rateLimitedForMs ?? 0) : 0));
+  const longest = Math.max(0, ...waits);
+  if (longest > 0) await pollPausedUntilStorage.setValue(now + longest);
 }
 
 /** Every batch's outcome, or null as soon as one shows there is no session. */
@@ -72,6 +96,9 @@ async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): 
 }
 
 async function runPoll(): Promise<void> {
+  // While Kick has asked us to back off, keep showing what we last knew.
+  if (Date.now() < (await pollPausedUntilStorage.getValue())) return;
+
   const tracked = await getTracked();
   const batches = tracked.length > 0 ? await fetchAll(tracked) : [];
   if (batches === null || batches.length === 0) {
@@ -81,8 +108,10 @@ async function runPoll(): Promise<void> {
     return;
   }
 
+  const now = Date.now();
+  await pauseIfRateLimited(batches, now);
   const previous = await liveStatusStorage.getValue();
-  const { next, wentLive } = computeNextStatus(previous, batches, Date.now());
+  const { next, wentLive } = computeNextStatus(previous, batches, now);
 
   // Saved before notifying: if the worker is stopped in between, the next
   // poll sees these streams as already notified instead of notifying twice.

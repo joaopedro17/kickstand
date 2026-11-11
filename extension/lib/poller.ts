@@ -4,7 +4,7 @@ import type { Livestream } from './types';
 /** What one request for a batch of tracked channels came back with. */
 export type BatchOutcome =
   | { ids: number[]; livestreams: Livestream[] }
-  | { ids: number[]; error: string };
+  | { ids: number[]; error: string; rateLimitedForMs?: number };
 
 type Polled = { id: number; entry: ChannelStatus; wentLive: boolean };
 

@@ -238,6 +238,74 @@ describe('pollNow', () => {
   });
 });
 
+describe('when Kick rate-limits', () => {
+  beforeEach(async () => {
+    fakeBrowser.reset();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(Date.parse('2026-11-11T12:00:00Z'));
+    await authTokensStorage.setValue({
+      accessToken: 'access',
+      refreshToken: 'refresh',
+      expiresAt: Date.now() + 60 * 60 * 1000,
+      refreshExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    });
+    await setTracked([tracked(1)]);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  function kickRateLimits(retryAfter?: string) {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      headers: new Headers(retryAfter ? { 'Retry-After': retryAfter } : {}),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    return fetchMock;
+  }
+
+  it('does not poll again until the wait Kick asked for has passed', async () => {
+    const fetchMock = kickRateLimits('120');
+    await pollNow();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    vi.setSystemTime(Date.now() + 119_000);
+    await pollNow();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    vi.setSystemTime(Date.now() + 2_000);
+    await pollNow();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('waits a minute when Kick does not say how long', async () => {
+    const fetchMock = kickRateLimits();
+    await pollNow();
+
+    vi.setSystemTime(Date.now() + 59_000);
+    await pollNow();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    vi.setSystemTime(Date.now() + 2_000);
+    await pollNow();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps showing the last known status while waiting', async () => {
+    await liveStatusStorage.setValue({ 1: live() });
+    await fakeBrowser.action.setBadgeText({ text: '1' });
+    kickRateLimits('120');
+
+    await pollNow();
+    await pollNow();
+
+    expect(await badge()).toBe('1');
+    expect((await liveStatusStorage.getValue())[1].status.kind).toBe('live');
+  });
+});
+
 describe('syncToTracked', () => {
   beforeEach(() => {
     fakeBrowser.reset();

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { REQUEST_TIMEOUT_MS, retryAfterMs } from './kick-api';
 import {
   chunk,
   resolveChannelsBySlug,
@@ -141,5 +142,60 @@ describe('kick-api requests', () => {
     );
 
     await expect(fetchLivestreamsForUsers([1], 'token')).rejects.toMatchObject({ kind: 'other' });
+  });
+
+  it('gives up on a request Kick never answers, as a network error', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(
+        (_url: string, init: RequestInit) =>
+          new Promise((_resolve, reject) =>
+            init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+          )
+      )
+    );
+
+    const request = fetchLivestreamsForUsers([1], 'token');
+    const outcome = expect(request).rejects.toMatchObject({ kind: 'network' });
+    await vi.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
+    await outcome;
+    vi.useRealTimers();
+  });
+
+  it('tells the caller how long Kick asked it to wait after a 429', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        headers: new Headers({ 'Retry-After': '120' }),
+      })
+    );
+
+    await expect(fetchLivestreamsForUsers([1], 'token')).rejects.toMatchObject({
+      kind: 'rate-limited',
+      retryAfterMs: 120_000,
+    });
+  });
+});
+
+describe('retryAfterMs', () => {
+  const now = Date.parse('2026-11-11T12:00:00Z');
+
+  it('reads a number of seconds', () => {
+    expect(retryAfterMs('30', now)).toBe(30_000);
+  });
+
+  it('reads an HTTP date', () => {
+    expect(retryAfterMs('Wed, 11 Nov 2026 12:01:00 GMT', now)).toBe(60_000);
+  });
+
+  it.each([null, '', 'soon', '-5'])('ignores %j', (value) => {
+    expect(retryAfterMs(value, now)).toBeNull();
+  });
+
+  it('never returns a wait in the past', () => {
+    expect(retryAfterMs('Wed, 11 Nov 2026 11:00:00 GMT', now)).toBe(0);
   });
 });

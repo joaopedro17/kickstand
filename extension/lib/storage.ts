@@ -68,3 +68,8 @@ export const authTokensStorage = storage.defineItem<AuthTokens | null>(
   'local:authTokens',
   { fallback: null }
 );
+
+/** Polling is skipped until this time (ms since epoch) after Kick rate-limits it. */
+export const pollPausedUntilStorage = storage.defineItem<number>('local:pollPausedUntil', {
+  fallback: 0,
+});
