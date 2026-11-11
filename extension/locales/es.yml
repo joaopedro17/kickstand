@@ -34,6 +34,7 @@ following:
   hideOffline: Ocultar offline
   channelNotFound: 'No se encontró ningún canal para "{slug}"'
   alreadyTracked: '"{slug}" ya se está siguiendo'
+  limitReached: 'Puedes seguir hasta {max} canales. Elimina uno para añadir otro.'
 
 browse:
   emptyLive: No hay transmisiones en directo ahora mismo.
@@ -75,6 +76,7 @@ errors:
   unauthorized: Tu sesión ha caducado — inicia sesión de nuevo.
   rateLimited: Kick está limitando las solicitudes — espera un momento e inténtalo de nuevo.
   other: Algo salió mal al comunicarse con Kick. Inténtalo de nuevo.
+  storageFull: 'El almacenamiento sincronizado de tu navegador está lleno. Elimina algunos canales e inténtalo de nuevo.'
   cancelled: Se canceló el inicio de sesión.
   oauth_rejected: Kick rechazó la solicitud de inicio de sesión.
   no_code: El inicio de sesión no se completó — no se recibió ningún código de autorización.

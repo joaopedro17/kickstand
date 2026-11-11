@@ -34,6 +34,7 @@ following:
   hideOffline: Dölj offline
   channelNotFound: 'Ingen kanal hittades för "{slug}"'
   alreadyTracked: '"{slug}" följs redan'
+  limitReached: 'Du kan följa upp till {max} kanaler. Ta bort en för att lägga till en ny.'
 
 browse:
   emptyLive: Inga live-sändningar just nu.
@@ -75,6 +76,7 @@ errors:
   unauthorized: Din session har gått ut — logga in igen.
   rateLimited: Kick begränsar just nu antalet förfrågningar — vänta en stund och försök igen.
   other: Något gick fel med Kick. Försök igen.
+  storageFull: 'Webbläsarens synklagring är full. Ta bort några kanaler och försök igen.'
   cancelled: Inloggningen avbröts.
   oauth_rejected: Kick avvisade inloggningsförsöket.
   no_code: Inloggningen slutfördes inte — ingen auktoriseringskod returnerades.

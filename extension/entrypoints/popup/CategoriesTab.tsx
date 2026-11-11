@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
-import { withAuthRetry } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/session-client';
 import { fetchCategories, KickApiError } from '@/lib/kick-api';
 import { translateErrorCode } from '@/lib/error-messages';
 import type { KickCategoryWithTags } from '@/lib/types';
@@ -99,7 +99,7 @@ export function CategoriesTab({
           submitSearch();
         }}
       >
-        <Icon icon="lucide:search" className="ml-1 text-base text-muted" />
+        <Icon icon="search" className="ml-1 text-base text-muted" />
         <label htmlFor="category-search" className="sr-only">
           {i18n.t('categories.searchPlaceholder')}
         </label>
@@ -118,7 +118,7 @@ export function CategoriesTab({
             onClick={clearSearch}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-muted hover:bg-white/[0.08]"
           >
-            <Icon icon="lucide:x" />
+            <Icon icon="x" />
           </IconButton>
         )}
       </form>
@@ -129,7 +129,7 @@ export function CategoriesTab({
 
       {!loading && categories.length === 0 && !error && (
         <EmptyState
-          icon="lucide:layout-grid"
+          icon="layout-grid"
           title={
             isSearching
               ? i18n.t('categories.emptyMatches')
@@ -185,7 +185,7 @@ function CategoryCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted">
-            <Icon icon="lucide:image" className="text-2xl" />
+            <Icon icon="image" className="text-2xl" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

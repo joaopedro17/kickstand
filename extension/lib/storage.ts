@@ -11,18 +11,33 @@ export interface Settings {
   notificationsEnabled: boolean;
 }
 
-export interface LiveStatusEntry {
-  isLive: boolean;
-  viewerCount: number;
-  category: { id: number; name: string } | null;
-  thumbnail: string | null;
-  title: string;
+/**
+ * What the last poll learned about a channel. Only a live channel has stream
+ * details, so an offline channel can't carry a stale viewer count or title.
+ */
+export type LiveStatus =
+  | {
+      kind: 'live';
+      /** Kick's `started_at`, compared as an opaque string; null when Kick omits it. */
+      startedAt: string | null;
+      viewerCount: number;
+      title: string;
+      category: { id: number; name: string } | null;
+      thumbnail: string | null;
+    }
+  | { kind: 'offline'; lastLiveAt: number | null };
+
+export interface ChannelStatus {
+  status: LiveStatus;
+  /** The stream Kickstand last notified for (or adopted silently); at most one notification per stream. */
+  notifiedStartedAt: string | null;
   avatarUrl: string | null;
   lastCheckedAt: number;
   lastError?: string;
 }
 
-export type LiveStatusCache = Record<number, LiveStatusEntry>;
+/** Keyed by broadcaster user id. A tracked channel with no entry has never been polled. */
+export type LiveStatusCache = Record<number, ChannelStatus>;
 
 export interface AuthTokens {
   accessToken: string;
@@ -35,17 +50,17 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: true,
 };
 
-export const trackedChannelsStorage = storage.defineItem<TrackedChannel[]>(
-  'sync:trackedChannels',
-  { fallback: [] }
-);
-
 export const settingsStorage = storage.defineItem<Settings>('sync:settings', {
   fallback: DEFAULT_SETTINGS,
 });
 
+// Stored under a new key: entries in the old flat shape (local:liveStatus)
+// are dropped, not converted. The first poll after an update then sees every
+// channel as never polled and adopts running streams without notifying.
+export const LEGACY_LIVE_STATUS_KEY = 'liveStatus';
+
 export const liveStatusStorage = storage.defineItem<LiveStatusCache>(
-  'local:liveStatus',
+  'local:channelStatus',
   { fallback: {} }
 );
 
@@ -53,18 +68,3 @@ export const authTokensStorage = storage.defineItem<AuthTokens | null>(
   'local:authTokens',
   { fallback: null }
 );
-
-export function diffLiveTransitions(
-  previous: LiveStatusCache,
-  next: LiveStatusCache
-): number[] {
-  const wentLive: number[] = [];
-  for (const [idStr, entry] of Object.entries(next)) {
-    const id = Number(idStr);
-    const wasLive = previous[id]?.isLive ?? false;
-    if (entry.isLive && !wasLive) {
-      wentLive.push(id);
-    }
-  }
-  return wentLive;
-}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { authTokensStorage } from '@/lib/storage';
-import { withAuthRetry } from '@/lib/auth';
+import { withAuthRetry } from '@/lib/session-client';
 import { fetchCurrentUser } from '@/lib/kick-api';
 import { LoginScreen } from './LoginScreen';
 import { Header, type TabName } from './components/Header';

@@ -34,6 +34,7 @@ following:
   hideOffline: Offline ausblenden
   channelNotFound: 'Kein Kanal für „{slug}“ gefunden'
   alreadyTracked: '„{slug}“ wird bereits verfolgt'
+  limitReached: 'Du kannst bis zu {max} Kanäle verfolgen. Entferne einen, um einen neuen hinzuzufügen.'
 
 browse:
   emptyLive: Momentan keine Live-Streams.
@@ -75,6 +76,7 @@ errors:
   unauthorized: Deine Sitzung ist abgelaufen — bitte melde dich erneut an.
   rateLimited: Kick begrenzt gerade die Anfragen — bitte warte einen Moment und versuche es erneut.
   other: Bei der Kommunikation mit Kick ist etwas schiefgelaufen. Bitte versuche es erneut.
+  storageFull: 'Der Sync-Speicher deines Browsers ist voll. Entferne einige Kanäle und versuche es erneut.'
   cancelled: Die Anmeldung wurde abgebrochen.
   oauth_rejected: Kick hat die Anmeldeanfrage abgelehnt.
   no_code: Die Anmeldung wurde nicht abgeschlossen — es wurde kein Autorisierungscode zurückgegeben.

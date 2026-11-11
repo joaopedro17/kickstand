@@ -1,7 +1,7 @@
-import { browser } from 'wxt/browser';
 import { useState } from 'react';
 import { i18n } from '#i18n';
 import { translateErrorCode } from '@/lib/error-messages';
+import { sendRequest } from '@/lib/messages';
 import { Icon, PrimaryButton } from './components/ui';
 
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
@@ -15,9 +15,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
     // OAuth window steals focus and closes this popup mid-flow otherwise.
     // If that happens, this response never arrives, but authTokensStorage's
     // watcher in App.tsx picks up the result next time the popup opens.
-    const result = await browser.runtime
-      .sendMessage({ type: 'login' })
-      .catch(() => null);
+    const result = await sendRequest({ type: 'login' }).catch(() => null);
     if (result?.success) {
       onLoggedIn();
     } else {
@@ -32,7 +30,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
       style={{ width: 380, minHeight: 480 }}
     >
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-lime/10 text-lime shadow-[0_0_0_4px_rgba(184,243,74,.08)]">
-        <Icon icon="lucide:tv" className="text-2xl" />
+        <Icon icon="tv" className="text-2xl" />
       </div>
       <div className="space-y-1">
         <h1 className="text-xl font-extrabold tracking-tight">
@@ -45,7 +43,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
         disabled={loading}
         className="mt-2 min-w-[180px]"
       >
-        <Icon icon="lucide:log-in" />
+        <Icon icon="log-in" />
         {loading ? i18n.t('login.buttonLoading') : i18n.t('login.button')}
       </PrimaryButton>
       {error && (

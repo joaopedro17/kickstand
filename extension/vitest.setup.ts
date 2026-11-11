@@ -33,6 +33,11 @@ const englishMessages = flatten(
 );
 
 beforeEach(() => {
+  // WXT's own test setup stubs these once per file. Tests that undo their
+  // fetch stub with vi.unstubAllGlobals() remove these too, and libraries
+  // that read the global (@wxt-dev/i18n) would then find no browser.
+  vi.stubGlobal('chrome', fakeBrowser);
+  vi.stubGlobal('browser', fakeBrowser);
   vi.spyOn(fakeBrowser.i18n, 'getMessage').mockImplementation(
     (name: string) => englishMessages[name] ?? ''
   );
