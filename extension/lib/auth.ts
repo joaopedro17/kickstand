@@ -120,40 +120,50 @@ export async function startLoginFlow(): Promise<AuthTokens> {
   return tokens;
 }
 
-export function isTokenExpiringSoon(
-  tokens: AuthTokens,
-  bufferMs = 2 * 60 * 1000
-): boolean {
-  return Date.now() >= tokens.expiresAt - bufferMs;
+/** Refresh this long before the access token actually expires. */
+const REFRESH_BUFFER_MS = 2 * 60 * 1000;
+
+export function isTokenExpiringSoon(tokens: AuthTokens): boolean {
+  return Date.now() >= tokens.expiresAt - REFRESH_BUFFER_MS;
 }
 
-export async function refreshTokens(
-  tokens: AuthTokens
-): Promise<AuthTokens | null> {
+export type RefreshResult =
+  | { ok: true; tokens: AuthTokens }
+  | { ok: false; reason: 'rejected' | 'transient' };
+
+// Only these mean Kick refused the refresh token itself. Anything else
+// (offline, rate-limited, Kick or the proxy down) says nothing about the
+// token, so it must not log the user out.
+const REJECTED_STATUSES = new Set([400, 401, 403]);
+
+export async function refreshTokens(tokens: AuthTokens): Promise<RefreshResult> {
+  if (Date.now() >= tokens.refreshExpiresAt) return { ok: false, reason: 'rejected' };
+
+  let res: Response;
   try {
-    const res = await fetch(`${WORKER_BASE_URL}/refresh`, {
+    res = await fetch(`${WORKER_BASE_URL}/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: tokens.refreshToken }),
     });
-    if (!res.ok) return null;
-    const tokenResponse: TokenResponse = await res.json();
-    const refreshed = toAuthTokens(tokenResponse);
-    await authTokensStorage.setValue(refreshed);
-    return refreshed;
   } catch {
-    return null;
+    return { ok: false, reason: 'transient' };
   }
+  if (!res.ok) {
+    return { ok: false, reason: REJECTED_STATUSES.has(res.status) ? 'rejected' : 'transient' };
+  }
+  const refreshed = toAuthTokens((await res.json()) as TokenResponse);
+  await authTokensStorage.setValue(refreshed);
+  return { ok: true, tokens: refreshed };
 }
 
-// Single-flight guard: when multiple callers need a refresh at roughly the
-// same time (e.g. the background alarm and a popup tab), they share one
-// in-flight `refreshTokens()` call instead of each racing their own
-// against Kick's rotating refresh tokens (the second call to redeem an
-// already-rotated refresh token would fail and wrongly log the user out).
-let inFlightRefresh: Promise<AuthTokens | null> | null = null;
+// Single-flight guard: when multiple callers in this context need a refresh
+// at roughly the same time, they share one in-flight `refreshTokens()` call
+// instead of each redeeming Kick's rotating refresh token (the second
+// redemption of an already-rotated token would be rejected).
+let inFlightRefresh: Promise<RefreshResult> | null = null;
 
-function refreshTokensSingleFlight(tokens: AuthTokens): Promise<AuthTokens | null> {
+function refreshTokensSingleFlight(tokens: AuthTokens): Promise<RefreshResult> {
   if (!inFlightRefresh) {
     inFlightRefresh = refreshTokens(tokens).finally(() => {
       inFlightRefresh = null;
@@ -162,38 +172,56 @@ function refreshTokensSingleFlight(tokens: AuthTokens): Promise<AuthTokens | nul
   return inFlightRefresh;
 }
 
+class TransientRefreshFailure extends KickApiError {
+  constructor() {
+    super('network', 'Could not refresh the session right now');
+  }
+}
+
+/**
+ * Turns a refresh outcome into a usable access token, or null when the
+ * session is over. `fallback` is a token still worth trying when the
+ * refresh failed for a reason unrelated to the session itself.
+ */
+async function resolveRefresh(
+  result: RefreshResult,
+  fallback: string | null
+): Promise<string | null> {
+  if (result.ok) return result.tokens.accessToken;
+  if (result.reason === 'rejected') {
+    await authTokensStorage.setValue(null);
+    return null;
+  }
+  if (fallback) return fallback;
+  throw new TransientRefreshFailure();
+}
+
 export async function getValidAccessToken(): Promise<string | null> {
   const tokens = await authTokensStorage.getValue();
   if (!tokens) return null;
   if (!isTokenExpiringSoon(tokens)) return tokens.accessToken;
 
-  const refreshed = await refreshTokensSingleFlight(tokens);
-  if (!refreshed) {
-    await authTokensStorage.setValue(null);
-    return null;
-  }
-  return refreshed.accessToken;
+  const stillValid = Date.now() < tokens.expiresAt ? tokens.accessToken : null;
+  return resolveRefresh(await refreshTokensSingleFlight(tokens), stillValid);
 }
 
-/**
- * Forces a refresh regardless of the proactive expiry check, sharing the
- * same single-flight in-flight promise as `getValidAccessToken`. Used when
- * a token that looked valid was rejected by the API anyway (server-side
- * revocation, clock skew, etc.).
- */
-async function forceRefresh(tokens: AuthTokens): Promise<AuthTokens | null> {
-  return refreshTokensSingleFlight(tokens);
+function isUnauthorized(err: unknown): boolean {
+  return err instanceof KickApiError && err.kind === 'unauthorized';
 }
 
 /**
  * Runs `fn` with a valid access token, transparently recovering from a
- * reactive 401: gets a token via `getValidAccessToken()` (returns null
- * immediately if not logged in), calls `fn`, and if it throws a
- * `KickApiError` with `kind === 'unauthorized'`, forces one refresh and
- * retries `fn` once with the new token. If that also fails (or refresh
- * itself fails), auth state is cleared and null is returned so callers can
- * treat it as "not logged in" — the popup bounces to the login screen via
+ * reactive 401: calls `fn`, and if it throws a `KickApiError` with
+ * `kind === 'unauthorized'`, forces one refresh and retries `fn` once with
+ * the new token.
+ *
+ * Returns null when there is no session: not logged in, Kick rejected the
+ * refresh token, or the retry was rejected too. In those cases auth state
+ * is cleared, the popup bounces to the login screen via
  * `authTokensStorage.watch()`, and background polling stops trying.
+ *
+ * A refresh that fails for a transient reason (offline, Kick or the proxy
+ * down) keeps the session and throws a `network` `KickApiError` instead.
  */
 export async function withAuthRetry<T>(
   fn: (accessToken: string) => Promise<T>
@@ -204,28 +232,20 @@ export async function withAuthRetry<T>(
   try {
     return await fn(accessToken);
   } catch (err) {
-    if (!(err instanceof KickApiError) || err.kind !== 'unauthorized') {
-      throw err;
-    }
+    if (!isUnauthorized(err)) throw err;
+  }
 
-    const tokens = await authTokensStorage.getValue();
-    if (!tokens) return null;
+  const tokens = await authTokensStorage.getValue();
+  if (!tokens) return null;
+  const retryToken = await resolveRefresh(await refreshTokensSingleFlight(tokens), null);
+  if (!retryToken) return null;
 
-    const refreshed = await forceRefresh(tokens);
-    if (!refreshed) {
-      await authTokensStorage.setValue(null);
-      return null;
-    }
-
-    try {
-      return await fn(refreshed.accessToken);
-    } catch (retryErr) {
-      if (retryErr instanceof KickApiError && retryErr.kind === 'unauthorized') {
-        await authTokensStorage.setValue(null);
-        return null;
-      }
-      throw retryErr;
-    }
+  try {
+    return await fn(retryToken);
+  } catch (retryErr) {
+    if (!isUnauthorized(retryErr)) throw retryErr;
+    await authTokensStorage.setValue(null);
+    return null;
   }
 }
 
