@@ -1,4 +1,27 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import {
+  Bell,
+  BellOff,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Eye,
+  Funnel,
+  Image as ImageIcon,
+  LayoutGrid,
+  List,
+  LogIn,
+  LogOut,
+  MonitorOff,
+  Plus,
+  Radio,
+  Search,
+  Settings,
+  TriangleAlert,
+  Tv,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 
 // Small primitives — kept in one file because the popup has only a handful of
 // call sites and a dedicated components/ tree would be premature. Every class
@@ -84,7 +107,7 @@ export function SectionHeader({
   kicker,
   right,
 }: {
-  icon: string;
+  icon: IconName;
   title: string;
   kicker?: string;
   right?: ReactNode;
@@ -121,7 +144,7 @@ export function LiveBadge({ animated = false }: { animated?: boolean }) {
 export function ViewerCount({ count }: { count: number }) {
   return (
     <span className="flex items-center gap-1 text-lime">
-      <Icon icon="lucide:eye" />
+      <Icon icon="eye" />
       {formatCount(count)}
     </span>
   );
@@ -137,7 +160,7 @@ export function ErrorBanner({
   return (
     <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
       <span className="flex items-center gap-1.5">
-        <Icon icon="lucide:alert-triangle" className="text-sm" />
+        <Icon icon="alert-triangle" className="text-sm" />
         {message}
       </span>
       {onRetry && (
@@ -158,7 +181,7 @@ export function EmptyState({
   title,
   hint,
 }: {
-  icon: string;
+  icon: IconName;
   title: string;
   hint?: string;
 }) {
@@ -173,19 +196,46 @@ export function EmptyState({
   );
 }
 
-export function Icon({
-  icon,
-  className = '',
-}: {
-  icon: string;
-  className?: string;
-}) {
-  // iconify-icon is a custom element; wrap it so consumers stay in TSX-land
-  // without every file re-declaring the JSX intrinsic.
+/**
+ * Every icon the popup uses, bundled with the extension. The previous
+ * web-component icons downloaded their SVG data from a third-party API at
+ * runtime, so they were blank offline and made an undisclosed request.
+ */
+const ICONS = {
+  'alert-triangle': TriangleAlert,
+  bell: Bell,
+  'bell-off': BellOff,
+  'chevron-down': ChevronDown,
+  'chevron-up': ChevronUp,
+  'external-link': ExternalLink,
+  eye: Eye,
+  filter: Funnel,
+  image: ImageIcon,
+  'layout-grid': LayoutGrid,
+  list: List,
+  'log-in': LogIn,
+  'log-out': LogOut,
+  plus: Plus,
+  radio: Radio,
+  search: Search,
+  settings: Settings,
+  tv: Tv,
+  'tv-off': MonitorOff,
+  x: X,
+} satisfies Record<string, LucideIcon>;
+
+export type IconName = keyof typeof ICONS;
+
+export function Icon({ icon, className = '' }: { icon: IconName; className?: string }) {
+  const Svg = ICONS[icon];
+  // 1em square, sitting on the text baseline: callers size icons with
+  // Tailwind's text-* classes, as they would a glyph.
   return (
-    // @ts-expect-error — iconify-icon ships its own JSX augmentation but
-    // TypeScript picks it up only after the first successful build.
-    <iconify-icon icon={icon} class={className} />
+    <Svg
+      size="1em"
+      aria-hidden="true"
+      className={`inline-block shrink-0 align-[-0.125em] ${className}`}
+    />
   );
 }
 

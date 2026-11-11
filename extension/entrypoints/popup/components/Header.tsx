@@ -1,4 +1,5 @@
 import { i18n } from '#i18n';
+import { Icon } from './ui';
 
 export type TabName = 'following' | 'browse' | 'categories';
 
@@ -67,7 +68,7 @@ export function Header({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-base">⚙️</span>
+            <Icon icon="settings" className="text-base text-muted" />
           )}
           <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-ink bg-lime" />
         </button>

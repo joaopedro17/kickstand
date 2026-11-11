@@ -84,7 +84,7 @@ export function BrowseTab({
       {categoryId && categoryName && (
         <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-lime/20 bg-lime/5 px-3 py-2 text-xs">
           <span className="flex items-center gap-1.5 text-white">
-            <Icon icon="lucide:filter" className="text-lime" />
+            <Icon icon="filter" className="text-lime" />
             {i18n.t('browse.filteredByPrefix')}{' '}
             <span className="font-bold text-lime">{categoryName}</span>
           </span>
@@ -94,7 +94,7 @@ export function BrowseTab({
               onClick={onClearCategory}
               className="min-h-8 px-2 py-0"
             >
-              <Icon icon="lucide:x" className="text-sm" />
+              <Icon icon="x" className="text-sm" />
               {i18n.t('browse.clearFilter')}
             </GhostButton>
           )}
@@ -106,7 +106,7 @@ export function BrowseTab({
       {loading && streams.length === 0 && <StreamGridSkeleton />}
 
       {!loading && streams.length === 0 && !error && (
-        <EmptyState icon="lucide:tv-off" title={i18n.t('browse.emptyLive')} />
+        <EmptyState icon="tv-off" title={i18n.t('browse.emptyLive')} />
       )}
 
       {streams.length > 0 && (
@@ -156,7 +156,7 @@ function StreamCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted">
-            <Icon icon="lucide:tv" className="text-2xl" />
+            <Icon icon="tv" className="text-2xl" />
           </div>
         )}
         <LiveBadge animated />
@@ -167,7 +167,7 @@ function StreamCard({
             {stream.channel.slug}
           </h3>
           <span className="text-muted transition group-hover:text-lime">
-            <Icon icon="lucide:external-link" className="text-sm" />
+            <Icon icon="external-link" className="text-sm" />
           </span>
         </div>
         <p className="mt-1 line-clamp-1 text-xs text-muted" title={stream.title}>

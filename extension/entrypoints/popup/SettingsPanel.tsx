@@ -49,7 +49,7 @@ export function SettingsPanel() {
         aria-labelledby="notifications-heading"
       >
         <SectionHeader
-          icon="lucide:bell"
+          icon="bell"
           title={i18n.t('settings.notificationsTitle')}
           kicker={i18n.t('settings.notificationsKicker')}
         />
@@ -93,7 +93,7 @@ export function SettingsPanel() {
 
         {channels.length === 0 ? (
           <EmptyState
-            icon="lucide:list"
+            icon="list"
             title={i18n.t('settings.emptyTrackedTitle')}
             hint={i18n.t('settings.emptyTrackedHint')}
           />
@@ -111,7 +111,7 @@ export function SettingsPanel() {
                   type="button"
                   onClick={() => removeChannel(channel.broadcasterUserId)}
                 >
-                  <Icon icon="lucide:x" className="text-sm" />
+                  <Icon icon="x" className="text-sm" />
                   {i18n.t('common.remove')}
                 </GhostButton>
               </li>
@@ -125,7 +125,7 @@ export function SettingsPanel() {
         onClick={() => requestLogout()}
         className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-panel px-4 text-sm font-bold text-white transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 active:scale-95"
       >
-        <Icon icon="lucide:log-out" className="text-base" />
+        <Icon icon="log-out" className="text-base" />
         {i18n.t('settings.logout')}
       </button>
     </div>

@@ -130,7 +130,7 @@ export function FollowingTab() {
       <AddChannelSection />
       {channels.length === 0 ? (
         <EmptyState
-          icon="lucide:radio"
+          icon="radio"
           title={i18n.t('following.emptyState')}
           hint={i18n.t('following.emptyStateHint')}
         />
@@ -151,7 +151,7 @@ function AddChannelSection() {
     >
       <div className="mb-3 flex items-center gap-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-lime/10 text-lime">
-          <Icon icon="lucide:plus" className="text-base" />
+          <Icon icon="plus" className="text-base" />
         </span>
         <div>
           <h2 id="add-channel-heading" className="text-sm font-extrabold tracking-tight">
@@ -183,7 +183,7 @@ function AddChannelSection() {
           spellCheck={false}
         />
         <PrimaryButton type="submit" disabled={adding || !slugInput.trim()}>
-          <Icon icon="lucide:plus" className="text-base" />
+          <Icon icon="plus" className="text-base" />
           {adding ? i18n.t('following.addButtonLoading') : i18n.t('following.addButton')}
         </PrimaryButton>
       </form>
@@ -279,7 +279,7 @@ function ChannelThumbnail({ status }: { status: LiveStatusEntry | undefined }) {
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-muted">
-          <Icon icon="lucide:tv-off" className="text-lg" />
+          <Icon icon="tv-off" className="text-lg" />
         </div>
       )}
       {status?.isLive && <LiveBadge />}
@@ -299,7 +299,7 @@ function MuteButton({ channel }: { channel: TrackedChannel }) {
       }}
       className={channel.muted ? 'text-lime' : ''}
     >
-      <Icon icon={channel.muted ? 'lucide:bell-off' : 'lucide:bell'} className="text-sm" />
+      <Icon icon={channel.muted ? 'bell-off' : 'bell'} className="text-sm" />
     </IconButton>
   );
 }
@@ -347,7 +347,7 @@ function OfflineGroup({
         <span>{label}</span>
         <span className="flex items-center gap-1">
           {expanded ? i18n.t('following.hideOffline') : i18n.t('following.showOffline')}
-          <Icon icon={expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'} className="text-sm" />
+          <Icon icon={expanded ? 'chevron-up' : 'chevron-down'} className="text-sm" />
         </span>
       </button>
       {expanded && (
