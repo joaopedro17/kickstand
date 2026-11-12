@@ -5,8 +5,10 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: write # needed to attach zips to the GitHub Release
+# Nothing by default; each job asks for what it needs. Actions are pinned
+# to commit SHAs (version in the comment) so a moved or hijacked tag can't
+# change what runs; Dependabot proposes updates.
+permissions: {}
 
 jobs:
   # Builds once, uploads the zips as a workflow artifact, and (on a real
@@ -15,17 +17,19 @@ jobs:
   # rebuild — just re-run the failed submit job from the Actions UI.
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # attach the zips to the GitHub Release
     defaults:
       run:
         working-directory: extension
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
         with:
           version: 11
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -76,7 +80,7 @@ jobs:
           ls -la ../dist-zips/
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: extension-zips
           path: dist-zips/*.zip
@@ -95,17 +99,22 @@ jobs:
   submit-chrome:
     needs: build
     runs-on: ubuntu-latest
+    # The store credentials live in this environment, which requires the
+    # owner's approval before the job runs.
+    environment: release
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: extension
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
         with:
           version: 11
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -115,7 +124,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: extension-zips
           path: extension/.output
@@ -131,17 +140,22 @@ jobs:
   submit-firefox:
     needs: build
     runs-on: ubuntu-latest
+    # The store credentials live in this environment, which requires the
+    # owner's approval before the job runs.
+    environment: release
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: extension
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
         with:
           version: 11
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -151,7 +165,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: extension-zips
           path: extension/.output
