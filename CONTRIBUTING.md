@@ -7,10 +7,38 @@ in the README.
 
 ## Project structure
 
-- `extension/` — the WXT browser extension (popup, background service
-  worker, Kick API client).
+- `extension/` — the WXT browser extension.
 - `worker/` — a Cloudflare Worker that proxies the OAuth token exchange so
   `client_secret` never ships inside the extension.
+
+Inside `extension/`, code is grouped by feature, and every test sits under
+`tests/` at the same path as the file it tests
+(`lib/kick/api.ts` → `tests/lib/kick/api.test.ts`):
+
+```
+extension/
+  lib/
+    kick/        Kick API client: requests, response parsing, types, errors
+    auth/        login (OAuth + PKCE), token refresh, logout, the popup's client
+    channels/    the tracked-channel list
+    polling/     the background poll and the live-status logic it applies
+    settings.ts  messages.ts  config.ts  chunk.ts  fetch-timeout.ts
+  entrypoints/
+    background.ts   wiring only: alarms, messages, notifications
+    popup/
+      following/  browse/  categories/  settings/  login/   one folder per screen
+      shared/     components, hooks and helpers the screens share
+  tests/
+    lib/  entrypoints/   mirror the folders above
+    support/             fakes, test setup and helpers shared by tests
+  locales/            one YAML file per language
+```
+
+Two boundaries are enforced by ESLint. The popup may use only
+`lib/auth/client.ts` and `lib/auth/storage.ts` from `lib/auth/`, because the
+background is the only writer of the tokens. It also may not import
+`lib/polling/poll.ts`, which runs in the background; it asks for a poll by
+message instead.
 
 ## Install
 
@@ -50,8 +78,10 @@ cd extension
 pnpm test
 ```
 
-Unit tests cover `extension/lib/` (auth, Kick API client, storage/diff
-logic). Popup and background wiring are verified manually via `pnpm dev`.
+Tests live in `extension/tests/`, mirroring the source tree. They cover
+`lib/`, the background's wiring and every popup screen; components render in
+happy-dom against WXT's fake browser. `pnpm coverage` writes the coverage
+report the code-quality gates read.
 
 ## Full setup
 
