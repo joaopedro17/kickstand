@@ -4,11 +4,12 @@ import { fetchLivestreams } from '@/lib/kick/api';
 import type { Livestream } from '@/lib/kick/types';
 import { Card } from '../shared/layout';
 import { EmptyState } from '../shared/feedback';
-import { GhostButton } from '../shared/controls';
+import { GhostButton, IconButton } from '../shared/controls';
 import { Icon } from '../shared/Icon';
 import { LiveBadge, ViewerCount } from '../shared/stream';
 import { PagedListBody } from '../shared/PagedListBody';
 import { usePagedList } from '../shared/usePagedList';
+import { trackChannels, useTracked } from '../shared/track';
 
 // Kick's API returns livestreams oldest-first with no sort option, so a
 // small page would mostly surface long-running low-viewer streams. Fetching
@@ -41,6 +42,7 @@ export function BrowseTab({
       ),
     byViewersDesc
   );
+  const trackedIds = new Set(useTracked().map((c) => c.broadcasterUserId));
 
   return (
     <div>
@@ -54,7 +56,12 @@ export function BrowseTab({
       >
         <div className="grid grid-cols-2 gap-2">
           {list.items.map((stream) => (
-            <StreamCard key={stream.id} stream={stream} onOpen={() => openStream(stream.slug)} />
+            <StreamCard
+              key={stream.id}
+              stream={stream}
+              tracked={trackedIds.has(stream.broadcaster.id)}
+              onOpen={() => openStream(stream.slug)}
+            />
           ))}
         </div>
       </PagedListBody>
@@ -79,11 +86,31 @@ function CategoryFilter({ name, onClear }: { name: string; onClear?: () => void 
   );
 }
 
+function TrackButton({ stream, tracked }: { stream: Livestream; tracked: boolean }) {
+  const { slug } = stream;
+  return (
+    <IconButton
+      type="button"
+      disabled={tracked}
+      aria-label={tracked ? i18n.t('browse.tracked', { slug }) : i18n.t('browse.track', { slug })}
+      onClick={(e) => {
+        e.stopPropagation();
+        trackChannels([{ broadcasterUserId: stream.broadcaster.id, slug }]).catch(() => {});
+      }}
+      className={tracked ? 'text-lime disabled:opacity-100' : ''}
+    >
+      <Icon icon={tracked ? 'check' : 'plus'} className="text-sm" />
+    </IconButton>
+  );
+}
+
 function StreamCard({
   stream,
+  tracked,
   onOpen,
 }: {
   stream: Livestream;
+  tracked: boolean;
   onOpen: () => void;
 }) {
   return (
@@ -110,9 +137,7 @@ function StreamCard({
           <h3 className="truncate text-sm font-extrabold">
             {stream.slug}
           </h3>
-          <span className="text-muted transition group-hover:text-lime">
-            <Icon icon="external-link" className="text-sm" />
-          </span>
+          <TrackButton stream={stream} tracked={tracked} />
         </div>
         <p className="mt-1 line-clamp-1 text-xs text-muted" title={stream.title}>
           {stream.title || '—'}

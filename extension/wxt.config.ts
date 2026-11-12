@@ -47,7 +47,10 @@ export default defineConfig({
       default_locale: 'en',
       name: '__MSG_extName__',
       description: '__MSG_extDescription__',
-      permissions: ['storage', 'alarms', 'notifications', 'identity'],
+      // activeTab: the popup may read the current tab's URL to offer tracking the
+      // channel it shows. It is granted only when the user opens the popup, and
+      // shows no install warning.
+      permissions: ['storage', 'alarms', 'notifications', 'identity', 'activeTab'],
       host_permissions: ['https://api.kick.com/*', 'https://id.kick.com/*'],
       icons: {
         16: 'icons/16.png',

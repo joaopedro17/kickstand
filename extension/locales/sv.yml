@@ -17,15 +17,14 @@ app:
   primaryNav: Huvudnavigering
 
 following:
-  slugPlaceholder: kanal-slug
+  slugPlaceholder: "Kanalnamn eller kick.com-länk"
   addButton: Lägg till
   addButtonLoading: Lägger till…
   addChannelTitle: Lägg till en kanal
-  addChannelKicker: Följ via exakt slug
-  slugHelp1: Kickstand kan inte söka efter kanaler via namn — Kicks API stöder bara att hitta en kanal via dess exakta slug, så du behöver skriva in den själv.
-  slugHelp2Prefix: "Slugen är den del av kanalens URL som kommer efter kick.com/ — för kick.com/xqc är den"
+  addChannelKicker: "Med namn eller länk"
+  addHelp: "Skriv eller klistra in kanalnamn eller kick.com-länkar. Skilj flera åt med mellanslag, kommatecken eller radbrytningar."
   emptyState: Inga följda kanaler än.
-  emptyStateHint: Klistra in en slug ovan för att börja följa.
+  emptyStateHint: "Lägg till en kanal ovan för att börja följa."
   mute: Tysta
   unmute: Sluta tysta
   offline: Offline
@@ -33,12 +32,19 @@ following:
   offlineGroupOther: 'Offline ({count})'
   showOffline: Visa offline
   hideOffline: Dölj offline
-  channelNotFound: 'Ingen kanal hittades för "{slug}"'
-  alreadyTracked: '"{slug}" följs redan'
+  added: "Följer nu: {slugs}"
+  channelNotFound: "Ingen kanal hittades för: {slugs}"
+  alreadyTracked: "Följs redan: {slugs}"
+  invalidInput: "Inte ett kanalnamn eller en kick.com-länk: {items}"
+  tooMany: "Bara {max} kanaler kan läggas till åt gången. De andra {count} finns kvar i rutan."
+  trackCurrentTab: "Följ {slug}"
+  currentTabHint: "Öppen i den här fliken"
   limitReached: 'Du kan följa upp till {max} kanaler. Ta bort en för att lägga till en ny.'
   refreshFailed: 'Det gick inte att uppdatera livestatus. Visar senast kända läge.'
 
 browse:
+  track: "Följ {slug}"
+  tracked: "{slug} följs"
   emptyLive: Inga live-sändningar just nu.
   filteredByPrefix: Filtrerat på
   clearFilter: Rensa

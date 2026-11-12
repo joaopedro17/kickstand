@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { chunk } from '@/lib/chunk';
+import type { Channel } from '@/lib/kick/types';
 
 /**
  * The tracked-channel list, in browser sync storage.
@@ -95,20 +96,44 @@ let queue: Promise<unknown> = Promise.resolve();
 
 function update<T>(change: (list: TrackedChannel[]) => { list: TrackedChannel[]; result: T }): Promise<T> {
   const run = queue.then(async () => {
-    const { list, result } = change(await getTracked());
-    await setTracked(list);
+    const current = await getTracked();
+    const { list, result } = change(current);
+    if (list !== current) await setTracked(list);
     return result;
   });
   queue = run.catch(() => {});
   return run;
 }
 
-export function addTracked(channel: TrackedChannel): Promise<'added' | 'already-tracked'> {
-  return update((list) =>
-    list.some((c) => c.broadcasterUserId === channel.broadcasterUserId)
-      ? { list, result: 'already-tracked' as const }
-      : { list: [...list, channel], result: 'added' as const }
-  );
+export interface AddOutcome {
+  added: Channel[];
+  alreadyTracked: Channel[];
+}
+
+/**
+ * Tracks each channel not tracked yet, unmuted, at the end of the list. The
+ * one way channels are added: typed, pasted, from the current tab, from
+ * Browse, or imported. A batch that would go over MAX_TRACKED adds nothing.
+ */
+export function addChannels(channels: Channel[], now: number): Promise<AddOutcome> {
+  return update((list) => {
+    const ids = new Set(list.map((c) => c.broadcasterUserId));
+    const added: Channel[] = [];
+    const alreadyTracked: Channel[] = [];
+    for (const channel of channels) {
+      if (ids.has(channel.broadcasterUserId)) {
+        alreadyTracked.push(channel);
+      } else {
+        ids.add(channel.broadcasterUserId);
+        added.push(channel);
+      }
+    }
+    const fresh = added.map((c) => ({ ...c, addedAt: now, muted: false }));
+    return {
+      list: added.length > 0 ? [...list, ...fresh] : list,
+      result: { added, alreadyTracked },
+    };
+  });
 }
 
 export function removeTracked(broadcasterUserId: number): Promise<void> {

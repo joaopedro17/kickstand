@@ -1,31 +1,21 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { requestLogout } from '@/lib/auth/client';
-import {
-  getTracked,
-  removeTracked,
-  watchTracked,
-  type TrackedChannel,
-} from '@/lib/channels/tracked';
+import { removeTracked } from '@/lib/channels/tracked';
 import { getSettings, updateSettings, watchSettings, type Settings } from '@/lib/settings';
 import { EmptyState } from '../shared/feedback';
 import { GhostButton } from '../shared/controls';
 import { Icon } from '../shared/Icon';
 import { SectionHeader } from '../shared/layout';
+import { useTracked } from '../shared/track';
 
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [channels, setChannels] = useState<TrackedChannel[]>([]);
+  const channels = useTracked();
 
   useEffect(() => {
     getSettings().then(setSettings);
-    getTracked().then(setChannels);
-    const unwatchSettings = watchSettings(setSettings);
-    const unwatchChannels = watchTracked(setChannels);
-    return () => {
-      unwatchSettings();
-      unwatchChannels();
-    };
+    return watchSettings(setSettings);
   }, []);
 
   if (!settings) return null;

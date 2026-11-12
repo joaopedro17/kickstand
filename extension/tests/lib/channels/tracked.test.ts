@@ -3,7 +3,7 @@ import { fakeBrowser } from 'wxt/testing/fake-browser';
 import {
   getTracked,
   setTracked,
-  addTracked,
+  addChannels,
   removeTracked,
   toggleMuted,
   watchTracked,
@@ -12,6 +12,7 @@ import {
   isStorageFullError,
   type TrackedChannel,
 } from '@/lib/channels/tracked';
+import type { Channel } from '@/lib/kick/types';
 
 /** The per-item limit of chrome.storage.sync (QUOTA_BYTES_PER_ITEM), key included. */
 const SYNC_ITEM_LIMIT = 8192;
@@ -22,6 +23,16 @@ function channel(id: number, slug = `slug${id}`): TrackedChannel {
 
 function channels(count: number): TrackedChannel[] {
   return Array.from({ length: count }, (_, i) => channel(i + 1));
+}
+
+const NOW = 1_800_000_000_000;
+
+function found(id: number, slug = `slug${id}`): Channel {
+  return { broadcasterUserId: id, slug };
+}
+
+function trackedAt(id: number, slug = `slug${id}`): TrackedChannel {
+  return { broadcasterUserId: id, slug, addedAt: NOW, muted: false };
 }
 
 async function syncContents(): Promise<Record<string, unknown>> {
@@ -95,28 +106,59 @@ describe('tracked channels storage', () => {
   });
 
   describe('changes', () => {
-    it('adds a channel', async () => {
-      expect(await addTracked(channel(1))).toBe('added');
-      expect(await getTracked()).toEqual([channel(1)]);
+    it('adds channels at the end, unmuted, stamped with the time they were added', async () => {
+      await setTracked([channel(1)]);
+
+      expect(await addChannels([found(2), found(3)], NOW)).toEqual({
+        added: [found(2), found(3)],
+        alreadyTracked: [],
+      });
+      expect(await getTracked()).toEqual([channel(1), trackedAt(2), trackedAt(3)]);
     });
 
-    it('does not add a channel that is already tracked', async () => {
-      await setTracked([channel(1, 'first-slug')]);
+    it('leaves a tracked channel as it is and says it was already tracked', async () => {
+      await setTracked([{ ...channel(1, 'first-slug'), muted: true }]);
 
-      expect(await addTracked(channel(1, 'renamed'))).toBe('already-tracked');
-      expect(await getTracked()).toEqual([channel(1, 'first-slug')]);
+      expect(await addChannels([found(1, 'renamed'), found(2)], NOW)).toEqual({
+        added: [found(2)],
+        alreadyTracked: [found(1, 'renamed')],
+      });
+      expect(await getTracked()).toEqual([{ ...channel(1, 'first-slug'), muted: true }, trackedAt(2)]);
     });
 
-    it('reports a full list instead of adding', async () => {
-      await setTracked(channels(MAX_TRACKED));
+    it('adds a channel named twice in one batch once', async () => {
+      expect(await addChannels([found(1), found(1, 'again')], NOW)).toEqual({
+        added: [found(1)],
+        alreadyTracked: [found(1, 'again')],
+      });
+      expect(await getTracked()).toEqual([trackedAt(1)]);
+    });
 
-      await expect(addTracked(channel(MAX_TRACKED + 1))).rejects.toBeInstanceOf(TrackedListFullError);
+    it('writes nothing when every channel is already tracked', async () => {
+      await setTracked([channel(1)]);
+      const seen: TrackedChannel[][] = [];
+      const unwatch = watchTracked((list) => seen.push(list));
+
+      await addChannels([found(1)], NOW);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      unwatch();
+
+      expect(seen).toEqual([]);
+    });
+
+    it('adds nothing from a batch that would go over the maximum', async () => {
+      await setTracked(channels(MAX_TRACKED - 1));
+
+      await expect(addChannels([found(MAX_TRACKED), found(MAX_TRACKED + 1)], NOW)).rejects.toBeInstanceOf(
+        TrackedListFullError
+      );
+      expect(await getTracked()).toHaveLength(MAX_TRACKED - 1);
     });
 
     it('keeps both of two adds made at the same time', async () => {
-      await Promise.all([addTracked(channel(1)), addTracked(channel(2))]);
+      await Promise.all([addChannels([found(1)], NOW), addChannels([found(2)], NOW)]);
 
-      expect(await getTracked()).toEqual([channel(1), channel(2)]);
+      expect(await getTracked()).toEqual([trackedAt(1), trackedAt(2)]);
     });
 
     it('removes a channel', async () => {
@@ -142,13 +184,13 @@ describe('tracked channels storage', () => {
     const seen: TrackedChannel[][] = [];
     const unwatch = watchTracked((list) => seen.push(list));
 
-    await addTracked(channel(1));
-    await expect.poll(() => seen.at(-1)).toEqual([channel(1)]);
+    await addChannels([found(1)], NOW);
+    await expect.poll(() => seen.at(-1)).toEqual([trackedAt(1)]);
 
     unwatch();
-    await addTracked(channel(2));
+    await addChannels([found(2)], NOW);
     await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(seen.at(-1)).toEqual([channel(1)]);
+    expect(seen.at(-1)).toEqual([trackedAt(1)]);
   });
 });
 

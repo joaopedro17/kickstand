@@ -17,15 +17,14 @@ app:
   primaryNav: Hauptnavigation
 
 following:
-  slugPlaceholder: kanal-slug
+  slugPlaceholder: "Kanalname oder kick.com-Link"
   addButton: Hinzufügen
   addButtonLoading: Wird hinzugefügt…
   addChannelTitle: Kanal hinzufügen
-  addChannelKicker: Per exaktem Slug folgen
-  slugHelp1: Kickstand kann Kanäle nicht nach Namen suchen — Kicks API unterstützt nur die Suche über den exakten Slug, also musst du ihn selbst eingeben.
-  slugHelp2Prefix: "Der Slug ist der Teil der Kanal-URL nach kick.com/ — bei kick.com/xqc lautet er"
+  addChannelKicker: "Per Name oder Link"
+  addHelp: "Gib Kanalnamen oder kick.com-Links ein oder füge sie ein. Trenne mehrere durch Leerzeichen, Kommas oder Zeilenumbrüche."
   emptyState: Noch keine verfolgten Kanäle.
-  emptyStateHint: Füge oben einen Slug ein, um mit dem Verfolgen zu starten.
+  emptyStateHint: "Füge oben einen Kanal hinzu, um mit dem Verfolgen zu starten."
   mute: Stummschalten
   unmute: Stummschaltung aufheben
   offline: Offline
@@ -33,12 +32,19 @@ following:
   offlineGroupOther: 'Offline ({count})'
   showOffline: Offline anzeigen
   hideOffline: Offline ausblenden
-  channelNotFound: 'Kein Kanal für „{slug}“ gefunden'
-  alreadyTracked: '„{slug}“ wird bereits verfolgt'
+  added: "Jetzt verfolgt: {slugs}"
+  channelNotFound: "Kein Kanal gefunden für: {slugs}"
+  alreadyTracked: "Bereits verfolgt: {slugs}"
+  invalidInput: "Kein Kanalname oder kick.com-Link: {items}"
+  tooMany: "Es können nur {max} Kanäle auf einmal hinzugefügt werden. Die übrigen {count} stehen noch im Feld."
+  trackCurrentTab: "{slug} verfolgen"
+  currentTabHint: "In diesem Tab geöffnet"
   limitReached: 'Du kannst bis zu {max} Kanäle verfolgen. Entferne einen, um einen neuen hinzuzufügen.'
   refreshFailed: 'Live-Status konnte nicht aktualisiert werden. Angezeigt wird der letzte bekannte Stand.'
 
 browse:
+  track: "{slug} verfolgen"
+  tracked: "{slug} wird verfolgt"
   emptyLive: Momentan keine Live-Streams.
   filteredByPrefix: Gefiltert nach
   clearFilter: Zurücksetzen

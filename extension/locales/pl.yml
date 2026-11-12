@@ -17,15 +17,14 @@ app:
   primaryNav: Nawigacja główna
 
 following:
-  slugPlaceholder: slug-kanału
+  slugPlaceholder: "Nazwa kanału lub link kick.com"
   addButton: Dodaj
   addButtonLoading: Dodawanie…
   addChannelTitle: Dodaj kanał
-  addChannelKicker: Obserwuj po dokładnym slugu
-  slugHelp1: Kickstand nie może wyszukiwać kanałów po nazwie — API Kicka pozwala znaleźć kanał wyłącznie po dokładnym slugu, więc musisz wpisać go samodzielnie.
-  slugHelp2Prefix: "Slug to część adresu URL kanału po kick.com/ — dla kick.com/xqc to"
+  addChannelKicker: "Po nazwie lub linku"
+  addHelp: "Wpisz lub wklej nazwy kanałów albo linki kick.com. Oddziel je spacjami, przecinkami lub nowymi wierszami."
   emptyState: Nie obserwujesz jeszcze żadnych kanałów.
-  emptyStateHint: Wklej slug powyżej, aby zacząć obserwować.
+  emptyStateHint: "Dodaj kanał powyżej, aby zacząć go śledzić."
   mute: Wycisz
   unmute: Wyłącz wyciszenie
   offline: Offline
@@ -33,12 +32,19 @@ following:
   offlineGroupOther: 'Offline ({count})'
   showOffline: Pokaż offline
   hideOffline: Ukryj offline
-  channelNotFound: 'Nie znaleziono kanału dla "{slug}"'
-  alreadyTracked: '"{slug}" jest już obserwowany'
+  added: "Teraz śledzisz: {slugs}"
+  channelNotFound: "Nie znaleziono kanału: {slugs}"
+  alreadyTracked: "Już śledzone: {slugs}"
+  invalidInput: "To nie jest nazwa kanału ani link kick.com: {items}"
+  tooMany: "Naraz można dodać tylko {max} kanałów. Pozostałe ({count}) zostały w polu."
+  trackCurrentTab: "Śledź {slug}"
+  currentTabHint: "Otwarty w tej karcie"
   limitReached: 'Możesz obserwować maksymalnie {max} kanałów. Usuń jeden, aby dodać kolejny.'
   refreshFailed: 'Nie udało się odświeżyć statusu na żywo. Wyświetlany jest ostatni znany stan.'
 
 browse:
+  track: "Śledź {slug}"
+  tracked: "{slug} jest śledzony"
   emptyLive: Obecnie brak transmisji na żywo.
   filteredByPrefix: Filtrowane wg
   clearFilter: Wyczyść

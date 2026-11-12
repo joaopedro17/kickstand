@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ClipboardEvent } from 'react';
 import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth/client';
 import { resolveChannelsBySlug } from '@/lib/kick/api';
@@ -13,7 +13,6 @@ import {
   type LiveStatus,
 } from '@/lib/polling/live-status';
 import {
-  addTracked,
   getTracked,
   isStorageFullError,
   MAX_TRACKED,
@@ -22,6 +21,14 @@ import {
   watchTracked,
   type TrackedChannel,
 } from '@/lib/channels/tracked';
+import {
+  MAX_SLUGS_PER_SUBMIT,
+  parseSlugInput,
+  slugFromKickUrl,
+  type SlugInput,
+} from '@/lib/channels/slug-input';
+import type { Channel } from '@/lib/kick/types';
+import { trackChannels, trackSlugs, type SlugOutcome } from '../shared/track';
 import { liveStatusStorage } from '@/lib/polling/storage';
 import { Card, SectionHeader } from '../shared/layout';
 import { EmptyState, ErrorBanner } from '../shared/feedback';
@@ -80,51 +87,87 @@ function useTrackedChannels() {
   return { channels, liveStatus };
 }
 
-/** Resolves a slug with Kick and tracks the channel; returns an error message, or null on success. */
-async function trackBySlug(slug: string): Promise<string | null> {
-  const resolvedChannels = await withAuthRetry((accessToken) =>
-    resolveChannelsBySlug([slug], accessToken)
-  );
-  if (!resolvedChannels) return translateErrorCode('not_logged_in');
-  const [resolved] = resolvedChannels;
-  if (!resolved) return i18n.t('following.channelNotFound', { slug });
-
-  const outcome = await addTracked({
-    broadcasterUserId: resolved.broadcasterUserId,
-    slug: resolved.slug,
-    addedAt: Date.now(),
-    muted: false,
-  });
-  if (outcome === 'already-tracked') return i18n.t('following.alreadyTracked', { slug });
-
-  // The channel is tracked either way; a failed poll shows up as stale live
-  // status, not as a failure to add.
-  sendRequest({ type: 'poll-now' }).catch(() => {});
-  return null;
+interface Notice {
+  tone: 'ok' | 'error';
+  text: string;
 }
+
+const listed = (items: string[]) => items.join(', ');
+
+/** One line per group of channels that met the same fate, the ones added first. */
+function noticesFor(input: SlugInput, outcome: SlugOutcome): Notice[] {
+  const notices: [boolean, Notice][] = [
+    [outcome.added.length > 0, { tone: 'ok', text: i18n.t('following.added', { slugs: listed(outcome.added.map((c) => c.slug)) }) }],
+    [outcome.alreadyTracked.length > 0, { tone: 'error', text: i18n.t('following.alreadyTracked', { slugs: listed(outcome.alreadyTracked.map((c) => c.slug)) }) }],
+    [outcome.notFound.length > 0, { tone: 'error', text: i18n.t('following.channelNotFound', { slugs: listed(outcome.notFound) }) }],
+    [input.invalid.length > 0, { tone: 'error', text: i18n.t('following.invalidInput', { items: listed(input.invalid) }) }],
+    [input.skipped.length > 0, { tone: 'error', text: i18n.t('following.tooMany', { max: String(MAX_SLUGS_PER_SUBMIT), count: String(input.skipped.length) }) }],
+  ];
+  return notices.filter(([shown]) => shown).map(([, notice]) => notice);
+}
+
+const NOTHING_ADDED: SlugOutcome = { added: [], alreadyTracked: [], notFound: [] };
 
 function useAddChannel() {
   const [slugInput, setSlugInput] = useState('');
-  const [addError, setAddError] = useState<string | null>(null);
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [adding, setAdding] = useState(false);
 
   async function add() {
-    const slug = slugInput.trim().toLowerCase();
-    if (!slug) return;
-    setAddError(null);
+    const input = parseSlugInput(slugInput);
+    setNotices([]);
     setAdding(true);
     try {
-      const error = await trackBySlug(slug);
-      setAddError(error);
-      if (!error) setSlugInput('');
+      const outcome = input.slugs.length > 0 ? await trackSlugs(input.slugs) : NOTHING_ADDED;
+      if (!outcome) {
+        setNotices([{ tone: 'error', text: translateErrorCode('not_logged_in') }]);
+        return;
+      }
+      setNotices(noticesFor(input, outcome));
+      // What still needs the user's attention stays in the box.
+      setSlugInput([...input.invalid, ...outcome.notFound, ...input.skipped].join(' '));
     } catch (err) {
-      setAddError(describeAddError(err));
+      setNotices([{ tone: 'error', text: describeAddError(err) }]);
     } finally {
       setAdding(false);
     }
   }
 
-  return { slugInput, setSlugInput, addError, adding, add };
+  return { slugInput, setSlugInput, notices, adding, add };
+}
+
+/**
+ * A single-line input drops the line breaks of pasted text, gluing a pasted
+ * list into one word. Pasted line breaks become spaces instead.
+ */
+function pasteOnOneLine(e: ClipboardEvent<HTMLInputElement>, setValue: (value: string) => void) {
+  const text = e.clipboardData.getData('text');
+  if (!/[\r\n]/.test(text)) return;
+  e.preventDefault();
+  const { value, selectionStart, selectionEnd } = e.currentTarget;
+  const start = selectionStart ?? value.length;
+  const end = selectionEnd ?? value.length;
+  setValue(value.slice(0, start) + text.replace(/[\r\n]+/g, ' ') + value.slice(end));
+}
+
+/** The channel the current tab shows, when it is one Kick knows and the user doesn't track yet. */
+function useCurrentTabChannel(tracked: TrackedChannel[]): Channel | null {
+  const [channel, setChannel] = useState<Channel | null>(null);
+
+  useEffect(() => {
+    async function lookUp() {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      const slug = slugFromKickUrl(tab?.url);
+      if (!slug || (await getTracked()).some((c) => c.slug === slug)) return;
+      const found = await withAuthRetry((accessToken) => resolveChannelsBySlug([slug], accessToken));
+      setChannel(found?.[0] ?? null);
+    }
+    // Only an offer: if anything fails, it just isn't shown.
+    lookUp().catch(() => {});
+  }, []);
+
+  const isTracked = tracked.some((c) => c.broadcasterUserId === channel?.broadcasterUserId);
+  return isTracked ? null : channel;
 }
 
 export function FollowingTab() {
@@ -140,7 +183,7 @@ export function FollowingTab() {
           onRetry={() => sendRequest({ type: 'poll-now' }).catch(() => {})}
         />
       )}
-      <AddChannelSection />
+      <AddChannelSection tracked={channels} />
       {channels.length === 0 ? (
         <EmptyState
           icon="radio"
@@ -154,8 +197,9 @@ export function FollowingTab() {
   );
 }
 
-function AddChannelSection() {
-  const { slugInput, setSlugInput, addError, adding, add } = useAddChannel();
+function AddChannelSection({ tracked }: { tracked: TrackedChannel[] }) {
+  const { slugInput, setSlugInput, notices, adding, add } = useAddChannel();
+  const tabChannel = useCurrentTabChannel(tracked);
 
   return (
     <section
@@ -168,6 +212,7 @@ function AddChannelSection() {
         headingId="add-channel-heading"
         kicker={i18n.t('following.addChannelKicker')}
       />
+      {tabChannel && <TrackTabChannel channel={tabChannel} />}
       <form
         className="flex gap-2"
         onSubmit={(e) => {
@@ -184,6 +229,7 @@ function AddChannelSection() {
           type="text"
           value={slugInput}
           onChange={(e) => setSlugInput(e.target.value)}
+          onPaste={(e) => pasteOnOneLine(e, setSlugInput)}
           placeholder={i18n.t('following.slugPlaceholder')}
           autoComplete="off"
           spellCheck={false}
@@ -193,19 +239,36 @@ function AddChannelSection() {
           {adding ? i18n.t('following.addButtonLoading') : i18n.t('following.addButton')}
         </PrimaryButton>
       </form>
-      <div className="mt-3 space-y-2 text-xs leading-5 text-muted">
-        <p>{i18n.t('following.slugHelp1')}</p>
-        <p>
-          {i18n.t('following.slugHelp2Prefix')}{' '}
-          <span className="font-semibold text-lime">xqc</span>.
-        </p>
-      </div>
-      {addError && (
-        <p className="mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
-          {addError}
-        </p>
+      <p className="mt-3 text-xs leading-5 text-muted">{i18n.t('following.addHelp')}</p>
+      {notices.length > 0 && (
+        <ul className="mt-2 space-y-1" aria-live="polite">
+          {notices.map((notice) => (
+            <li
+              key={notice.text}
+              className={
+                notice.tone === 'ok'
+                  ? 'rounded-xl border border-lime/30 bg-lime/10 px-3 py-2 text-xs text-lime'
+                  : 'rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200'
+              }
+            >
+              {notice.text}
+            </li>
+          ))}
+        </ul>
       )}
     </section>
+  );
+}
+
+function TrackTabChannel({ channel }: { channel: Channel }) {
+  return (
+    <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-lime/20 bg-lime/5 px-3 py-2 text-xs">
+      <span className="text-muted">{i18n.t('following.currentTabHint')}</span>
+      <PrimaryButton type="button" onClick={() => trackChannels([channel]).catch(() => {})} className="min-h-8 px-3">
+        <Icon icon="plus" className="text-sm" />
+        {i18n.t('following.trackCurrentTab', { slug: channel.slug })}
+      </PrimaryButton>
+    </div>
   );
 }
 

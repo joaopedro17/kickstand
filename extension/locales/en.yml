@@ -17,15 +17,14 @@ app:
   primaryNav: Primary navigation
 
 following:
-  slugPlaceholder: channel-slug
+  slugPlaceholder: Channel name or kick.com link
   addButton: Add
   addButtonLoading: Adding…
   addChannelTitle: Add a channel
-  addChannelKicker: Follow by exact slug
-  slugHelp1: Kickstand can't look channels up by name — Kick's API only supports finding a channel by its exact slug, so you'll need to type it in yourself.
-  slugHelp2Prefix: "The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's"
+  addChannelKicker: By name or link
+  addHelp: Type or paste channel names or kick.com links. Separate several with spaces, commas or new lines.
   emptyState: No tracked channels yet.
-  emptyStateHint: Paste a slug above to start tracking.
+  emptyStateHint: Add a channel above to start tracking.
   mute: Mute
   unmute: Unmute
   offline: Offline
@@ -33,12 +32,19 @@ following:
   offlineGroupOther: 'Offline ({count})'
   showOffline: Show offline
   hideOffline: Hide offline
-  channelNotFound: 'No channel found for "{slug}"'
-  alreadyTracked: '"{slug}" is already tracked'
+  added: 'Now tracking {slugs}'
+  channelNotFound: 'No channel found for: {slugs}'
+  alreadyTracked: 'Already tracked: {slugs}'
+  invalidInput: 'Not a channel name or kick.com link: {items}'
+  tooMany: 'Only {max} channels can be added at once. The other {count} are still in the box.'
+  trackCurrentTab: 'Track {slug}'
+  currentTabHint: Open in this tab
   limitReached: 'You can track up to {max} channels. Remove one to add another.'
   refreshFailed: 'Couldn''t refresh live status. Showing the last known state.'
 
 browse:
+  track: 'Track {slug}'
+  tracked: '{slug} is tracked'
   emptyLive: No live streams right now.
   filteredByPrefix: Filtered by
   clearFilter: Clear

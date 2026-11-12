@@ -9,6 +9,8 @@ import { FollowingTab } from '@/entrypoints/popup/following/FollowingTab';
 import { liveStatusStorage } from '@/lib/polling/storage';
 import type { ChannelStatus } from '@/lib/polling/live-status';
 import { type TrackedChannel, getTracked, setTracked, MAX_TRACKED } from '@/lib/channels/tracked';
+import { MAX_SLUGS_PER_SUBMIT } from '@/lib/channels/slug-input';
+import { fakeKick } from '@/tests/support/fake-kick';
 
 function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -19,6 +21,27 @@ function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) 
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
+
+const CHANNELS = '/public/v1/channels';
+
+/** Kick knows these channels, slug to broadcaster id, and answers lookups for them. */
+function kickKnows(channels: Record<string, number>) {
+  return fakeKick({
+    [CHANNELS]: (url) => ({
+      data: url.searchParams
+        .getAll('slug')
+        .filter((slug) => slug in channels)
+        .map((slug) => ({ broadcaster_user_id: channels[slug], slug })),
+    }),
+  });
+}
+
+function onTab(url: string | undefined) {
+  vi.spyOn(fakeBrowser.tabs, 'query').mockResolvedValue([{ url } as never]);
+}
+
+const addInput = () => screen.getByRole<HTMLInputElement>('textbox', { name: 'Channel name or kick.com link' });
+const addButton = () => screen.getByRole('button', { name: 'Add' });
 
 function tracked(id: number, slug: string): TrackedChannel {
   return { broadcasterUserId: id, slug, addedAt: id, muted: false };
@@ -135,6 +158,122 @@ describe('FollowingTab', () => {
     ]);
     expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
     expect(screen.getByRole('textbox')).toHaveValue('');
+    expect(screen.getByText('Now tracking xqc')).toBeInTheDocument();
+  });
+
+  describe('adding several channels at once', () => {
+    it('tracks every name and link pasted, in one request to Kick', async () => {
+      const kick = kickKnows({ xqc: 1, amouranth: 2, adin: 3 });
+      render(<FollowingTab />);
+
+      await userEvent.click(addInput());
+      await userEvent.paste('https://kick.com/xqc\n@amouranth, kick.com/adin/videos');
+      await userEvent.click(addButton());
+
+      await expect.poll(async () => (await getTracked()).map((c) => c.slug)).toEqual(['xqc', 'amouranth', 'adin']);
+      expect(kick.requests).toHaveLength(1);
+      expect(kick.requests[0].searchParams.getAll('slug')).toEqual(['xqc', 'amouranth', 'adin']);
+      expect(screen.getByText('Now tracking xqc, amouranth, adin')).toBeInTheDocument();
+      expect(addInput()).toHaveValue('');
+    });
+
+    it('turns the line breaks of a pasted list into spaces, at the cursor', async () => {
+      render(<FollowingTab />);
+
+      await userEvent.type(addInput(), 'first last');
+      addInput().setSelectionRange(6, 6);
+      await userEvent.paste('a\nb\r\nc ');
+
+      expect(addInput()).toHaveValue('first a b c last');
+    });
+
+    it('says what happened to each channel, and leaves the ones to fix in the box', async () => {
+      await setTracked([tracked(1, 'xqc')]);
+      kickKnows({ xqc: 1, amouranth: 2 });
+      render(<FollowingTab />);
+
+      await userEvent.type(addInput(), 'xqc amouranth ghost bad!name');
+      await userEvent.click(addButton());
+
+      expect(await screen.findByText('Now tracking amouranth')).toBeInTheDocument();
+      expect(screen.getByText('Already tracked: xqc')).toBeInTheDocument();
+      expect(screen.getByText('No channel found for: ghost')).toBeInTheDocument();
+      expect(screen.getByText('Not a channel name or kick.com link: bad!name')).toBeInTheDocument();
+      expect(addInput()).toHaveValue('bad!name ghost');
+    });
+
+    it('does not ask Kick when nothing typed is a channel name', async () => {
+      const kick = kickKnows({});
+      render(<FollowingTab />);
+
+      await userEvent.type(addInput(), 'https://twitch.tv/xqc');
+      await userEvent.click(addButton());
+
+      expect(await screen.findByText('Not a channel name or kick.com link: https://twitch.tv/xqc')).toBeInTheDocument();
+      expect(kick.requests).toHaveLength(0);
+    });
+
+    it(`adds the first ${MAX_SLUGS_PER_SUBMIT} and keeps the rest in the box for the next add`, async () => {
+      const slugs = Array.from({ length: MAX_SLUGS_PER_SUBMIT + 2 }, (_, i) => `c${i}`);
+      kickKnows(Object.fromEntries(slugs.map((slug, i) => [slug, i + 1])));
+      render(<FollowingTab />);
+
+      await userEvent.click(addInput());
+      await userEvent.paste(slugs.join(' '));
+      await userEvent.click(addButton());
+
+      expect(
+        await screen.findByText(`Only ${MAX_SLUGS_PER_SUBMIT} channels can be added at once. The other 2 are still in the box.`)
+      ).toBeInTheDocument();
+      expect(await getTracked()).toHaveLength(MAX_SLUGS_PER_SUBMIT);
+      expect(addInput()).toHaveValue(slugs.slice(MAX_SLUGS_PER_SUBMIT).join(' '));
+    });
+  });
+
+  describe('the channel open in the current tab', () => {
+    it('offers to track it in one click', async () => {
+      onTab('https://kick.com/xqc');
+      kickKnows({ xqc: 42 });
+      render(<FollowingTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Track xqc' }));
+
+      await expect.poll(async () => (await getTracked()).map((c) => c.slug)).toEqual(['xqc']);
+      expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
+      await expect.poll(() => screen.queryByRole('button', { name: 'Track xqc' })).toBeNull();
+    });
+
+    it('is not offered when the channel is already tracked, without asking Kick', async () => {
+      await setTracked([tracked(42, 'xqc')]);
+      onTab('https://kick.com/XQC/videos');
+      const kick = kickKnows({ xqc: 42 });
+      render(<FollowingTab />);
+
+      await screen.findByText('Offline (1)');
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(screen.queryByRole('button', { name: /^Track/ })).toBeNull();
+      expect(kick.requests).toHaveLength(0);
+    });
+
+    it('is not offered when Kick has no such channel', async () => {
+      onTab('https://kick.com/ghost');
+      const kick = kickKnows({});
+      render(<FollowingTab />);
+
+      await expect.poll(() => kick.requests.length).toBe(1);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(screen.queryByRole('button', { name: /^Track/ })).toBeNull();
+    });
+
+    it('is not offered on pages that are not a Kick channel', async () => {
+      onTab('https://kick.com/categories/slots');
+      const kick = kickKnows({ categories: 1 });
+      render(<FollowingTab />);
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(screen.queryByRole('button', { name: /^Track/ })).toBeNull();
+      expect(kick.requests).toHaveLength(0);
+    });
   });
 
   it('tells the user when no channel has that slug', async () => {
@@ -144,7 +283,7 @@ describe('FollowingTab', () => {
     await userEvent.type(screen.getByRole('textbox'), 'nobody');
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
 
-    expect(await screen.findByText('No channel found for "nobody"')).toBeInTheDocument();
+    expect(await screen.findByText('No channel found for: nobody')).toBeInTheDocument();
     expect(await getTracked()).toEqual([]);
   });
 
@@ -156,7 +295,7 @@ describe('FollowingTab', () => {
     await userEvent.type(screen.getByRole('textbox'), 'xqc');
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
 
-    expect(await screen.findByText('"xqc" is already tracked')).toBeInTheDocument();
+    expect(await screen.findByText('Already tracked: xqc')).toBeInTheDocument();
     expect(await getTracked()).toHaveLength(1);
   });
 

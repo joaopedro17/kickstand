@@ -17,15 +17,14 @@ app:
   primaryNav: Navegação principal
 
 following:
-  slugPlaceholder: slug-do-canal
+  slugPlaceholder: "Nome do canal ou link do kick.com"
   addButton: Adicionar
   addButtonLoading: Adicionando…
   addChannelTitle: Adicionar um canal
-  addChannelKicker: Siga pelo slug exato
-  slugHelp1: O Kickstand não consegue buscar canais pelo nome — a API do Kick só permite localizar um canal pelo slug exato, então você precisa digitá-lo manualmente.
-  slugHelp2Prefix: "O slug é a parte da URL do canal depois de kick.com/ — para kick.com/xqc, o slug é"
+  addChannelKicker: "Por nome ou link"
+  addHelp: "Digite ou cole nomes de canais ou links do kick.com. Separe vários com espaços, vírgulas ou quebras de linha."
   emptyState: Nenhum canal acompanhado ainda.
-  emptyStateHint: Cole um slug acima para começar a acompanhar.
+  emptyStateHint: "Adicione um canal acima para começar a acompanhar."
   mute: Silenciar
   unmute: Reativar
   offline: Offline
@@ -33,12 +32,19 @@ following:
   offlineGroupOther: 'Offline ({count})'
   showOffline: Mostrar offline
   hideOffline: Ocultar offline
-  channelNotFound: 'Nenhum canal encontrado para "{slug}"'
-  alreadyTracked: '"{slug}" já está sendo acompanhado'
+  added: "Agora acompanhando: {slugs}"
+  channelNotFound: "Nenhum canal encontrado para: {slugs}"
+  alreadyTracked: "Já acompanhados: {slugs}"
+  invalidInput: "Não é um nome de canal nem um link do kick.com: {items}"
+  tooMany: "Só é possível adicionar {max} canais por vez. Os outros {count} continuam na caixa."
+  trackCurrentTab: "Acompanhar {slug}"
+  currentTabHint: "Aberto nesta aba"
   limitReached: 'Você pode acompanhar até {max} canais. Remova um para adicionar outro.'
   refreshFailed: 'Não foi possível atualizar o status ao vivo. Mostrando o último estado conhecido.'
 
 browse:
+  track: "Acompanhar {slug}"
+  tracked: "{slug} já é acompanhado"
   emptyLive: Nenhuma transmissão ao vivo no momento.
   filteredByPrefix: Filtrado por
   clearFilter: Limpar

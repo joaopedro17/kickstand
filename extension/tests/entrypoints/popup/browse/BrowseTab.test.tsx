@@ -5,6 +5,8 @@ import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import { fakeKick, page, rawStream } from '@/tests/support/fake-kick';
+import type { Request } from '@/lib/messages';
+import { getTracked, setTracked } from '@/lib/channels/tracked';
 import { BrowseTab } from '@/entrypoints/popup/browse/BrowseTab';
 
 const LIVESTREAMS = '/public/v2/livestreams';
@@ -13,9 +15,11 @@ const shownStreams = () =>
   screen.queryAllByRole('heading', { level: 3 }).map((h) => h.textContent);
 
 describe('BrowseTab', () => {
+  let backgroundReceived: Request[];
+
   beforeEach(() => {
     fakeBrowser.reset();
-    fakeBackground();
+    backgroundReceived = fakeBackground().received;
   });
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -148,5 +152,32 @@ describe('BrowseTab', () => {
     await userEvent.click(await screen.findByText('streamer1'));
 
     expect(create).toHaveBeenCalledWith({ url: 'https://kick.com/streamer1' });
+  });
+
+  describe('tracking from a card', () => {
+    it('tracks the streamer without opening the stream, and asks for a poll', async () => {
+      const kick = fakeKick({ [LIVESTREAMS]: () => page([rawStream(7, 10)]) });
+      const create = vi.spyOn(fakeBrowser.tabs, 'create').mockResolvedValue({} as never);
+      render(<BrowseTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Track streamer7' }));
+
+      await expect.poll(async () => await getTracked()).toEqual([
+        expect.objectContaining({ broadcasterUserId: 7, slug: 'streamer7', muted: false }),
+      ]);
+      expect(create).not.toHaveBeenCalled();
+      expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
+      expect(kick.requests.every((u) => u.pathname === LIVESTREAMS)).toBe(true);
+      expect(await screen.findByRole('button', { name: 'streamer7 is tracked' })).toBeDisabled();
+    });
+
+    it('shows a streamer already tracked as tracked', async () => {
+      await setTracked([{ broadcasterUserId: 2, slug: 'streamer2', addedAt: 1, muted: false }]);
+      fakeKick({ [LIVESTREAMS]: () => page([rawStream(1, 10), rawStream(2, 5)]) });
+      render(<BrowseTab />);
+
+      expect(await screen.findByRole('button', { name: 'streamer2 is tracked' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Track streamer1' })).toBeEnabled();
+    });
   });
 });
