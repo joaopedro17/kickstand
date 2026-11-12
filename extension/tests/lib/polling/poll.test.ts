@@ -11,6 +11,7 @@ import { liveStatusStorage } from '@/lib/polling/storage';
 import type { ChannelStatus } from '@/lib/polling/live-status';
 import { type TrackedChannel, setTracked } from '@/lib/channels/tracked';
 import { updateSettings } from '@/lib/settings';
+import { avatarStorage } from '@/lib/channels/avatars';
 
 const STARTED = '2026-11-11T10:00:00Z';
 
@@ -79,6 +80,11 @@ async function logIn() {
     expiresAt: Date.now() + 60 * 60 * 1000,
     refreshExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
   });
+}
+
+/** The livestream-status requests a fetch mock received, leaving out picture lookups. */
+function livestreamRequests(fetchMock: ReturnType<typeof vi.fn>) {
+  return fetchMock.mock.calls.filter(([url]) => String(url).includes('/users/livestreams'));
 }
 
 async function badge() {
@@ -362,6 +368,44 @@ describe('pollNow', () => {
     });
   });
 
+  it('fetches the pictures of tracked channels it has none for', async () => {
+    await setTracked([tracked(1), tracked(2)]);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async (url: string) => ({
+        ok: true,
+        status: 200,
+        json: async () =>
+          url.includes('/users/livestreams')
+            ? { data: [] }
+            : { data: [{ user_id: 2, profile_picture: 'https://pic/2' }] },
+      }))
+    );
+
+    await pollNow();
+
+    expect(await avatarStorage.getValue()).toEqual({
+      1: { url: null, fetchedAt: expect.any(Number) },
+      2: { url: 'https://pic/2', fetchedAt: expect.any(Number) },
+    });
+  });
+
+  it('still updates live status when pictures cannot be fetched', async () => {
+    await setTracked([tracked(1)]);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async (url: string) =>
+        url.includes('/users/livestreams')
+          ? { ok: true, status: 200, json: async () => ({ data: [livestream(1)] }) }
+          : Promise.reject(new TypeError('Failed to fetch'))
+      )
+    );
+
+    await expect(pollNow()).resolves.toBeUndefined();
+
+    expect(await badge()).toBe('1');
+  });
+
   it('does not notify for a muted channel, but still counts it on the badge', async () => {
     await setTracked([tracked(1, true)]);
     await liveStatusStorage.setValue({ 1: offline() });
@@ -405,7 +449,7 @@ describe('pollNow', () => {
 
     await Promise.all([pollNow(), pollNow(), pollNow()]);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(livestreamRequests(fetchMock)).toHaveLength(1);
   });
 
   it('clears the badge and stops when logged out', async () => {
@@ -436,7 +480,7 @@ describe('pollNow', () => {
 
     await pollNow();
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(livestreamRequests(fetchMock)).toHaveLength(2);
   });
 
   it('keeps the previous status of a batch that failed, with the error', async () => {

@@ -1,7 +1,8 @@
 import { browser } from 'wxt/browser';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { toggleMuted, type TrackedChannel } from '@/lib/channels/tracked';
+import { avatarStorage, type Avatar } from '@/lib/channels/avatars';
 import type { ChannelStatus, LiveStatus, LiveStatusCache } from '@/lib/polling/live-status';
 import { Card } from '../shared/layout';
 import { Icon } from '../shared/Icon';
@@ -62,6 +63,15 @@ export function ChannelLists({
   );
 }
 
+function useAvatars(): Record<number, Avatar> {
+  const [avatars, setAvatars] = useState<Record<number, Avatar>>({});
+  useEffect(() => {
+    avatarStorage.getValue().then(setAvatars);
+    return avatarStorage.watch(setAvatars);
+  }, []);
+  return avatars;
+}
+
 function ChannelRows({
   channels,
   liveStatus,
@@ -69,26 +79,34 @@ function ChannelRows({
   channels: TrackedChannel[];
   liveStatus: LiveStatusCache;
 }) {
-  return channels.map((channel) => (
-    <li key={channel.broadcasterUserId}>
-      <ChannelRow channel={channel} status={liveStatus[channel.broadcasterUserId]} />
-    </li>
-  ));
+  const avatars = useAvatars();
+  return channels.map((channel) => {
+    const id = channel.broadcasterUserId;
+    // The fetched picture first; else the one the last live poll saw.
+    const avatarUrl = avatars[id]?.url ?? liveStatus[id]?.avatarUrl ?? null;
+    return (
+      <li key={id}>
+        <ChannelRow channel={channel} status={liveStatus[id]} avatarUrl={avatarUrl} />
+      </li>
+    );
+  });
 }
 
 function ChannelRow({
   channel,
   status,
+  avatarUrl,
 }: {
   channel: TrackedChannel;
   status: ChannelStatus | undefined;
+  avatarUrl: string | null;
 }) {
   return (
     <Card
       className="group flex cursor-pointer gap-3 p-3"
       onClick={() => openChannel(channel.slug)}
     >
-      <ChannelThumbnail status={status?.status} />
+      <ChannelThumbnail status={status?.status} avatarUrl={avatarUrl} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <h3 className="truncate text-sm font-extrabold">{channel.slug}</h3>
@@ -106,7 +124,7 @@ function ChannelRow({
 
 type LiveStream = Extract<LiveStatus, { kind: 'live' }>;
 
-function ChannelThumbnail({ status }: { status: LiveStatus | undefined }) {
+function ChannelThumbnail({ status, avatarUrl }: { status: LiveStatus | undefined; avatarUrl: string | null }) {
   const thumbnail = status?.kind === 'live' ? status.thumbnail : null;
   return (
     <div className="relative h-[72px] w-[104px] shrink-0 overflow-hidden rounded-xl bg-neutral-800">
@@ -118,7 +136,11 @@ function ChannelThumbnail({ status }: { status: LiveStatus | undefined }) {
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-muted">
-          <Icon icon="tv-off" className="text-lg" />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover" />
+          ) : (
+            <Icon icon="tv-off" className="text-lg" />
+          )}
         </div>
       )}
       {status?.kind === 'live' && <LiveBadge />}

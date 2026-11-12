@@ -5,13 +5,14 @@ import {
   parseCategoryPage,
   parseChannels,
   parseCurrentUser,
+  parseUsers,
   parseLivestreamPage,
   parseLivestreams,
 } from './parse';
 import type { Category, Channel, CurrentUser, Livestream, Page } from './types';
 import { chunk } from '@/lib/chunk';
 
-type QueryParams = Record<string, string | number | string[] | number[] | undefined>;
+type QueryParams = Record<string, string | number | (string | number)[] | undefined>;
 
 function buildUrl(path: string, params: QueryParams): string {
   const url = new URL(`${KICK_API_BASE}${path}`);
@@ -73,14 +74,26 @@ async function kickFetch<T>(
   return parse(body);
 }
 
+/** One request per `size` values of the repeated query parameter `name`, results merged in order. */
+async function kickFetchInBatches<T>(
+  path: string,
+  name: string,
+  values: string[] | number[],
+  size: number,
+  accessToken: string,
+  parse: (body: unknown) => T[]
+): Promise<T[]> {
+  const results: T[] = [];
+  for (const batch of chunk<string | number>(values, size)) {
+    results.push(...(await kickFetch(path, { [name]: batch }, accessToken, parse)));
+  }
+  return results;
+}
+
 const MAX_SLUGS_PER_CHANNEL_REQUEST = 50;
 
 export async function resolveChannelsBySlug(slugs: string[], accessToken: string): Promise<Channel[]> {
-  const results: Channel[] = [];
-  for (const batch of chunk(slugs, MAX_SLUGS_PER_CHANNEL_REQUEST)) {
-    results.push(...(await kickFetch('/public/v1/channels', { slug: batch }, accessToken, parseChannels)));
-  }
-  return results;
+  return kickFetchInBatches('/public/v1/channels', 'slug', slugs, MAX_SLUGS_PER_CHANNEL_REQUEST, accessToken, parseChannels);
 }
 
 /** Kick accepts at most this many `user_id` values per livestreams request. */
@@ -111,6 +124,14 @@ export async function fetchLivestreams(
 
 export async function fetchCurrentUser(accessToken: string): Promise<CurrentUser> {
   return kickFetch('/public/v1/users', {}, accessToken, parseCurrentUser);
+}
+
+/** How many `id` values one users request carries. */
+const MAX_IDS_PER_USERS_REQUEST = 50;
+
+/** Any Kick users, by id: their profile pictures. */
+export async function fetchUsers(ids: number[], accessToken: string): Promise<CurrentUser[]> {
+  return kickFetchInBatches('/public/v1/users', 'id', ids, MAX_IDS_PER_USERS_REQUEST, accessToken, parseUsers);
 }
 
 const CATEGORY_PAGE_SIZE = 25;

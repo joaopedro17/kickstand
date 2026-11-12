@@ -7,11 +7,36 @@ import {
   fetchLivestreams,
   fetchCategoryPage,
   searchCategories,
+  fetchUsers,
 } from '@/lib/kick/api';
 
 describe('Kick API requests', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('fetchUsers asks for users by id, 50 per request, and keeps their pictures', async () => {
+    const fetchMock = vi.fn().mockImplementation(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: new URL(url).searchParams.getAll('id').map((id) => ({
+          user_id: Number(id),
+          profile_picture: id === '2' ? '' : `https://pic/${id}`,
+        })),
+      }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const ids = Array.from({ length: 51 }, (_, i) => i + 1);
+    const users = await fetchUsers(ids, 'token');
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(new URL(fetchMock.mock.calls[0][0]).pathname).toBe('/public/v1/users');
+    expect(new URL(fetchMock.mock.calls[0][0]).searchParams.getAll('id')).toHaveLength(50);
+    expect(users).toHaveLength(51);
+    expect(users[0]).toEqual({ userId: 1, profilePicture: 'https://pic/1' });
+    expect(users[1]).toEqual({ userId: 2, profilePicture: null });
   });
 
   it('resolveChannelsBySlug batches slugs into groups of 50 and merges results', async () => {

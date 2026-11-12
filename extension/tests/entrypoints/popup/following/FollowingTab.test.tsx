@@ -11,6 +11,7 @@ import type { ChannelStatus } from '@/lib/polling/live-status';
 import { type TrackedChannel, getTracked, setTracked, MAX_TRACKED } from '@/lib/channels/tracked';
 import { MAX_SLUGS_PER_SUBMIT } from '@/lib/channels/slug-input';
 import { fakeKick } from '@/tests/support/fake-kick';
+import { avatarStorage } from '@/lib/channels/avatars';
 
 function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -495,6 +496,33 @@ describe('FollowingTab', () => {
       expect(screen.getByText('Last live 2d ago')).toBeInTheDocument();
       const never = screen.getByText('never').closest('li')!;
       expect(within(never).getByText('Offline')).toBeInTheDocument();
+    });
+  });
+
+  describe('pictures of offline channels', () => {
+    const offline = (avatarUrl: string | null): ChannelStatus => ({
+      status: { kind: 'offline', lastLiveAt: null },
+      notifiedStartedAt: null,
+      avatarUrl,
+      lastCheckedAt: Date.now(),
+    });
+    const pictureOf = (slug: string) => screen.getByText(slug).closest('li')!.querySelector('img')?.src;
+
+    it('shows the picture fetched for the channel, else the one seen while it was live', async () => {
+      await setTracked([tracked(1, 'fetched'), tracked(2, 'seen'), tracked(3, 'none')]);
+      await liveStatusStorage.setValue({
+        1: offline('https://seen/1'),
+        2: offline('https://seen/2'),
+        3: offline(null),
+      });
+      await avatarStorage.setValue({ 1: { url: 'https://fetched/1', fetchedAt: Date.now() } });
+      render(<FollowingTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: /show offline/i }));
+
+      await expect.poll(() => pictureOf('fetched')).toBe('https://fetched/1');
+      expect(pictureOf('seen')).toBe('https://seen/2');
+      expect(pictureOf('none')).toBeUndefined();
     });
   });
 

@@ -141,6 +141,10 @@ export function parseChannels(raw: unknown): Channel[] {
   return parseEach(raw, parseChannel);
 }
 
+export function parseUsers(raw: unknown): CurrentUser[] {
+  return parseEach(raw, parseUser);
+}
+
 export function parseCurrentUser(raw: unknown): CurrentUser {
   const [user] = parseEach(raw, parseUser);
   if (!user) throw unexpected('no user');

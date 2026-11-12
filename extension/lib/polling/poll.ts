@@ -1,6 +1,6 @@
 import { browser } from 'wxt/browser';
 import { chunk } from '@/lib/chunk';
-import { fetchLivestreamsForUsers, MAX_USERS_PER_LIVESTREAM_REQUEST } from '@/lib/kick/api';
+import { fetchLivestreamsForUsers, fetchUsers, MAX_USERS_PER_LIVESTREAM_REQUEST } from '@/lib/kick/api';
 import { KickApiError } from '@/lib/kick/error';
 import {
   channelsToNotify,
@@ -13,6 +13,7 @@ import { withAuthRetry } from '@/lib/auth/tokens';
 import { liveStatusStorage, pollPausedUntilStorage, pollRateLimitedStorage } from './storage';
 import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
+import { refreshAvatars } from '@/lib/channels/avatars';
 import { getSettings, isQuietTime } from '@/lib/settings';
 import { notifyChannels } from './alerts';
 import { playAlertSound } from './sound';
@@ -62,12 +63,13 @@ async function fetchBatch(ids: number[]): Promise<BatchOutcome | null> {
  * After a 429, polls are skipped for as long as Kick asked (the longest,
  * across batches) and slowed down until a poll goes through.
  */
-async function pauseIfRateLimited(batches: BatchOutcome[], now: number): Promise<void> {
+async function pauseIfRateLimited(batches: BatchOutcome[], now: number): Promise<boolean> {
   const waits = batches.map((b) => ('rateLimitedForMs' in b ? (b.rateLimitedForMs ?? 0) : 0));
   const longest = Math.max(0, ...waits);
   if (longest > 0) await pollPausedUntilStorage.setValue(now + longest);
   await pollRateLimitedStorage.setValue(longest > 0);
   await ensurePollAlarm();
+  return longest > 0;
 }
 
 /** Every batch's outcome, or null as soon as one shows there is no session. */
@@ -118,7 +120,7 @@ async function runPoll(): Promise<void> {
   }
 
   const now = Date.now();
-  await pauseIfRateLimited(batches, now);
+  const rateLimited = await pauseIfRateLimited(batches, now);
   const previous = await liveStatusStorage.getValue();
   const { next, wentLive, switchedCategory } = computeNextStatus(previous, batches, now);
 
@@ -128,6 +130,10 @@ async function runPoll(): Promise<void> {
   await showOnBadge(next);
 
   await alertAbout(tracked, { wentLive, switchedCategory }, next, now);
+  // Offline channels' pictures, for the Following tab. Nice to have: skipped
+  // while Kick is rate-limiting, and a failure here doesn't fail the poll.
+  if (rateLimited) return;
+  await refreshAvatars(tracked, (ids) => withAuthRetry((token) => fetchUsers(ids, token)), now).catch(() => {});
 }
 
 let inFlightPoll: Promise<void> | null = null;
