@@ -59,6 +59,7 @@ categories:
   emptyAll: No hay categorías disponibles.
 
 settings:
+  soundToggle: "Reproducir un sonido con los avisos"
   focusTabToggle: "Ir a la pestaña abierta del canal en lugar de abrir una nueva"
   focusTabHint: "Tu navegador pedirá permiso para que Kickstand vea tus pestañas abiertas."
   categoryChangeToggle: "Avisar también cuando un canal en directo cambie de categoría"

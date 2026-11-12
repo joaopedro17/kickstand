@@ -50,7 +50,16 @@ export default defineConfig({
       // activeTab: the popup may read the current tab's URL to offer tracking the
       // channel it shows. It is granted only when the user opens the popup, and
       // shows no install warning.
-      permissions: ['storage', 'alarms', 'notifications', 'identity', 'activeTab'],
+      // offscreen (Chrome only, no install warning): the optional alert sound
+      // plays from an offscreen page, since a service worker can't play audio.
+      permissions: [
+        'storage',
+        'alarms',
+        'notifications',
+        'identity',
+        'activeTab',
+        ...(env.browser === 'chrome' ? ['offscreen'] : []),
+      ],
       // Optional, asked for only when the user turns on "switch to the
       // channel's open tab": a required tabs permission would show an install
       // warning, and adding one in an update disables the extension for

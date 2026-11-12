@@ -59,6 +59,7 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  soundToggle: "Play a sound with alerts"
   focusTabToggle: Switch to the channel's open tab instead of opening a new one
   focusTabHint: Your browser will ask to let Kickstand see your open tabs.
   categoryChangeToggle: "Also alert when a live channel changes category"

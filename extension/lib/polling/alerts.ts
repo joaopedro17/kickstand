@@ -44,12 +44,13 @@ async function alertText(kind: AlertKind, channel: TrackedChannel, stream: LiveE
   };
 }
 
-/** Shows an alert for each channel, all live in `status`. */
+/** Shows an alert for each channel live in `status`; returns how many were shown. */
 export async function notifyChannels(
   kind: AlertKind,
   channels: TrackedChannel[],
   status: LiveStatusCache
-): Promise<void> {
+): Promise<number> {
+  let shown = 0;
   for (const channel of channels) {
     const entry = status[channel.broadcasterUserId];
     // Only channels live in this poll are passed in.
@@ -59,7 +60,9 @@ export async function notifyChannels(
       iconUrl: entry.avatarUrl || browser.runtime.getURL('/icons/128.png'),
       ...(await alertText(kind, channel, entry.status)),
     });
+    shown += 1;
   }
+  return shown;
 }
 
 /** Shows the channel an alert was about, in its open tab if allowed and there is one, and dismisses the alert. */

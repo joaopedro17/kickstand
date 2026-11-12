@@ -59,6 +59,7 @@ categories:
   emptyAll: Aucune catégorie disponible.
 
 settings:
+  soundToggle: "Jouer un son avec les alertes"
   focusTabToggle: "Aller à l’onglet déjà ouvert de la chaîne au lieu d’en ouvrir un nouveau"
   focusTabHint: "Ton navigateur demandera d’autoriser Kickstand à voir tes onglets ouverts."
   categoryChangeToggle: "Alerter aussi quand une chaîne en direct change de catégorie"

@@ -227,6 +227,87 @@ describe('pollNow', () => {
     }
   });
 
+  describe('sound', () => {
+    function fakeOffscreen(create = vi.fn().mockResolvedValue(undefined)) {
+      const offscreen = {
+        createDocument: create,
+        closeDocument: vi.fn().mockRejectedValue(new Error('No current offscreen document')),
+      };
+      Object.assign(fakeBrowser, { offscreen });
+      return offscreen;
+    }
+
+    beforeEach(async () => {
+      await setTracked([tracked(1), tracked(2)]);
+      await liveStatusStorage.setValue({ 1: offline(), 2: offline() });
+      kickHasLive(livestream(1), livestream(2));
+    });
+
+    it('plays once per poll that shows alerts, through an offscreen page on Chrome', async () => {
+      await updateSettings({ soundEnabled: true });
+      const offscreen = fakeOffscreen();
+
+      await pollNow();
+
+      expect(await notifications()).toHaveLength(2);
+      expect(offscreen.closeDocument).toHaveBeenCalledTimes(1);
+      expect(offscreen.createDocument).toHaveBeenCalledTimes(1);
+      expect(offscreen.createDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ url: 'offscreen.html', reasons: ['AUDIO_PLAYBACK'] })
+      );
+    });
+
+    it('plays from the background page on Firefox', async () => {
+      vi.stubEnv('FIREFOX', 'true');
+      await updateSettings({ soundEnabled: true });
+      const played: string[] = [];
+      vi.stubGlobal(
+        'Audio',
+        class {
+          constructor(private src: string) {}
+          play() {
+            played.push(this.src);
+            return Promise.resolve();
+          }
+        }
+      );
+      const offscreen = fakeOffscreen();
+
+      await pollNow();
+
+      expect(played).toEqual([expect.stringMatching(/\/sounds\/alert\.wav$/)]);
+      expect(offscreen.createDocument).not.toHaveBeenCalled();
+    });
+
+    it('stays silent unless turned on', async () => {
+      const offscreen = fakeOffscreen();
+
+      await pollNow();
+
+      expect(await notifications()).toHaveLength(2);
+      expect(offscreen.createDocument).not.toHaveBeenCalled();
+    });
+
+    it('stays silent when there is nothing to alert about', async () => {
+      await updateSettings({ soundEnabled: true });
+      await liveStatusStorage.setValue({});
+      const offscreen = fakeOffscreen();
+
+      await pollNow();
+
+      expect(offscreen.createDocument).not.toHaveBeenCalled();
+    });
+
+    it('still shows the alerts when the sound cannot play', async () => {
+      await updateSettings({ soundEnabled: true });
+      fakeOffscreen(vi.fn().mockRejectedValue(new Error('offscreen unavailable')));
+
+      await expect(pollNow()).resolves.toBeUndefined();
+
+      expect(await notifications()).toHaveLength(2);
+    });
+  });
+
   describe('category changes', () => {
     function liveInSlots(): ChannelStatus {
       const entry = live();

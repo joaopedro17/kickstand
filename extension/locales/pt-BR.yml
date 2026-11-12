@@ -59,6 +59,7 @@ categories:
   emptyAll: Nenhuma categoria disponível.
 
 settings:
+  soundToggle: "Tocar um som com os alertas"
   focusTabToggle: "Ir para a aba já aberta do canal em vez de abrir uma nova"
   focusTabHint: "Seu navegador vai pedir permissão para o Kickstand ver suas abas abertas."
   categoryChangeToggle: "Avisar também quando um canal ao vivo mudar de categoria"

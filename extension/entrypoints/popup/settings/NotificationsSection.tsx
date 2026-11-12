@@ -175,6 +175,12 @@ export function NotificationsSection({ settings }: { settings: Settings }) {
         onChange={(notificationsEnabled) => updateSettings({ notificationsEnabled })}
       />
       <Toggle
+        id="alert-sound"
+        label={i18n.t('settings.soundToggle')}
+        checked={settings.soundEnabled}
+        onChange={(soundEnabled) => updateSettings({ soundEnabled })}
+      />
+      <Toggle
         id="category-alerts"
         label={i18n.t('settings.categoryChangeToggle')}
         checked={settings.notifyCategoryChange}

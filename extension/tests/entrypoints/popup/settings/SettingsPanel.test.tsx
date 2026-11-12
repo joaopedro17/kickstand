@@ -54,6 +54,16 @@ describe('SettingsPanel', () => {
     expect(screen.getByRole('radiogroup', { name: 'Check for live channels every' })).toBeInTheDocument();
   });
 
+  it('turns the alert sound on, which starts off', async () => {
+    render(<SettingsPanel />);
+    const toggle = await screen.findByRole('checkbox', { name: 'Play a sound with alerts' });
+    expect(toggle).not.toBeChecked();
+
+    await userEvent.click(toggle);
+
+    await expect.poll(async () => (await getSettings()).soundEnabled).toBe(true);
+  });
+
   it('turns category-change alerts on, which start off', async () => {
     render(<SettingsPanel />);
     const toggle = await screen.findByRole('checkbox', { name: 'Also alert when a live channel changes category' });

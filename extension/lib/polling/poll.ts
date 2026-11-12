@@ -15,6 +15,7 @@ import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
 import { getSettings, isQuietTime } from '@/lib/settings';
 import { notifyChannels } from './alerts';
+import { playAlertSound } from './sound';
 
 export const POLL_ALARM = 'kickstand-poll';
 /** How often to poll while Kick is rate-limiting, whatever the user picked. */
@@ -81,6 +82,28 @@ async function fetchAll(tracked: TrackedChannel[]): Promise<BatchOutcome[] | nul
   return batches;
 }
 
+/**
+ * Shows the alerts a poll calls for, and the sound once if any was shown.
+ * A stream that starts during quiet hours is already recorded as notified,
+ * so no alert for it piles up for when they end.
+ */
+async function alertAbout(
+  tracked: TrackedChannel[],
+  changes: { wentLive: number[]; switchedCategory: number[] },
+  status: LiveStatusCache,
+  now: number
+): Promise<void> {
+  const settings = await getSettings();
+  if (!settings.notificationsEnabled || isQuietTime(settings.quietHours, new Date(now))) return;
+  let shown = await notifyChannels('live', channelsToNotify(tracked, changes.wentLive), status);
+  if (settings.notifyCategoryChange) {
+    shown += await notifyChannels('switched', channelsToNotify(tracked, changes.switchedCategory), status);
+  }
+  // A sound that can't play (offscreen API missing, autoplay refused) must
+  // not fail the poll.
+  if (settings.soundEnabled && shown > 0) await playAlertSound().catch(() => {});
+}
+
 async function runPoll(): Promise<void> {
   // While Kick has asked us to back off, keep showing what we last knew.
   if (Date.now() < (await pollPausedUntilStorage.getValue())) return;
@@ -104,14 +127,7 @@ async function runPoll(): Promise<void> {
   await liveStatusStorage.setValue(next);
   await showOnBadge(next);
 
-  // A stream that starts during quiet hours is recorded as notified above,
-  // so no alert for it piles up for when they end.
-  const settings = await getSettings();
-  if (!settings.notificationsEnabled || isQuietTime(settings.quietHours, new Date(now))) return;
-  await notifyChannels('live', channelsToNotify(tracked, wentLive), next);
-  if (settings.notifyCategoryChange) {
-    await notifyChannels('switched', channelsToNotify(tracked, switchedCategory), next);
-  }
+  await alertAbout(tracked, { wentLive, switchedCategory }, next, now);
 }
 
 let inFlightPoll: Promise<void> | null = null;

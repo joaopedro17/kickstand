@@ -59,6 +59,7 @@ categories:
   emptyAll: Keine Kategorien verfügbar.
 
 settings:
+  soundToggle: "Bei Benachrichtigungen einen Ton abspielen"
   focusTabToggle: "Zum offenen Tab des Kanals wechseln statt einen neuen zu öffnen"
   focusTabHint: "Dein Browser fragt, ob Kickstand deine offenen Tabs sehen darf."
   categoryChangeToggle: "Auch benachrichtigen, wenn ein Live-Kanal die Kategorie wechselt"
