@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Aggiornato {count} min fa"
 
 browse:
+  hideOptions: "Opzioni per nascondere {slug}"
+  hide: "Nascondi {name}"
   mature: "Per adulti"
   language: "Lingua"
   allLanguages: "Tutte le lingue"
@@ -69,6 +71,9 @@ categories:
   emptyAll: Nessuna categoria disponibile.
 
 settings:
+  hiddenTitle: "Nascosti in Esplora"
+  hiddenNone: "Niente è nascosto in Esplora."
+  showAgain: "Mostra di nuovo {name}"
   browseTitle: "Esplora"
   browseKicker: "Cosa mostra Esplora"
   blurMatureToggle: "Sfoca le anteprime degli stream per adulti"

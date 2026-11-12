@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Uppdaterad för {count} min sedan"
 
 browse:
+  hideOptions: "Döljalternativ för {slug}"
+  hide: "Dölj {name}"
   mature: "Vuxet"
   language: "Språk"
   allLanguages: "Alla språk"
@@ -69,6 +71,9 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  hiddenTitle: "Dolda i Utforska"
+  hiddenNone: "Inget är dolt i Utforska."
+  showAgain: "Visa {name} igen"
   browseTitle: "Utforska"
   browseKicker: "Vad Utforska visar"
   blurMatureToggle: "Göra miniatyrer av vuxenströmmar suddiga"

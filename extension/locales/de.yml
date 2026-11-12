@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Vor {count} Min. aktualisiert"
 
 browse:
+  hideOptions: "Ausblendoptionen für {slug}"
+  hide: "{name} ausblenden"
   mature: "Ab 18"
   language: "Sprache"
   allLanguages: "Alle Sprachen"
@@ -69,6 +71,9 @@ categories:
   emptyAll: Keine Kategorien verfügbar.
 
 settings:
+  hiddenTitle: "In Entdecken ausgeblendet"
+  hiddenNone: "In Entdecken ist nichts ausgeblendet."
+  showAgain: "{name} wieder anzeigen"
   browseTitle: "Entdecken"
   browseKicker: "Was Entdecken zeigt"
   blurMatureToggle: "Vorschaubilder von Streams ab 18 unscharf zeigen"

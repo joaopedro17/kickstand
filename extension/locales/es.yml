@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Actualizado hace {count} min"
 
 browse:
+  hideOptions: "Opciones para ocultar {slug}"
+  hide: "Ocultar {name}"
   mature: "Adultos"
   language: "Idioma"
   allLanguages: "Todos los idiomas"
@@ -69,6 +71,9 @@ categories:
   emptyAll: No hay categorías disponibles.
 
 settings:
+  hiddenTitle: "Ocultos en Explorar"
+  hiddenNone: "No hay nada oculto en Explorar."
+  showAgain: "Volver a mostrar {name}"
   browseTitle: "Explorar"
   browseKicker: "Lo que muestra Explorar"
   blurMatureToggle: "Difuminar las miniaturas de streams para adultos"

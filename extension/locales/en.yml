@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: 'Updated {count} min ago'
 
 browse:
+  hideOptions: 'Hide options for {slug}'
+  hide: 'Hide {name}'
   mature: Mature
   language: Language
   allLanguages: All languages
@@ -69,6 +71,9 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  hiddenTitle: Hidden from Browse
+  hiddenNone: Nothing is hidden from Browse.
+  showAgain: 'Show {name} again'
   browseTitle: Browse
   browseKicker: What Browse shows
   blurMatureToggle: Blur thumbnails of mature streams

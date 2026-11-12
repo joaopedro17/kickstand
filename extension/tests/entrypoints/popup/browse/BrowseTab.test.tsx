@@ -8,6 +8,7 @@ import { fakeKick, page, rawStream } from '@/tests/support/fake-kick';
 import type { Request } from '@/lib/messages';
 import { getTracked, setTracked } from '@/lib/channels/tracked';
 import { getSettings, updateSettings } from '@/lib/settings';
+import { getHidden, hideChannel } from '@/lib/browse-hidden';
 import { BrowseTab } from '@/entrypoints/popup/browse/BrowseTab';
 
 const LIVESTREAMS = '/public/v2/livestreams';
@@ -252,6 +253,66 @@ describe('BrowseTab', () => {
       await screen.findByText('streamer1');
       expect(thumbnailOf('streamer1')).not.toHaveClass('blur-xl');
       expect(screen.queryByText('Mature')).toBeNull();
+    });
+  });
+
+  describe('hiding', () => {
+    const streams = () =>
+      page([
+        rawStream(1, 30, { category: { id: 9, name: 'Slots', thumbnail: '' } }),
+        rawStream(2, 20, { category: { id: 9, name: 'Slots', thumbnail: '' } }),
+        rawStream(3, 10),
+      ]);
+
+    it('hides a channel from Browse, without opening its stream', async () => {
+      fakeKick({ [LIVESTREAMS]: streams });
+      const create = vi.spyOn(fakeBrowser.tabs, 'create').mockResolvedValue({} as never);
+      render(<BrowseTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Hide options for streamer1' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hide streamer1' }));
+
+      await expect.poll(shownStreams).toEqual(['streamer2', 'streamer3']);
+      expect(create).not.toHaveBeenCalled();
+      expect((await getHidden()).channels).toEqual([{ id: 1, slug: 'streamer1' }]);
+    });
+
+    it('hides every stream in a category', async () => {
+      fakeKick({ [LIVESTREAMS]: streams });
+      render(<BrowseTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Hide options for streamer2' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hide Slots' }));
+
+      await expect.poll(shownStreams).toEqual(['streamer3']);
+      expect((await getHidden()).categories).toEqual([{ id: 9, name: 'Slots' }]);
+    });
+
+    it('offers no category to hide for a stream without one', async () => {
+      fakeKick({ [LIVESTREAMS]: () => page([rawStream(1, 10, { category: null })]) });
+      render(<BrowseTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Hide options for streamer1' }));
+
+      expect(screen.getByRole('button', { name: 'Hide streamer1' })).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: /^Hide (?!options)/ })).toHaveLength(1);
+    });
+
+    it('leaves out what was hidden before', async () => {
+      await hideChannel({ id: 3, slug: 'streamer3' });
+      fakeKick({ [LIVESTREAMS]: streams });
+      render(<BrowseTab />);
+
+      await screen.findByText('streamer1');
+      expect(shownStreams()).toEqual(['streamer1', 'streamer2']);
+    });
+
+    it('says so when everything loaded is hidden', async () => {
+      await hideChannel({ id: 1, slug: 'streamer1' });
+      fakeKick({ [LIVESTREAMS]: () => page([rawStream(1, 10)]) });
+      render(<BrowseTab />);
+
+      expect(await screen.findByText('No live streams right now.')).toBeInTheDocument();
     });
   });
 });

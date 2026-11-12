@@ -11,6 +11,9 @@ import { PagedListBody } from '../shared/PagedListBody';
 import { usePagedList } from '../shared/usePagedList';
 import { trackChannels, useTracked } from '../shared/track';
 import { useSettings } from '../shared/useSettings';
+import { useState } from 'react';
+import { hideCategory, hideChannel, isShown } from '@/lib/browse-hidden';
+import { useHidden } from '../shared/useHidden';
 import { updateSettings } from '@/lib/settings';
 
 // Kick's API returns livestreams oldest-first with no sort option, so a
@@ -100,15 +103,19 @@ function StreamList({
     byViewersDesc
   );
   const trackedIds = new Set(useTracked().map((c) => c.broadcasterUserId));
+  const hidden = useHidden();
+  // Filtered as shown rather than as loaded, so hiding and showing again
+  // take effect at once on what is already on screen.
+  const visible = list.items.filter((stream) => isShown(stream, hidden));
 
   return (
     <PagedListBody
-      list={list}
+      list={{ ...list, items: visible }}
       skeleton={<StreamGridSkeleton />}
       empty={<EmptyState icon="tv-off" title={i18n.t('browse.emptyLive')} />}
     >
       <div className="grid grid-cols-2 gap-2">
-        {list.items.map((stream) => (
+        {visible.map((stream) => (
           <StreamCard
             key={stream.id}
             stream={stream}
@@ -134,6 +141,48 @@ function CategoryFilter({ name, onClear }: { name: string; onClear?: () => void 
           <Icon icon="x" className="text-sm" />
           {i18n.t('browse.clearFilter')}
         </GhostButton>
+      )}
+    </div>
+  );
+}
+
+/** A button that opens the choice of hiding this channel, or its category, from Browse. */
+function HideMenu({ stream }: { stream: Livestream }) {
+  const [open, setOpen] = useState(false);
+  const { slug, category } = stream;
+  const choices = [
+    { name: slug, hide: () => hideChannel({ id: stream.broadcaster.id, slug }) },
+    ...(category ? [{ name: category.name, hide: () => hideCategory(category) }] : []),
+  ];
+  return (
+    <div className="relative">
+      <IconButton
+        type="button"
+        aria-label={i18n.t('browse.hideOptions', { slug })}
+        aria-expanded={open}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+      >
+        <Icon icon="eye-off" className="text-sm" />
+      </IconButton>
+      {open && (
+        <div className="absolute right-0 top-6 z-10 w-36 rounded-xl border border-white/10 bg-ink p-1 shadow-lg">
+          {choices.map((choice) => (
+            <button
+              key={choice.name}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                choice.hide().catch(() => {});
+              }}
+              className="block w-full truncate rounded-lg px-2 py-1.5 text-left text-xs text-white hover:bg-white/10"
+            >
+              {i18n.t('browse.hide', { name: choice.name })}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -202,7 +251,10 @@ function StreamCard({
           <h3 className="truncate text-sm font-extrabold">
             {stream.slug}
           </h3>
-          <TrackButton stream={stream} tracked={tracked} />
+          <span className="flex items-center gap-1">
+            <HideMenu stream={stream} />
+            <TrackButton stream={stream} tracked={tracked} />
+          </span>
         </div>
         <p className="mt-1 line-clamp-1 text-xs text-muted" title={stream.title}>
           {stream.title || '—'}

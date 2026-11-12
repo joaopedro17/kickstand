@@ -7,6 +7,7 @@ import { fakeBackground } from '@/tests/support/fake-background';
 import type { Request } from '@/lib/messages';
 import { type TrackedChannel, getTracked, setTracked } from '@/lib/channels/tracked';
 import { getSettings } from '@/lib/settings';
+import { getHidden, hideCategory, hideChannel } from '@/lib/browse-hidden';
 import { fakeKick } from '@/tests/support/fake-kick';
 import { fakePermissions } from '@/tests/support/fake-permissions';
 import { SettingsPanel } from '@/entrypoints/popup/settings/SettingsPanel';
@@ -155,6 +156,28 @@ describe('SettingsPanel', () => {
 
     await expect.poll(async () => (await getSettings()).blurMature).toBe(false);
     expect(screen.getByRole('region', { name: 'Browse' })).toContainElement(toggle);
+  });
+
+  describe('hidden from Browse', () => {
+    it('lists what is hidden and shows each again on request', async () => {
+      await hideChannel({ id: 1, slug: 'loud' });
+      await hideCategory({ id: 9, name: 'Slots' });
+      render(<SettingsPanel />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Show Slots again' }));
+      await expect.poll(async () => (await getHidden()).categories).toEqual([]);
+      await expect.poll(() => screen.queryByText('Slots')).toBeNull();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Show loud again' }));
+      await expect.poll(async () => (await getHidden()).channels).toEqual([]);
+      expect(await screen.findByText('Nothing is hidden from Browse.')).toBeInTheDocument();
+    });
+
+    it('says when nothing is hidden', async () => {
+      render(<SettingsPanel />);
+
+      expect(await screen.findByText('Nothing is hidden from Browse.')).toBeInTheDocument();
+    });
   });
 
   it('names its sections for screen readers', async () => {
