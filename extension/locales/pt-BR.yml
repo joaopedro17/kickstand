@@ -56,6 +56,14 @@ categories:
   emptyAll: Nenhuma categoria disponível.
 
 settings:
+  transferTitle: "Leve sua lista"
+  transferKicker: "Copiar, baixar ou importar"
+  copyList: "Copiar lista"
+  copied: "Copiada"
+  downloadList: "Baixar"
+  importLabel: "Canais para importar"
+  importPlaceholder: "Nomes de canais ou links do kick.com, um por linha"
+  importButton: "Importar"
   notifyToggle: Notificar quando um canal acompanhado entrar ao vivo
   notificationsTitle: Notificações
   notificationsKicker: Fique por dentro

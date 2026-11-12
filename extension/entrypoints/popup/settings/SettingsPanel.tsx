@@ -8,6 +8,7 @@ import { GhostButton } from '../shared/controls';
 import { Icon } from '../shared/Icon';
 import { SectionHeader } from '../shared/layout';
 import { useTracked } from '../shared/track';
+import { TransferSection } from './TransferSection';
 
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -107,6 +108,8 @@ export function SettingsPanel() {
           </ul>
         )}
       </section>
+
+      <TransferSection channels={channels} />
 
       <button
         type="button"

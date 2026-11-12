@@ -56,6 +56,14 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  transferTitle: "Flytta din lista"
+  transferKicker: "Kopiera, ladda ned eller importera"
+  copyList: "Kopiera lista"
+  copied: "Kopierad"
+  downloadList: "Ladda ned"
+  importLabel: "Kanaler att importera"
+  importPlaceholder: "Kanalnamn eller kick.com-länkar, en per rad"
+  importButton: "Importera"
   notifyToggle: Meddela när en följd kanal sänder live
   notificationsTitle: Aviseringar
   notificationsKicker: Håll dig uppdaterad

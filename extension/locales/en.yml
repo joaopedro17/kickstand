@@ -56,6 +56,14 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  transferTitle: Move your list
+  transferKicker: Copy, download or import
+  copyList: Copy list
+  copied: Copied
+  downloadList: Download
+  importLabel: Channels to import
+  importPlaceholder: Channel names or kick.com links, one per line
+  importButton: Import
   notifyToggle: Notify when a tracked channel goes live
   notificationsTitle: Notifications
   notificationsKicker: Stay in the loop

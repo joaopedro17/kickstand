@@ -2,6 +2,8 @@ import {
   Bell,
   BellOff,
   Check,
+  Copy,
+  Download,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -18,6 +20,7 @@ import {
   Settings,
   TriangleAlert,
   Tv,
+  Upload,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -32,6 +35,8 @@ const ICONS = {
   bell: Bell,
   'bell-off': BellOff,
   check: Check,
+  copy: Copy,
+  download: Download,
   'chevron-down': ChevronDown,
   'chevron-up': ChevronUp,
   eye: Eye,
@@ -47,6 +52,7 @@ const ICONS = {
   settings: Settings,
   tv: Tv,
   'tv-off': MonitorOff,
+  upload: Upload,
   x: X,
 } satisfies Record<string, LucideIcon>;
 
