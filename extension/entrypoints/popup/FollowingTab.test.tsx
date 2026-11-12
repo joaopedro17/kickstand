@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { fakeBackground } from '@/test/fake-background';
+import { fakeBackground } from '@/tests/support/fake-background';
 import type { Request } from '@/lib/messages';
 import { FollowingTab } from './FollowingTab';
 import { liveStatusStorage, type ChannelStatus, type TrackedChannel } from '@/lib/storage';

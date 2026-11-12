@@ -2,9 +2,9 @@ import { describe, it, expect, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { load } from 'js-yaml';
-import { ERROR_CODES, translateErrorCode } from './lib/error-messages';
+import { ERROR_CODES, translateErrorCode } from '@/lib/error-messages';
 
-const LOCALES_DIR = join(__dirname, 'locales');
+const LOCALES_DIR = join(__dirname, '../locales');
 
 function flattenKeys(obj: Record<string, unknown>, prefix = ''): string[] {
   return Object.entries(obj).flatMap(([key, value]) => {

@@ -26,7 +26,7 @@ function flatten(tree: Record<string, unknown>, prefix = ''): Record<string, str
 }
 
 const englishMessages = flatten(
-  load(readFileSync(resolve(__dirname, 'locales/en.yml'), 'utf-8')) as Record<
+  load(readFileSync(resolve(__dirname, '../../locales/en.yml'), 'utf-8')) as Record<
     string,
     unknown
   >

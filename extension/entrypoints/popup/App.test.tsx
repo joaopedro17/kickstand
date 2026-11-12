@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { fakeBackground } from '@/test/fake-background';
-import { fakeKick, page, rawCategory, rawStream } from '@/test/fake-kick';
+import { fakeBackground } from '@/tests/support/fake-background';
+import { fakeKick, page, rawCategory, rawStream } from '@/tests/support/fake-kick';
 import { authTokensStorage, profileStorage } from '@/lib/storage';
 import App from './App';
 

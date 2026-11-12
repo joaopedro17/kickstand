@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { fakeBackground } from '@/test/fake-background';
-import { fakeKick, page, rawStream } from '@/test/fake-kick';
+import { fakeBackground } from '@/tests/support/fake-background';
+import { fakeKick, page, rawStream } from '@/tests/support/fake-kick';
 import { BrowseTab } from './BrowseTab';
 
 const LIVESTREAMS = '/public/v2/livestreams';

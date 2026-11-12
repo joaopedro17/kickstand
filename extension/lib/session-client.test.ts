@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { fakeBackground } from '@/test/fake-background';
+import { fakeBackground } from '@/tests/support/fake-background';
 import { withAuthRetry, requestLogout } from './session-client';
 import { KickApiError } from './kick-api';
 import { authTokensStorage } from './storage';

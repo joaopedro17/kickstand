@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { deliver } from '@/test/fake-background';
+import { deliver } from '@/tests/support/fake-background';
 import { listenForRequests, sendRequest, type RequestHandlers } from './messages';
 
 function handlers(overrides: Partial<RequestHandlers> = {}): RequestHandlers {
