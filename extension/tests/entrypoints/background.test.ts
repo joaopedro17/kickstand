@@ -72,6 +72,22 @@ describe('background', () => {
     vi.restoreAllMocks();
   });
 
+  it("starts on Firefox, whose MV2 build has browserAction instead of action", async () => {
+    // Firefox's browserAction has the same methods as action; fakeBrowser's
+    // own browserAction lacks the badge colours, so action's stand in.
+    const { action, browserAction } = fakeBrowser;
+    Object.assign(fakeBrowser, { action: undefined, browserAction: action });
+    try {
+      kickHasLive(1);
+      await startWorker();
+      await fakeBrowser.runtime.onStartup.trigger();
+
+      await expect.poll(() => action.getBadgeText({})).toBe('1');
+    } finally {
+      Object.assign(fakeBrowser, { action, browserAction });
+    }
+  });
+
   it('makes sure the poll alarm exists whenever the worker starts', async () => {
     kickHasLive();
     await startWorker();

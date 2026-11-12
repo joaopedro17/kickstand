@@ -8,6 +8,7 @@ import { getTracked, watchTracked } from '@/lib/channels/tracked';
 import { LEGACY_LIVE_STATUS_KEY } from '@/lib/polling/storage';
 import { profileStorage } from '@/lib/auth/storage';
 import { watchSettings } from '@/lib/settings';
+import { toolbarButton } from '@/lib/toolbar';
 import {
   ensurePollAlarm,
   forgetSessionData,
@@ -51,8 +52,8 @@ export default defineBackground(() => {
   // Explicit colors instead of the browser default: the default badge
   // background is theme-dependent and, on a dark toolbar theme, renders as a
   // dark badge with dark text — nearly unreadable.
-  browser.action.setBadgeBackgroundColor({ color: '#2121214b' });
-  browser.action.setBadgeTextColor({ color: '#FFFFFF' });
+  toolbarButton().setBadgeBackgroundColor({ color: '#2121214b' });
+  toolbarButton().setBadgeTextColor({ color: '#FFFFFF' });
 
   // Every time the worker starts, not just on install or browser start: an
   // alarm lost for any reason would otherwise stop polling until the next

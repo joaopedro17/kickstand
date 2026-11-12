@@ -15,6 +15,7 @@ import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
 import { refreshAvatars } from '@/lib/channels/avatars';
 import { getSettings, isQuietTime } from '@/lib/settings';
+import { toolbarButton } from '@/lib/toolbar';
 import { notifyChannels } from './alerts';
 import { playAlertSound } from './sound';
 
@@ -27,7 +28,7 @@ const DEFAULT_RATE_LIMIT_WAIT_MS = 60_000;
 /** The only place the toolbar badge is set. */
 async function showOnBadge(cache: LiveStatusCache): Promise<void> {
   const live = countLive(cache);
-  await browser.action.setBadgeText({ text: live > 0 ? String(live) : '' });
+  await toolbarButton().setBadgeText({ text: live > 0 ? String(live) : '' });
 }
 
 /**
@@ -115,7 +116,7 @@ async function runPoll(): Promise<void> {
   if (batches === null || batches.length === 0) {
     // Nothing tracked, or no session: an empty badge rather than stale
     // counts, and no point asking Kick.
-    await browser.action.setBadgeText({ text: '' });
+    await toolbarButton().setBadgeText({ text: '' });
     return;
   }
 
@@ -163,5 +164,5 @@ export async function syncToTracked(tracked: TrackedChannel[]): Promise<void> {
 export async function forgetSessionData(): Promise<void> {
   await liveStatusStorage.setValue({});
   await profileStorage.setValue(null);
-  await browser.action.setBadgeText({ text: '' });
+  await toolbarButton().setBadgeText({ text: '' });
 }
