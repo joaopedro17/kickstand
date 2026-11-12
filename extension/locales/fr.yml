@@ -59,6 +59,9 @@ categories:
   emptyAll: Aucune catégorie disponible.
 
 settings:
+  quietHoursToggle: "Couper les alertes pendant les heures calmes"
+  quietFrom: "De"
+  quietTo: "À"
   pollIntervalLabel: "Vérifier les chaînes en direct toutes les"
   pollIntervalOption: "{count} min"
   transferTitle: "Transférer ta liste"

@@ -59,6 +59,9 @@ categories:
   emptyAll: Nessuna categoria disponibile.
 
 settings:
+  quietHoursToggle: "Silenzia gli avvisi nelle ore di quiete"
+  quietFrom: "Dalle"
+  quietTo: "Alle"
   pollIntervalLabel: "Controlla i canali live ogni"
   pollIntervalOption: "{count} min"
   transferTitle: "Sposta la tua lista"

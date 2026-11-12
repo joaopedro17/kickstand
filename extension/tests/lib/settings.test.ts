@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import {
   DEFAULT_SETTINGS,
+  isQuietTime,
   getSettings,
   parseSettings,
   updateSettings,
@@ -102,6 +103,20 @@ describe('settings storage', () => {
     });
   });
 
+  it('computes a change from the settings as stored, so quick changes all land', async () => {
+    await Promise.all([
+      updateSettings((s) => ({ quietHours: { ...s.quietHours, startMinute: 60 } })),
+      updateSettings((s) => ({ quietHours: { ...s.quietHours, endMinute: 120 } })),
+      updateSettings({ soundEnabled: true }),
+    ]);
+
+    expect(await getSettings()).toEqual({
+      ...DEFAULT_SETTINGS,
+      quietHours: { ...DEFAULT_SETTINGS.quietHours, startMinute: 60, endMinute: 120 },
+      soundEnabled: true,
+    });
+  });
+
   it('tells a watcher about each change, with defaults filled in', async () => {
     const seen: Settings[] = [];
     const unwatch = watchSettings((s) => seen.push(s));
@@ -112,5 +127,38 @@ describe('settings storage', () => {
     await updateSettings({ blurMature: true });
 
     expect(seen).toEqual([{ ...DEFAULT_SETTINGS, blurMature: false }]);
+  });
+});
+
+describe('isQuietTime', () => {
+  const at = (h: number, m = 0) => new Date(2026, 10, 11, h, m);
+  const quiet = (start: number, end: number, enabled = true) => ({
+    enabled,
+    startMinute: start * 60,
+    endMinute: end * 60,
+  });
+
+  it('is quiet inside a window within the day, from its start up to but not including its end', () => {
+    expect(isQuietTime(quiet(13, 15), at(12, 59))).toBe(false);
+    expect(isQuietTime(quiet(13, 15), at(13))).toBe(true);
+    expect(isQuietTime(quiet(13, 15), at(14, 59))).toBe(true);
+    expect(isQuietTime(quiet(13, 15), at(15))).toBe(false);
+  });
+
+  it('handles a window that runs past midnight', () => {
+    expect(isQuietTime(quiet(22, 7), at(21, 59))).toBe(false);
+    expect(isQuietTime(quiet(22, 7), at(22))).toBe(true);
+    expect(isQuietTime(quiet(22, 7), at(0))).toBe(true);
+    expect(isQuietTime(quiet(22, 7), at(6, 59))).toBe(true);
+    expect(isQuietTime(quiet(22, 7), at(7))).toBe(false);
+  });
+
+  it('is never quiet while turned off', () => {
+    expect(isQuietTime(quiet(0, 23, false), at(12))).toBe(false);
+  });
+
+  it('is never quiet when the window starts and ends at the same time', () => {
+    expect(isQuietTime(quiet(9, 9), at(9))).toBe(false);
+    expect(isQuietTime(quiet(9, 9), at(3))).toBe(false);
   });
 });

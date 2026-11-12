@@ -72,6 +72,16 @@ function kickHasLive(...streams: Record<string, unknown>[]) {
   return fetchMock;
 }
 
+/** Tokens valid for an hour from the (possibly faked) current time. */
+async function logIn() {
+  await authTokensStorage.setValue({
+    accessToken: 'access',
+    refreshToken: 'refresh',
+    expiresAt: Date.now() + 60 * 60 * 1000,
+    refreshExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+  });
+}
+
 async function badge() {
   return fakeBrowser.action.getBadgeText({});
 }
@@ -174,6 +184,48 @@ describe('pollNow', () => {
       iconUrl: expect.stringMatching(/\/icons\/128\.png$/),
       message: 'Streaming now on Kick',
     });
+  });
+
+  it('stays silent during quiet hours, still updating the badge, and does not catch up afterwards', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date(2026, 10, 11, 23, 30));
+      await logIn();
+      await updateSettings({ quietHours: { enabled: true, startMinute: 22 * 60, endMinute: 7 * 60 } });
+      await setTracked([tracked(1)]);
+      await liveStatusStorage.setValue({ 1: offline() });
+      kickHasLive(livestream(1));
+
+      await pollNow();
+      expect(await notifications()).toEqual([]);
+      expect(await badge()).toBe('1');
+
+      vi.setSystemTime(new Date(2026, 10, 12, 8, 0));
+      await logIn();
+      await pollNow();
+      expect(await notifications()).toEqual([]);
+      expect(await badge()).toBe('1');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('notifies outside quiet hours', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date(2026, 10, 11, 21, 59));
+      await logIn();
+      await updateSettings({ quietHours: { enabled: true, startMinute: 22 * 60, endMinute: 7 * 60 } });
+      await setTracked([tracked(1)]);
+      await liveStatusStorage.setValue({ 1: offline() });
+      kickHasLive(livestream(1));
+
+      await pollNow();
+
+      expect(await notifications()).toEqual(['kickstand-live-1']);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('does not notify for a muted channel, but still counts it on the badge', async () => {

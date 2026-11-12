@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
@@ -51,6 +51,37 @@ describe('SettingsPanel', () => {
     await expect.poll(async () => (await getSettings()).pollIntervalMinutes).toBe(1);
     expect(screen.getByRole('radio', { name: '1 min' })).toBeChecked();
     expect(screen.getByRole('radiogroup', { name: 'Check for live channels every' })).toBeInTheDocument();
+  });
+
+  it('sets quiet hours, from 22:00 to 07:00 unless changed', async () => {
+    render(<SettingsPanel />);
+    const toggle = await screen.findByRole('checkbox', { name: 'Silence alerts during quiet hours' });
+    const from = screen.getByLabelText('From');
+    const to = screen.getByLabelText('To');
+    expect(toggle).not.toBeChecked();
+    expect(from).toHaveValue('22:00');
+    expect(to).toHaveValue('07:00');
+    expect(from).toBeDisabled();
+
+    await userEvent.click(toggle);
+    await expect.poll(() => from.hasAttribute('disabled')).toBe(false);
+    fireEvent.change(from, { target: { value: '23:30' } });
+    fireEvent.change(to, { target: { value: '06:05' } });
+
+    await expect
+      .poll(async () => (await getSettings()).quietHours)
+      .toEqual({ enabled: true, startMinute: 23 * 60 + 30, endMinute: 6 * 60 + 5 });
+  });
+
+  it('ignores a cleared time field', async () => {
+    render(<SettingsPanel />);
+    await userEvent.click(await screen.findByRole('checkbox', { name: 'Silence alerts during quiet hours' }));
+    await expect.poll(async () => (await getSettings()).quietHours.enabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '' } });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect((await getSettings()).quietHours.startMinute).toBe(22 * 60);
   });
 
   it('names its sections for screen readers', async () => {

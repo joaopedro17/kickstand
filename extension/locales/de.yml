@@ -59,6 +59,9 @@ categories:
   emptyAll: Keine Kategorien verfügbar.
 
 settings:
+  quietHoursToggle: "Benachrichtigungen in Ruhezeiten stummschalten"
+  quietFrom: "Von"
+  quietTo: "Bis"
   pollIntervalLabel: "Auf Live-Kanäle prüfen alle"
   pollIntervalOption: "{count} Min."
   transferTitle: "Liste übertragen"

@@ -59,6 +59,9 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  quietHoursToggle: "Tysta aviseringar under tysta timmar"
+  quietFrom: "Från"
+  quietTo: "Till"
   pollIntervalLabel: "Leta efter livekanaler var"
   pollIntervalOption: "{count} min"
   transferTitle: "Flytta din lista"

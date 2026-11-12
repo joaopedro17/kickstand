@@ -59,6 +59,9 @@ categories:
   emptyAll: No hay categorías disponibles.
 
 settings:
+  quietHoursToggle: "Silenciar alertas en horas de descanso"
+  quietFrom: "De"
+  quietTo: "A"
   pollIntervalLabel: "Buscar canales en directo cada"
   pollIntervalOption: "{count} min"
   transferTitle: "Mover tu lista"

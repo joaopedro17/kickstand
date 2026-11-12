@@ -14,7 +14,7 @@ import { withAuthRetry } from '@/lib/auth/tokens';
 import { liveStatusStorage, pollPausedUntilStorage, pollRateLimitedStorage } from './storage';
 import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
-import { getSettings } from '@/lib/settings';
+import { getSettings, isQuietTime } from '@/lib/settings';
 
 export const POLL_ALARM = 'kickstand-poll';
 /** How often to poll while Kick is rate-limiting, whatever the user picked. */
@@ -149,8 +149,11 @@ async function runPoll(): Promise<void> {
   await liveStatusStorage.setValue(next);
   await showOnBadge(next);
 
-  const { notificationsEnabled } = await getSettings();
-  const toNotify = notificationsEnabled ? channelsToNotify(tracked, wentLive) : [];
+  // A stream that starts during quiet hours is recorded as notified above,
+  // so no alert for it piles up for when they end.
+  const { notificationsEnabled, quietHours } = await getSettings();
+  const silent = !notificationsEnabled || isQuietTime(quietHours, new Date(now));
+  const toNotify = silent ? [] : channelsToNotify(tracked, wentLive);
   if (toNotify.length > 0) await notifyLive(toNotify, next);
 }
 

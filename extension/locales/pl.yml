@@ -59,6 +59,9 @@ categories:
   emptyAll: Brak dostępnych kategorii.
 
 settings:
+  quietHoursToggle: "Wycisz powiadomienia w godzinach ciszy"
+  quietFrom: "Od"
+  quietTo: "Do"
   pollIntervalLabel: "Sprawdzaj kanały na żywo co"
   pollIntervalOption: "{count} min"
   transferTitle: "Przenieś listę"

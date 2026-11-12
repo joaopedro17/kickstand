@@ -90,12 +90,33 @@ export function parseSettings(stored: unknown): Settings {
   };
 }
 
+/** Whether `when`, in local time, falls in the quiet hours. A window that starts where it ends is empty. */
+export function isQuietTime(quiet: QuietHours, when: Date): boolean {
+  if (!quiet.enabled) return false;
+  const minute = when.getHours() * 60 + when.getMinutes();
+  const { startMinute: start, endMinute: end } = quiet;
+  return start <= end ? minute >= start && minute < end : minute >= start || minute < end;
+}
+
 export async function getSettings(): Promise<Settings> {
   return parseSettings(await settingsStorage.getValue());
 }
 
-export async function updateSettings(changes: Partial<Settings>): Promise<void> {
-  await settingsStorage.setValue({ ...(await getSettings()), ...changes });
+type SettingsChange = Partial<Settings> | ((current: Settings) => Partial<Settings>);
+
+// Updates in this context run one after another, each reading what the
+// previous one wrote, so two quick changes can't overwrite each other.
+let queue: Promise<unknown> = Promise.resolve();
+
+/** Changes the named fields; a function computes them from the settings as stored. */
+export function updateSettings(change: SettingsChange): Promise<void> {
+  const run = queue.then(async () => {
+    const current = await getSettings();
+    const changes = typeof change === 'function' ? change(current) : change;
+    await settingsStorage.setValue({ ...current, ...changes });
+  });
+  queue = run.catch(() => {});
+  return run;
 }
 
 export function watchSettings(onChange: (settings: Settings) => void): () => void {

@@ -59,6 +59,9 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  quietHoursToggle: Silence alerts during quiet hours
+  quietFrom: From
+  quietTo: To
   pollIntervalLabel: Check for live channels every
   pollIntervalOption: '{count} min'
   transferTitle: Move your list
