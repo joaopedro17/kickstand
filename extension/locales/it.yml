@@ -41,6 +41,9 @@ following:
   currentTabHint: "Aperto in questa scheda"
   limitReached: 'Puoi seguire fino a {max} canali. Rimuovine uno per aggiungerne un altro.'
   refreshFailed: 'Impossibile aggiornare lo stato live. Viene mostrato l''ultimo stato noto.'
+  refresh: "Aggiorna lo stato live"
+  updatedJustNow: "Aggiornato ora"
+  updatedMinutesAgo: "Aggiornato {count} min fa"
 
 browse:
   track: "Segui {slug}"
@@ -56,6 +59,8 @@ categories:
   emptyAll: Nessuna categoria disponibile.
 
 settings:
+  pollIntervalLabel: "Controlla i canali live ogni"
+  pollIntervalOption: "{count} min"
   transferTitle: "Sposta la tua lista"
   transferKicker: "Copia, scarica o importa"
   copyList: "Copia lista"

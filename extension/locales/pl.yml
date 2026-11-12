@@ -41,6 +41,9 @@ following:
   currentTabHint: "Otwarty w tej karcie"
   limitReached: 'Możesz obserwować maksymalnie {max} kanałów. Usuń jeden, aby dodać kolejny.'
   refreshFailed: 'Nie udało się odświeżyć statusu na żywo. Wyświetlany jest ostatni znany stan.'
+  refresh: "Odśwież status na żywo"
+  updatedJustNow: "Zaktualizowano przed chwilą"
+  updatedMinutesAgo: "Zaktualizowano {count} min temu"
 
 browse:
   track: "Śledź {slug}"
@@ -56,6 +59,8 @@ categories:
   emptyAll: Brak dostępnych kategorii.
 
 settings:
+  pollIntervalLabel: "Sprawdzaj kanały na żywo co"
+  pollIntervalOption: "{count} min"
   transferTitle: "Przenieś listę"
   transferKicker: "Kopiuj, pobierz lub importuj"
   copyList: "Kopiuj listę"

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { requestLogout } from '@/lib/auth/client';
 import { removeTracked } from '@/lib/channels/tracked';
-import { getSettings, updateSettings, watchSettings, type Settings } from '@/lib/settings';
+import { getSettings, POLL_INTERVALS, updateSettings, watchSettings, type Settings } from '@/lib/settings';
 import { EmptyState } from '../shared/feedback';
 import { GhostButton } from '../shared/controls';
 import { Icon } from '../shared/Icon';
@@ -55,6 +55,27 @@ export function SettingsPanel() {
           />
           <span>{i18n.t('settings.notifyToggle')}</span>
         </label>
+        <div
+          role="radiogroup"
+          aria-labelledby="poll-interval-label"
+          className="mt-3 flex flex-wrap items-center gap-2 text-xs text-white"
+        >
+          <span id="poll-interval-label" className="text-muted">
+            {i18n.t('settings.pollIntervalLabel')}
+          </span>
+          {POLL_INTERVALS.map((minutes) => (
+            <label key={minutes} className="flex cursor-pointer items-center gap-1 transition hover:text-lime">
+              <input
+                type="radio"
+                name="poll-interval"
+                checked={settings.pollIntervalMinutes === minutes}
+                onChange={() => updateSettings({ pollIntervalMinutes: minutes })}
+                className="h-4 w-4 cursor-pointer accent-[#b8f34a]"
+              />
+              {i18n.t('settings.pollIntervalOption', { count: String(minutes) })}
+            </label>
+          ))}
+        </div>
       </section>
 
       <section

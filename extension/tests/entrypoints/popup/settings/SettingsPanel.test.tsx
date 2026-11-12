@@ -42,6 +42,17 @@ describe('SettingsPanel', () => {
     await expect.poll(async () => (await getSettings()).notificationsEnabled).toBe(true);
   });
 
+  it('checks every two minutes unless the user picks another interval', async () => {
+    render(<SettingsPanel />);
+
+    expect(await screen.findByRole('radio', { name: '2 min' })).toBeChecked();
+    await userEvent.click(screen.getByRole('radio', { name: '1 min' }));
+
+    await expect.poll(async () => (await getSettings()).pollIntervalMinutes).toBe(1);
+    expect(screen.getByRole('radio', { name: '1 min' })).toBeChecked();
+    expect(screen.getByRole('radiogroup', { name: 'Check for live channels every' })).toBeInTheDocument();
+  });
+
   it('names its sections for screen readers', async () => {
     render(<SettingsPanel />);
 

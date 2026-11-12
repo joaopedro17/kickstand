@@ -99,6 +99,54 @@ function useCurrentTabChannel(tracked: TrackedChannel[]): Channel | null {
   return isTracked ? null : channel;
 }
 
+/** How often the "Updated … ago" label is recomputed while the popup is open. */
+const CLOCK_TICK_MS = 30_000;
+
+function useNow(): number {
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), CLOCK_TICK_MS);
+    return () => clearInterval(timer);
+  }, []);
+  return now;
+}
+
+function updatedLabel(checkedAt: number, now: number): string {
+  const minutes = Math.floor((now - checkedAt) / 60_000);
+  return minutes < 1
+    ? i18n.t('following.updatedJustNow')
+    : i18n.t('following.updatedMinutesAgo', { count: String(minutes) });
+}
+
+/** When live status was last checked, and a button to check again. */
+function Freshness({ liveStatus }: { liveStatus: LiveStatusCache }) {
+  const now = useNow();
+  const [refreshing, setRefreshing] = useState(false);
+  const checks = Object.values(liveStatus).map((entry) => entry.lastCheckedAt);
+  if (checks.length === 0) return null;
+
+  function refresh() {
+    setRefreshing(true);
+    sendRequest({ type: 'poll-now' })
+      .catch(() => {})
+      .finally(() => setRefreshing(false));
+  }
+
+  return (
+    <div className="mb-2 flex items-center justify-end gap-2 text-[11px] text-muted">
+      <span>{updatedLabel(Math.max(...checks), now)}</span>
+      <IconButton
+        type="button"
+        aria-label={i18n.t('following.refresh')}
+        disabled={refreshing}
+        onClick={refresh}
+      >
+        <Icon icon="refresh" className={refreshing ? 'animate-spin text-sm' : 'text-sm'} />
+      </IconButton>
+    </div>
+  );
+}
+
 export function FollowingTab() {
   const { channels, liveStatus } = useTrackedChannels();
 
@@ -120,7 +168,10 @@ export function FollowingTab() {
           hint={i18n.t('following.emptyStateHint')}
         />
       ) : (
-        <ChannelLists channels={channels} liveStatus={liveStatus} />
+        <>
+          <Freshness liveStatus={liveStatus} />
+          <ChannelLists channels={channels} liveStatus={liveStatus} />
+        </>
       )}
     </div>
   );

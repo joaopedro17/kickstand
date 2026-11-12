@@ -7,6 +7,7 @@ import { listenForRequests, type LoginResult } from '@/lib/messages';
 import { getTracked, watchTracked } from '@/lib/channels/tracked';
 import { LEGACY_LIVE_STATUS_KEY } from '@/lib/polling/storage';
 import { profileStorage } from '@/lib/auth/storage';
+import { watchSettings } from '@/lib/settings';
 import {
   ensurePollAlarm,
   forgetSessionData,
@@ -57,6 +58,9 @@ export default defineBackground(() => {
   // alarm lost for any reason would otherwise stop polling until the next
   // browser restart.
   ensurePollAlarm();
+  // Any settings change: ensurePollAlarm leaves an alarm that already has
+  // the right period alone.
+  watchSettings(() => ensurePollAlarm());
 
   browser.runtime.onInstalled.addListener(() => onInstalledOrUpdated());
   browser.runtime.onStartup.addListener(() => pollNow());

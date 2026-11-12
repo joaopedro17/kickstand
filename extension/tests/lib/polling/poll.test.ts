@@ -290,6 +290,23 @@ describe('when Kick rate-limits', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('slows polling to every five minutes, and goes back to the chosen interval after a good poll', async () => {
+    await updateSettings({ pollIntervalMinutes: 1 });
+    const period = async () => (await fakeBrowser.alarms.get(POLL_ALARM))?.periodInMinutes;
+    kickRateLimits('30');
+
+    await pollNow();
+    expect(await period()).toBe(5);
+
+    vi.setSystemTime(Date.now() + 31_000);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ data: [] }) })
+    );
+    await pollNow();
+    expect(await period()).toBe(1);
+  });
+
   it('keeps showing the last known status while waiting', async () => {
     await liveStatusStorage.setValue({ 1: live() });
     await fakeBrowser.action.setBadgeText({ text: '1' });
@@ -324,18 +341,37 @@ describe('ensurePollAlarm', () => {
     fakeBrowser.reset();
   });
 
-  it('creates the poll alarm when it is missing', async () => {
+  const period = async () => (await fakeBrowser.alarms.get(POLL_ALARM))?.periodInMinutes;
+
+  it('creates the poll alarm at the default two minutes when it is missing', async () => {
     await ensurePollAlarm();
 
-    expect(await fakeBrowser.alarms.get(POLL_ALARM)).toMatchObject({ periodInMinutes: 5 });
+    expect(await period()).toBe(2);
   });
 
-  it('leaves an existing poll alarm alone, so its next run is not pushed back', async () => {
-    await fakeBrowser.alarms.create(POLL_ALARM, { periodInMinutes: 5, when: 12345 });
+  it('uses the interval the user picked', async () => {
+    await updateSettings({ pollIntervalMinutes: 1 });
+
+    await ensurePollAlarm();
+
+    expect(await period()).toBe(1);
+  });
+
+  it('leaves an alarm with the right period alone, so its next run is not pushed back', async () => {
+    await fakeBrowser.alarms.create(POLL_ALARM, { periodInMinutes: 2, when: 12345 });
 
     await ensurePollAlarm();
 
     expect((await fakeBrowser.alarms.get(POLL_ALARM))?.scheduledTime).toBe(12345);
+  });
+
+  it('replaces an alarm whose period is no longer the one wanted', async () => {
+    await fakeBrowser.alarms.create(POLL_ALARM, { periodInMinutes: 5 });
+    await updateSettings({ pollIntervalMinutes: 1 });
+
+    await ensurePollAlarm();
+
+    expect(await period()).toBe(1);
   });
 });
 

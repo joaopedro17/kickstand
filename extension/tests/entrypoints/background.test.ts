@@ -7,6 +7,7 @@ import { liveStatusStorage } from '@/lib/polling/storage';
 import type { ChannelStatus } from '@/lib/polling/live-status';
 import { setTracked, removeTracked } from '@/lib/channels/tracked';
 import * as login from '@/lib/auth/login';
+import { updateSettings } from '@/lib/settings';
 
 function kickHasLive(...ids: number[]) {
   const fetchMock = vi.fn().mockImplementation(async (url: string) => ({
@@ -76,6 +77,15 @@ describe('background', () => {
     await startWorker();
 
     expect(await fakeBrowser.alarms.get(POLL_ALARM)).toBeDefined();
+  });
+
+  it('reschedules polling as soon as the user picks another interval', async () => {
+    kickHasLive();
+    await startWorker();
+
+    await updateSettings({ pollIntervalMinutes: 5 });
+
+    await expect.poll(async () => (await fakeBrowser.alarms.get(POLL_ALARM))?.periodInMinutes).toBe(5);
   });
 
   it('polls right away when installed or updated, instead of waiting for the alarm', async () => {

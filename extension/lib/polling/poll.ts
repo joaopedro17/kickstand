@@ -10,13 +10,14 @@ import {
   type LiveStatusCache,
 } from './live-status';
 import { withAuthRetry } from '@/lib/auth/tokens';
-import { liveStatusStorage, pollPausedUntilStorage } from './storage';
+import { liveStatusStorage, pollPausedUntilStorage, pollRateLimitedStorage } from './storage';
 import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
 import { getSettings } from '@/lib/settings';
 
 export const POLL_ALARM = 'kickstand-poll';
-const POLL_PERIOD_MINUTES = 5;
+/** How often to poll while Kick is rate-limiting, whatever the user picked. */
+const RATE_LIMITED_PERIOD_MINUTES = 5;
 const NOTIFICATION_PREFIX = 'kickstand-live-';
 /** How long to back off after a 429 that doesn't say how long to wait. */
 const DEFAULT_RATE_LIMIT_WAIT_MS = 60_000;
@@ -40,10 +41,18 @@ async function showOnBadge(cache: LiveStatusCache): Promise<void> {
   await browser.action.setBadgeText({ text: live > 0 ? String(live) : '' });
 }
 
-/** Creates the poll alarm if it's missing; an existing one keeps its schedule. */
+/**
+ * Makes the poll alarm run at the user's interval, or every five minutes
+ * while Kick is rate-limiting. An alarm already at that period keeps its
+ * schedule.
+ */
 export async function ensurePollAlarm(): Promise<void> {
-  if (await browser.alarms.get(POLL_ALARM)) return;
-  await browser.alarms.create(POLL_ALARM, { periodInMinutes: POLL_PERIOD_MINUTES });
+  const { pollIntervalMinutes } = await getSettings();
+  const rateLimited = await pollRateLimitedStorage.getValue();
+  const period = rateLimited ? Math.max(pollIntervalMinutes, RATE_LIMITED_PERIOD_MINUTES) : pollIntervalMinutes;
+  if ((await browser.alarms.get(POLL_ALARM))?.periodInMinutes === period) return;
+  // Creating an alarm under an existing name replaces it.
+  await browser.alarms.create(POLL_ALARM, { periodInMinutes: period });
 }
 
 async function fetchBatch(ids: number[]): Promise<BatchOutcome | null> {
@@ -61,11 +70,16 @@ async function fetchBatch(ids: number[]): Promise<BatchOutcome | null> {
   }
 }
 
-/** After a 429, polls are skipped for as long as Kick asked (the longest, across batches). */
+/**
+ * After a 429, polls are skipped for as long as Kick asked (the longest,
+ * across batches) and slowed down until a poll goes through.
+ */
 async function pauseIfRateLimited(batches: BatchOutcome[], now: number): Promise<void> {
   const waits = batches.map((b) => ('rateLimitedForMs' in b ? (b.rateLimitedForMs ?? 0) : 0));
   const longest = Math.max(0, ...waits);
   if (longest > 0) await pollPausedUntilStorage.setValue(now + longest);
+  await pollRateLimitedStorage.setValue(longest > 0);
+  await ensurePollAlarm();
 }
 
 /** Every batch's outcome, or null as soon as one shows there is no session. */

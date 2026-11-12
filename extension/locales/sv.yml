@@ -41,6 +41,9 @@ following:
   currentTabHint: "Öppen i den här fliken"
   limitReached: 'Du kan följa upp till {max} kanaler. Ta bort en för att lägga till en ny.'
   refreshFailed: 'Det gick inte att uppdatera livestatus. Visar senast kända läge.'
+  refresh: "Uppdatera livestatus"
+  updatedJustNow: "Uppdaterad nyss"
+  updatedMinutesAgo: "Uppdaterad för {count} min sedan"
 
 browse:
   track: "Följ {slug}"
@@ -56,6 +59,8 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  pollIntervalLabel: "Leta efter livekanaler var"
+  pollIntervalOption: "{count} min"
   transferTitle: "Flytta din lista"
   transferKicker: "Kopiera, ladda ned eller importera"
   copyList: "Kopiera lista"

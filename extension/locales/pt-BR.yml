@@ -41,6 +41,9 @@ following:
   currentTabHint: "Aberto nesta aba"
   limitReached: 'Você pode acompanhar até {max} canais. Remova um para adicionar outro.'
   refreshFailed: 'Não foi possível atualizar o status ao vivo. Mostrando o último estado conhecido.'
+  refresh: "Atualizar status ao vivo"
+  updatedJustNow: "Atualizado agora mesmo"
+  updatedMinutesAgo: "Atualizado há {count} min"
 
 browse:
   track: "Acompanhar {slug}"
@@ -56,6 +59,8 @@ categories:
   emptyAll: Nenhuma categoria disponível.
 
 settings:
+  pollIntervalLabel: "Verificar canais ao vivo a cada"
+  pollIntervalOption: "{count} min"
   transferTitle: "Leve sua lista"
   transferKicker: "Copiar, baixar ou importar"
   copyList: "Copiar lista"

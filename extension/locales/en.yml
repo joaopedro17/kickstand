@@ -41,6 +41,9 @@ following:
   currentTabHint: Open in this tab
   limitReached: 'You can track up to {max} channels. Remove one to add another.'
   refreshFailed: 'Couldn''t refresh live status. Showing the last known state.'
+  refresh: Refresh live status
+  updatedJustNow: Updated just now
+  updatedMinutesAgo: 'Updated {count} min ago'
 
 browse:
   track: 'Track {slug}'
@@ -56,6 +59,8 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  pollIntervalLabel: Check for live channels every
+  pollIntervalOption: '{count} min'
   transferTitle: Move your list
   transferKicker: Copy, download or import
   copyList: Copy list

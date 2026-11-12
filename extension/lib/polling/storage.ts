@@ -15,3 +15,8 @@ export const liveStatusStorage = storage.defineItem<LiveStatusCache>(
 export const pollPausedUntilStorage = storage.defineItem<number>('local:pollPausedUntil', {
   fallback: 0,
 });
+
+/** Kick rate-limited the latest poll: polls stay slowed down until one goes through. */
+export const pollRateLimitedStorage = storage.defineItem<boolean>('local:pollRateLimited', {
+  fallback: false,
+});

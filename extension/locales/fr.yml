@@ -41,6 +41,9 @@ following:
   currentTabHint: "Ouverte dans cet onglet"
   limitReached: 'Vous pouvez suivre jusqu''à {max} chaînes. Supprimez-en une pour en ajouter une autre.'
   refreshFailed: 'Impossible d''actualiser le statut en direct. Affichage du dernier état connu.'
+  refresh: "Actualiser le statut en direct"
+  updatedJustNow: "Mis à jour à l’instant"
+  updatedMinutesAgo: "Mis à jour il y a {count} min"
 
 browse:
   track: "Suivre {slug}"
@@ -56,6 +59,8 @@ categories:
   emptyAll: Aucune catégorie disponible.
 
 settings:
+  pollIntervalLabel: "Vérifier les chaînes en direct toutes les"
+  pollIntervalOption: "{count} min"
   transferTitle: "Transférer ta liste"
   transferKicker: "Copier, télécharger ou importer"
   copyList: "Copier la liste"

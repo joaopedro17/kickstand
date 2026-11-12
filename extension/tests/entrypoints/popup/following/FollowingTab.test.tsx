@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
@@ -109,6 +109,79 @@ describe('FollowingTab', () => {
       await screen.findByText('No tracked channels yet.');
 
       expect(backgroundReceived).not.toContainEqual({ type: 'poll-now' });
+    });
+  });
+
+  describe('freshness', () => {
+    it('says how long ago live status was updated', async () => {
+      await setTracked([tracked(1, 'one'), tracked(2, 'two')]);
+      await liveStatusStorage.setValue({
+        1: { ...live('t', 1), lastCheckedAt: Date.now() - 10 * 60_000 },
+        2: { ...live('t', 1), lastCheckedAt: Date.now() - 3 * 60_000 - 5_000 },
+      });
+
+      render(<FollowingTab />);
+
+      expect(await screen.findByText('Updated 3 min ago')).toBeInTheDocument();
+    });
+
+    it('says "just now" within the first minute', async () => {
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() - 5_000 } });
+
+      render(<FollowingTab />);
+
+      expect(await screen.findByText('Updated just now')).toBeInTheDocument();
+    });
+
+    it('keeps the label current while the popup stays open', async () => {
+      vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
+      try {
+        await setTracked([tracked(1, 'one')]);
+        await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() - 5_000 } });
+        render(<FollowingTab />);
+        await screen.findByText('Updated just now');
+
+        await act(async () => {
+          vi.advanceTimersByTime(2 * 60_000);
+        });
+
+        expect(screen.getByText('Updated 2 min ago')).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('shows no label before anything was polled', async () => {
+      render(<FollowingTab />);
+      await screen.findByText('No tracked channels yet.');
+
+      expect(screen.queryByText(/^Updated/)).toBeNull();
+    });
+
+    it('refreshes on demand', async () => {
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() - 5_000 } });
+      render(<FollowingTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Refresh live status' }));
+
+      expect(backgroundReceived).toContainEqual({ type: 'poll-now' });
+    });
+
+    it('cannot be refreshed again while a refresh is running', async () => {
+      let finish = () => {};
+      fakeBackground({ 'poll-now': () => new Promise<void>((resolve) => (finish = resolve)) });
+      await setTracked([tracked(1, 'one')]);
+      await liveStatusStorage.setValue({ 1: { ...live('t', 1), lastCheckedAt: Date.now() - 5_000 } });
+      render(<FollowingTab />);
+      const refresh = await screen.findByRole('button', { name: 'Refresh live status' });
+
+      await userEvent.click(refresh);
+      expect(refresh).toBeDisabled();
+
+      finish();
+      await expect.poll(() => refresh.hasAttribute('disabled')).toBe(false);
     });
   });
 
