@@ -195,6 +195,38 @@ on file changes.
 3. Click "Load Temporary Add-on" and select any file inside
    `extension/.output/firefox-mv3/` (e.g. `manifest.json`).
 
+## When Kick adds a followed-channels endpoint
+
+Kickstand can't import the channels a user follows on Kick: as of
+November 2026, Kick's public API has no endpoint or scope for it. The
+request is tracked in
+[KickDevDocs#87](https://github.com/KickEngineering/KickDevDocs/issues/87)
+("on our roadmap", no date). Kickstand does not call Kick's private
+website endpoints instead, as they can change or be blocked without
+notice.
+
+Everything else is already in place. Every way of adding channels goes
+through `addChannels(channels, now)` in
+[`extension/lib/channels/tracked.ts`](extension/lib/channels/tracked.ts)
+(through `trackChannels` in the popup), so an import is "fetch the list,
+then add it". When the endpoint ships:
+
+1. Add its scope to `KICK_SCOPES` in
+   [`extension/lib/config.ts`](extension/lib/config.ts).
+2. Add the request to [`extension/lib/kick/api.ts`](extension/lib/kick/api.ts),
+   with a parser in `lib/kick/parse.ts` that turns each item into a
+   `Channel` (`broadcasterUserId`, `slug`). If the endpoint pages, follow
+   `fetchCategoryPage`.
+3. Add an "Import from Kick" button to the "Move your list" section in
+   Settings (`entrypoints/popup/settings/TransferSection.tsx`). It calls
+   the new request, then `trackChannels`, and shows the same notices as a
+   pasted import (`AddNotices`).
+4. Existing users granted only the old scopes, and a new scope needs fresh
+   consent. When the button gets a 401 or 403 for a missing scope, ask the
+   user to log out and in again rather than showing a generic error.
+5. Mention the new scope in [`PRIVACY.md`](PRIVACY.md) and in the store
+   listings' permission notes.
+
 ## Publishing
 
 Store submissions run through [`.github/workflows/release.yml`](.github/workflows/release.yml),
