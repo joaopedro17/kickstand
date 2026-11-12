@@ -28,6 +28,8 @@ following:
   mute: Tysta
   unmute: Sluta tysta
   offline: Offline
+  filterLabel: "Filtrera kanaler"
+  filterNoMatch: "Ingen följd kanal matchar ”{query}”"
   liveFor: "Live i {duration}"
   lastLive: "Senast live för {duration} sedan"
   durationMinutes: "{m} min"

@@ -28,6 +28,8 @@ following:
   mute: Mute
   unmute: Unmute
   offline: Offline
+  filterLabel: Filter channels
+  filterNoMatch: 'No tracked channel matches "{query}"'
   liveFor: 'Live for {duration}'
   lastLive: 'Last live {duration} ago'
   durationMinutes: '{m}m'

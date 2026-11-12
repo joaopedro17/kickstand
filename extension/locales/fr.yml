@@ -28,6 +28,8 @@ following:
   mute: Muet
   unmute: Réactiver le son
   offline: Hors ligne
+  filterLabel: "Filtrer les chaînes"
+  filterNoMatch: "Aucune chaîne suivie ne correspond à « {query} »"
   liveFor: "En direct depuis {duration}"
   lastLive: "Dernier direct il y a {duration}"
   durationMinutes: "{m} min"

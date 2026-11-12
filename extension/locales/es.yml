@@ -28,6 +28,8 @@ following:
   mute: Silenciar
   unmute: Activar sonido
   offline: Offline
+  filterLabel: "Filtrar canales"
+  filterNoMatch: "Ningún canal seguido coincide con «{query}»"
   liveFor: "En directo desde hace {duration}"
   lastLive: "En directo por última vez hace {duration}"
   durationMinutes: "{m} min"

@@ -28,6 +28,8 @@ following:
   mute: Stummschalten
   unmute: Stummschaltung aufheben
   offline: Offline
+  filterLabel: "Kanäle filtern"
+  filterNoMatch: "Kein verfolgter Kanal passt zu „{query}“"
   liveFor: "Seit {duration} live"
   lastLive: "Zuletzt live vor {duration}"
   durationMinutes: "{m} Min."

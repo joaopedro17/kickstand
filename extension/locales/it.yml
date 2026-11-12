@@ -28,6 +28,8 @@ following:
   mute: Disattiva audio
   unmute: Riattiva audio
   offline: Offline
+  filterLabel: "Filtra canali"
+  filterNoMatch: "Nessun canale seguito corrisponde a \"{query}\""
   liveFor: "Live da {duration}"
   lastLive: "Ultima live {duration} fa"
   durationMinutes: "{m} min"

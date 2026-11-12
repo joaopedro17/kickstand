@@ -526,6 +526,41 @@ describe('FollowingTab', () => {
     });
   });
 
+  describe('filtering a long list', () => {
+    const many = (count: number) => Array.from({ length: count }, (_, i) => tracked(i + 1, `channel${i + 1}`));
+    const filterBox = () => screen.queryByRole('searchbox', { name: 'Filter channels' });
+
+    it('offers no filter for 8 channels or fewer', async () => {
+      await setTracked(many(8));
+      render(<FollowingTab />);
+
+      await screen.findByText('Offline (8)');
+      expect(filterBox()).toBeNull();
+    });
+
+    it('filters live and offline channels by name, showing offline matches straight away', async () => {
+      await setTracked([...many(8), tracked(20, 'xqc'), tracked(21, 'xqcow')]);
+      await liveStatusStorage.setValue({ 21: live('live one', 5) });
+      render(<FollowingTab />);
+
+      await userEvent.type(await screen.findByRole('searchbox', { name: 'Filter channels' }), 'XQC');
+
+      const headings = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+      expect(headings).toEqual(['xqcow', 'xqc']);
+      expect(screen.getByText('Offline (1)')).toBeInTheDocument();
+    });
+
+    it('says so when nothing matches', async () => {
+      await setTracked(many(9));
+      render(<FollowingTab />);
+
+      await userEvent.type(await screen.findByRole('searchbox', { name: 'Filter channels' }), 'zzz');
+
+      expect(screen.getByText('No tracked channel matches "zzz"')).toBeInTheDocument();
+      expect(screen.queryAllByRole('heading', { level: 3 })).toEqual([]);
+    });
+  });
+
   it('mutes a channel from its row', async () => {
     await setTracked([tracked(2, 'big')]);
     await liveStatusStorage.setValue({ 2: live('big stream', 5000) });

@@ -6,7 +6,7 @@ import { avatarStorage, type Avatar } from '@/lib/channels/avatars';
 import type { ChannelStatus, LiveStatus, LiveStatusCache } from '@/lib/polling/live-status';
 import { Card } from '../shared/layout';
 import { Icon } from '../shared/Icon';
-import { IconButton } from '../shared/controls';
+import { IconButton, TextInput } from '../shared/controls';
 import { LiveBadge, ViewerCount } from '../shared/stream';
 import { useNow } from '../shared/useNow';
 
@@ -43,6 +43,9 @@ function partitionByLive(channels: TrackedChannel[], liveStatus: LiveStatusCache
   };
 }
 
+/** A filter box is offered once the list is longer than this. */
+const MAX_UNFILTERED = 8;
+
 export function ChannelLists({
   channels,
   liveStatus,
@@ -50,15 +53,33 @@ export function ChannelLists({
   channels: TrackedChannel[];
   liveStatus: LiveStatusCache;
 }) {
-  const { live, offline } = partitionByLive(channels, liveStatus);
+  const [query, setQuery] = useState('');
+  const needle = query.trim().toLowerCase();
+  const shown = needle ? channels.filter((c) => c.slug.includes(needle)) : channels;
+  const { live, offline } = partitionByLive(shown, liveStatus);
   return (
     <>
+      {channels.length > MAX_UNFILTERED && (
+        <TextInput
+          type="search"
+          aria-label={i18n.t('following.filterLabel')}
+          placeholder={i18n.t('following.filterLabel')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="mb-3 w-full"
+        />
+      )}
+      {needle && shown.length === 0 && (
+        <p className="px-1 text-xs text-muted">{i18n.t('following.filterNoMatch', { query: query.trim() })}</p>
+      )}
       {live.length > 0 && (
         <ul className="space-y-2">
           <ChannelRows channels={live} liveStatus={liveStatus} />
         </ul>
       )}
-      {offline.length > 0 && <OfflineGroup channels={offline} liveStatus={liveStatus} />}
+      {offline.length > 0 && (
+        <OfflineGroup channels={offline} liveStatus={liveStatus} forceOpen={needle !== ''} />
+      )}
     </>
   );
 }
@@ -209,13 +230,17 @@ function StreamDetails({ stream }: { stream: LiveStream }) {
 function OfflineGroup({
   channels,
   liveStatus,
+  forceOpen,
 }: {
   channels: TrackedChannel[];
   liveStatus: LiveStatusCache;
+  /** Shown open while the list is filtered: the user is looking for these. */
+  forceOpen: boolean;
 }) {
   // Collapsed by default: the point of surfacing offline is to reassure the
   // user their tracking is intact, not to distract from currently-live cards.
-  const [expanded, setExpanded] = useState(false);
+  const [toggled, setExpanded] = useState(false);
+  const expanded = toggled || forceOpen;
   const label =
     channels.length === 1
       ? i18n.t('following.offlineGroupOne')
