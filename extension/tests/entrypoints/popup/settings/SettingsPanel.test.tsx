@@ -31,7 +31,7 @@ describe('SettingsPanel', () => {
 
   it('turns live notifications off and back on', async () => {
     render(<SettingsPanel />);
-    const toggle = await screen.findByRole('checkbox', {
+    const toggle = await screen.findByRole('switch', {
       name: 'Notify when a tracked channel goes live',
     });
     expect(toggle).toBeChecked();
@@ -57,7 +57,7 @@ describe('SettingsPanel', () => {
 
   it('turns the alert sound on, which starts off', async () => {
     render(<SettingsPanel />);
-    const toggle = await screen.findByRole('checkbox', { name: 'Play a sound with alerts' });
+    const toggle = await screen.findByRole('switch', { name: 'Play a sound with alerts' });
     expect(toggle).not.toBeChecked();
 
     await userEvent.click(toggle);
@@ -67,7 +67,7 @@ describe('SettingsPanel', () => {
 
   it('turns category-change alerts on, which start off', async () => {
     render(<SettingsPanel />);
-    const toggle = await screen.findByRole('checkbox', { name: 'Also alert when a live channel changes category' });
+    const toggle = await screen.findByRole('switch', { name: 'Also alert when a live channel changes category' });
     expect(toggle).not.toBeChecked();
 
     await userEvent.click(toggle);
@@ -77,7 +77,7 @@ describe('SettingsPanel', () => {
 
   describe('switching to an open tab', () => {
     const toggle = () =>
-      screen.findByRole<HTMLInputElement>('checkbox', {
+      screen.findByRole<HTMLInputElement>('switch', {
         name: "Switch to the channel's open tab instead of opening a new one",
       });
 
@@ -118,7 +118,7 @@ describe('SettingsPanel', () => {
 
   it('sets quiet hours, from 22:00 to 07:00 unless changed', async () => {
     render(<SettingsPanel />);
-    const toggle = await screen.findByRole('checkbox', { name: 'Silence alerts during quiet hours' });
+    const toggle = await screen.findByRole('switch', { name: 'Silence alerts during quiet hours' });
     const from = screen.getByLabelText('From');
     const to = screen.getByLabelText('To');
     expect(toggle).not.toBeChecked();
@@ -138,7 +138,7 @@ describe('SettingsPanel', () => {
 
   it('ignores a cleared time field', async () => {
     render(<SettingsPanel />);
-    await userEvent.click(await screen.findByRole('checkbox', { name: 'Silence alerts during quiet hours' }));
+    await userEvent.click(await screen.findByRole('switch', { name: 'Silence alerts during quiet hours' }));
     await expect.poll(async () => (await getSettings()).quietHours.enabled).toBe(true);
 
     fireEvent.change(screen.getByLabelText('From'), { target: { value: '' } });
@@ -149,7 +149,7 @@ describe('SettingsPanel', () => {
 
   it('blurs mature thumbnails in Browse unless turned off', async () => {
     render(<SettingsPanel />);
-    const toggle = await screen.findByRole('checkbox', { name: 'Blur thumbnails of mature streams' });
+    const toggle = await screen.findByRole('switch', { name: 'Blur thumbnails of mature streams' });
     expect(toggle).toBeChecked();
 
     await userEvent.click(toggle);
