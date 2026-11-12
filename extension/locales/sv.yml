@@ -17,28 +17,49 @@ app:
   primaryNav: Huvudnavigering
 
 following:
-  slugPlaceholder: kanal-slug
+  slugPlaceholder: "Kanalnamn eller kick.com-länk"
   addButton: Lägg till
   addButtonLoading: Lägger till…
   addChannelTitle: Lägg till en kanal
-  addChannelKicker: Följ via exakt slug
-  slugHelp1: Kickstand kan inte söka efter kanaler via namn — Kicks API stöder bara att hitta en kanal via dess exakta slug, så du behöver skriva in den själv.
-  slugHelp2Prefix: "Slugen är den del av kanalens URL som kommer efter kick.com/ — för kick.com/xqc är den"
+  addChannelKicker: "Med namn eller länk"
+  addHelp: "Skriv eller klistra in kanalnamn eller kick.com-länkar. Skilj flera åt med mellanslag, kommatecken eller radbrytningar."
   emptyState: Inga följda kanaler än.
-  emptyStateHint: Klistra in en slug ovan för att börja följa.
+  emptyStateHint: "Lägg till en kanal ovan för att börja följa."
   mute: Tysta
   unmute: Sluta tysta
   offline: Offline
+  filterLabel: "Filtrera kanaler"
+  filterNoMatch: "Ingen följd kanal matchar ”{query}”"
+  liveFor: "Live i {duration}"
+  lastLive: "Senast live för {duration} sedan"
+  durationMinutes: "{m} min"
+  durationHours: "{h} h {m} min"
+  durationDays: "{d} d"
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Visa offline
   hideOffline: Dölj offline
-  channelNotFound: 'Ingen kanal hittades för "{slug}"'
-  alreadyTracked: '"{slug}" följs redan'
+  added: "Följer nu: {slugs}"
+  channelNotFound: "Ingen kanal hittades för: {slugs}"
+  alreadyTracked: "Följs redan: {slugs}"
+  invalidInput: "Inte ett kanalnamn eller en kick.com-länk: {items}"
+  tooMany: "Bara {max} kanaler kan läggas till åt gången. De andra {count} finns kvar i rutan."
+  trackCurrentTab: "Följ {slug}"
+  currentTabHint: "Öppen i den här fliken"
   limitReached: 'Du kan följa upp till {max} kanaler. Ta bort en för att lägga till en ny.'
   refreshFailed: 'Det gick inte att uppdatera livestatus. Visar senast kända läge.'
+  refresh: "Uppdatera livestatus"
+  updatedJustNow: "Uppdaterad nyss"
+  updatedMinutesAgo: "Uppdaterad för {count} min sedan"
 
 browse:
+  hideOptions: "Döljalternativ för {slug}"
+  hide: "Dölj {name}"
+  mature: "Vuxet"
+  language: "Språk"
+  allLanguages: "Alla språk"
+  track: "Följ {slug}"
+  tracked: "{slug} följs"
   emptyLive: Inga live-sändningar just nu.
   filteredByPrefix: Filtrerat på
   clearFilter: Rensa
@@ -50,6 +71,29 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  hiddenTitle: "Dolda i Utforska"
+  hiddenNone: "Inget är dolt i Utforska."
+  showAgain: "Visa {name} igen"
+  browseTitle: "Utforska"
+  browseKicker: "Vad Utforska visar"
+  blurMatureToggle: "Göra miniatyrer av vuxenströmmar suddiga"
+  soundToggle: "Spela ett ljud vid aviseringar"
+  focusTabToggle: "Byt till kanalens öppna flik i stället för att öppna en ny"
+  focusTabHint: "Webbläsaren frågar om Kickstand får se dina öppna flikar."
+  categoryChangeToggle: "Avisera även när en livekanal byter kategori"
+  quietHoursToggle: "Tysta aviseringar under tysta timmar"
+  quietFrom: "Från"
+  quietTo: "Till"
+  pollIntervalLabel: "Leta efter livekanaler var"
+  pollIntervalOption: "{count} min"
+  transferTitle: "Flytta din lista"
+  transferKicker: "Kopiera, ladda ned eller importera"
+  copyList: "Kopiera lista"
+  copied: "Kopierad"
+  downloadList: "Ladda ned"
+  importLabel: "Kanaler att importera"
+  importPlaceholder: "Kanalnamn eller kick.com-länkar, en per rad"
+  importButton: "Importera"
   notifyToggle: Meddela när en följd kanal sänder live
   notificationsTitle: Aviseringar
   notificationsKicker: Håll dig uppdaterad
@@ -64,6 +108,9 @@ settings:
 notifications:
   liveTitle: '{slug} sänder live!'
   liveDefaultMessage: Sänder live nu på Kick
+  liveContext: "{category} · {count} tittare"
+  liveContextNoCategory: "{count} tittare"
+  switchedTitle: "{name} bytte till {category}"
 
 common:
   loading: Laddar…

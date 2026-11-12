@@ -1,17 +1,22 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser } from 'wxt/browser';
-import { startLoginFlow, AuthError, answerTokenRequest, logout } from '@/lib/session';
+import { startLoginFlow, AuthError } from '@/lib/auth/login';
+import { answerTokenRequest } from '@/lib/auth/tokens';
+import { logout } from '@/lib/auth/logout';
 import { listenForRequests, type LoginResult } from '@/lib/messages';
-import { getTracked, watchTracked } from '@/lib/tracked-channels';
-import { LEGACY_LIVE_STATUS_KEY, profileStorage } from '@/lib/storage';
+import { getTracked, watchTracked } from '@/lib/channels/tracked';
+import { LEGACY_LIVE_STATUS_KEY } from '@/lib/polling/storage';
+import { profileStorage } from '@/lib/auth/storage';
+import { watchSettings } from '@/lib/settings';
+import { toolbarButton } from '@/lib/toolbar';
 import {
   ensurePollAlarm,
   forgetSessionData,
-  openNotifiedChannel,
   pollNow,
   POLL_ALARM,
   syncToTracked,
-} from '@/lib/poll';
+} from '@/lib/polling/poll';
+import { openNotifiedChannel } from '@/lib/polling/alerts';
 
 // Runs the OAuth flow here rather than in the popup: launchWebAuthFlow opens
 // a new window, which steals focus and causes the extension popup to close
@@ -47,13 +52,16 @@ export default defineBackground(() => {
   // Explicit colors instead of the browser default: the default badge
   // background is theme-dependent and, on a dark toolbar theme, renders as a
   // dark badge with dark text — nearly unreadable.
-  browser.action.setBadgeBackgroundColor({ color: '#2121214b' });
-  browser.action.setBadgeTextColor({ color: '#FFFFFF' });
+  toolbarButton().setBadgeBackgroundColor({ color: '#2121214b' });
+  toolbarButton().setBadgeTextColor({ color: '#FFFFFF' });
 
   // Every time the worker starts, not just on install or browser start: an
   // alarm lost for any reason would otherwise stop polling until the next
   // browser restart.
   ensurePollAlarm();
+  // Any settings change: ensurePollAlarm leaves an alarm that already has
+  // the right period alone.
+  watchSettings(() => ensurePollAlarm());
 
   browser.runtime.onInstalled.addListener(() => onInstalledOrUpdated());
   browser.runtime.onStartup.addListener(() => pollNow());

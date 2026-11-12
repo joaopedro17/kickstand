@@ -17,28 +17,49 @@ app:
   primaryNav: Navigation principale
 
 following:
-  slugPlaceholder: slug-de-la-chaîne
+  slugPlaceholder: "Nom de chaîne ou lien kick.com"
   addButton: Ajouter
   addButtonLoading: Ajout en cours…
   addChannelTitle: Ajouter une chaîne
-  addChannelKicker: Suivre par slug exact
-  slugHelp1: Kickstand ne peut pas rechercher des chaînes par leur nom — l'API de Kick ne permet de trouver une chaîne que par son slug exact, vous devrez donc le saisir vous-même.
-  slugHelp2Prefix: "Le slug est la partie de l'URL de la chaîne après kick.com/ — pour kick.com/xqc, c'est"
+  addChannelKicker: "Par nom ou lien"
+  addHelp: "Saisis ou colle des noms de chaînes ou des liens kick.com. Sépare-les par des espaces, des virgules ou des retours à la ligne."
   emptyState: Aucune chaîne suivie pour l'instant.
-  emptyStateHint: Collez un slug ci-dessus pour commencer le suivi.
+  emptyStateHint: "Ajoute une chaîne ci-dessus pour commencer le suivi."
   mute: Muet
   unmute: Réactiver le son
   offline: Hors ligne
+  filterLabel: "Filtrer les chaînes"
+  filterNoMatch: "Aucune chaîne suivie ne correspond à « {query} »"
+  liveFor: "En direct depuis {duration}"
+  lastLive: "Dernier direct il y a {duration}"
+  durationMinutes: "{m} min"
+  durationHours: "{h} h {m} min"
+  durationDays: "{d} j"
   offlineGroupOne: Hors ligne (1)
   offlineGroupOther: 'Hors ligne ({count})'
   showOffline: Afficher hors ligne
   hideOffline: Masquer hors ligne
-  channelNotFound: 'Aucune chaîne trouvée pour « {slug} »'
-  alreadyTracked: '« {slug} » est déjà suivi'
+  added: "Désormais suivies : {slugs}"
+  channelNotFound: "Aucune chaîne trouvée pour : {slugs}"
+  alreadyTracked: "Déjà suivies : {slugs}"
+  invalidInput: "Ni un nom de chaîne ni un lien kick.com : {items}"
+  tooMany: "On ne peut ajouter que {max} chaînes à la fois. Les {count} autres sont toujours dans le champ."
+  trackCurrentTab: "Suivre {slug}"
+  currentTabHint: "Ouverte dans cet onglet"
   limitReached: 'Vous pouvez suivre jusqu''à {max} chaînes. Supprimez-en une pour en ajouter une autre.'
   refreshFailed: 'Impossible d''actualiser le statut en direct. Affichage du dernier état connu.'
+  refresh: "Actualiser le statut en direct"
+  updatedJustNow: "Mis à jour à l’instant"
+  updatedMinutesAgo: "Mis à jour il y a {count} min"
 
 browse:
+  hideOptions: "Options pour masquer {slug}"
+  hide: "Masquer {name}"
+  mature: "Adulte"
+  language: "Langue"
+  allLanguages: "Toutes les langues"
+  track: "Suivre {slug}"
+  tracked: "{slug} est suivie"
   emptyLive: Aucun stream en direct pour le moment.
   filteredByPrefix: Filtré par
   clearFilter: Réinitialiser
@@ -50,6 +71,29 @@ categories:
   emptyAll: Aucune catégorie disponible.
 
 settings:
+  hiddenTitle: "Masqués dans Découvrir"
+  hiddenNone: "Rien n’est masqué dans Découvrir."
+  showAgain: "Réafficher {name}"
+  browseTitle: "Découvrir"
+  browseKicker: "Ce que Découvrir affiche"
+  blurMatureToggle: "Flouter les miniatures des streams pour adultes"
+  soundToggle: "Jouer un son avec les alertes"
+  focusTabToggle: "Aller à l’onglet déjà ouvert de la chaîne au lieu d’en ouvrir un nouveau"
+  focusTabHint: "Ton navigateur demandera d’autoriser Kickstand à voir tes onglets ouverts."
+  categoryChangeToggle: "Alerter aussi quand une chaîne en direct change de catégorie"
+  quietHoursToggle: "Couper les alertes pendant les heures calmes"
+  quietFrom: "De"
+  quietTo: "À"
+  pollIntervalLabel: "Vérifier les chaînes en direct toutes les"
+  pollIntervalOption: "{count} min"
+  transferTitle: "Transférer ta liste"
+  transferKicker: "Copier, télécharger ou importer"
+  copyList: "Copier la liste"
+  copied: "Copiée"
+  downloadList: "Télécharger"
+  importLabel: "Chaînes à importer"
+  importPlaceholder: "Noms de chaînes ou liens kick.com, un par ligne"
+  importButton: "Importer"
   notifyToggle: Notifier quand une chaîne suivie passe en direct
   notificationsTitle: Notifications
   notificationsKicker: Restez au courant
@@ -64,6 +108,9 @@ settings:
 notifications:
   liveTitle: '{slug} est en direct !'
   liveDefaultMessage: En direct maintenant sur Kick
+  liveContext: "{category} · {count} spectateurs"
+  liveContextNoCategory: "{count} spectateurs"
+  switchedTitle: "{name} est passé à {category}"
 
 common:
   loading: Chargement…

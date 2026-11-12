@@ -17,28 +17,49 @@ app:
   primaryNav: Nawigacja główna
 
 following:
-  slugPlaceholder: slug-kanału
+  slugPlaceholder: "Nazwa kanału lub link kick.com"
   addButton: Dodaj
   addButtonLoading: Dodawanie…
   addChannelTitle: Dodaj kanał
-  addChannelKicker: Obserwuj po dokładnym slugu
-  slugHelp1: Kickstand nie może wyszukiwać kanałów po nazwie — API Kicka pozwala znaleźć kanał wyłącznie po dokładnym slugu, więc musisz wpisać go samodzielnie.
-  slugHelp2Prefix: "Slug to część adresu URL kanału po kick.com/ — dla kick.com/xqc to"
+  addChannelKicker: "Po nazwie lub linku"
+  addHelp: "Wpisz lub wklej nazwy kanałów albo linki kick.com. Oddziel je spacjami, przecinkami lub nowymi wierszami."
   emptyState: Nie obserwujesz jeszcze żadnych kanałów.
-  emptyStateHint: Wklej slug powyżej, aby zacząć obserwować.
+  emptyStateHint: "Dodaj kanał powyżej, aby zacząć go śledzić."
   mute: Wycisz
   unmute: Wyłącz wyciszenie
   offline: Offline
+  filterLabel: "Filtruj kanały"
+  filterNoMatch: "Żaden śledzony kanał nie pasuje do „{query}”"
+  liveFor: "Na żywo od {duration}"
+  lastLive: "Ostatnio na żywo {duration} temu"
+  durationMinutes: "{m} min"
+  durationHours: "{h} godz. {m} min"
+  durationDays: "{d} d"
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Pokaż offline
   hideOffline: Ukryj offline
-  channelNotFound: 'Nie znaleziono kanału dla "{slug}"'
-  alreadyTracked: '"{slug}" jest już obserwowany'
+  added: "Teraz śledzisz: {slugs}"
+  channelNotFound: "Nie znaleziono kanału: {slugs}"
+  alreadyTracked: "Już śledzone: {slugs}"
+  invalidInput: "To nie jest nazwa kanału ani link kick.com: {items}"
+  tooMany: "Naraz można dodać tylko {max} kanałów. Pozostałe ({count}) zostały w polu."
+  trackCurrentTab: "Śledź {slug}"
+  currentTabHint: "Otwarty w tej karcie"
   limitReached: 'Możesz obserwować maksymalnie {max} kanałów. Usuń jeden, aby dodać kolejny.'
   refreshFailed: 'Nie udało się odświeżyć statusu na żywo. Wyświetlany jest ostatni znany stan.'
+  refresh: "Odśwież status na żywo"
+  updatedJustNow: "Zaktualizowano przed chwilą"
+  updatedMinutesAgo: "Zaktualizowano {count} min temu"
 
 browse:
+  hideOptions: "Opcje ukrywania dla {slug}"
+  hide: "Ukryj {name}"
+  mature: "Dla dorosłych"
+  language: "Język"
+  allLanguages: "Wszystkie języki"
+  track: "Śledź {slug}"
+  tracked: "{slug} jest śledzony"
   emptyLive: Obecnie brak transmisji na żywo.
   filteredByPrefix: Filtrowane wg
   clearFilter: Wyczyść
@@ -50,6 +71,29 @@ categories:
   emptyAll: Brak dostępnych kategorii.
 
 settings:
+  hiddenTitle: "Ukryte w Przeglądaj"
+  hiddenNone: "Nic nie jest ukryte w Przeglądaj."
+  showAgain: "Pokaż ponownie {name}"
+  browseTitle: "Przeglądaj"
+  browseKicker: "Co pokazuje Przeglądaj"
+  blurMatureToggle: "Rozmywaj miniatury streamów dla dorosłych"
+  soundToggle: "Odtwarzaj dźwięk przy powiadomieniach"
+  focusTabToggle: "Przełącz na otwartą kartę kanału zamiast otwierać nową"
+  focusTabHint: "Przeglądarka poprosi o zgodę na wgląd Kickstand w otwarte karty."
+  categoryChangeToggle: "Powiadamiaj też, gdy kanał na żywo zmieni kategorię"
+  quietHoursToggle: "Wycisz powiadomienia w godzinach ciszy"
+  quietFrom: "Od"
+  quietTo: "Do"
+  pollIntervalLabel: "Sprawdzaj kanały na żywo co"
+  pollIntervalOption: "{count} min"
+  transferTitle: "Przenieś listę"
+  transferKicker: "Kopiuj, pobierz lub importuj"
+  copyList: "Kopiuj listę"
+  copied: "Skopiowano"
+  downloadList: "Pobierz"
+  importLabel: "Kanały do zaimportowania"
+  importPlaceholder: "Nazwy kanałów lub linki kick.com, po jednym w wierszu"
+  importButton: "Importuj"
   notifyToggle: Powiadamiaj, gdy obserwowany kanał wejdzie na żywo
   notificationsTitle: Powiadomienia
   notificationsKicker: Bądź na bieżąco
@@ -64,6 +108,9 @@ settings:
 notifications:
   liveTitle: '{slug} jest na żywo!'
   liveDefaultMessage: Transmituje teraz na Kick
+  liveContext: "{category} · widzowie: {count}"
+  liveContextNoCategory: "Widzowie: {count}"
+  switchedTitle: "{name} przełącza się na {category}"
 
 common:
   loading: Ładowanie…

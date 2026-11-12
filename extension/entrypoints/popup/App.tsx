@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { authTokensStorage } from '@/lib/storage';
-import { LoginScreen } from './LoginScreen';
-import { Header, type TabName } from './components/Header';
-import { FollowingTab } from './FollowingTab';
-import { BrowseTab } from './BrowseTab';
-import { CategoriesTab } from './CategoriesTab';
-import { SettingsPanel } from './SettingsPanel';
-import { useAvatar } from './useAvatar';
+import { authTokensStorage } from '@/lib/auth/storage';
+import { LoginScreen } from './login/LoginScreen';
+import { Header, type TabName } from './shared/Header';
+import { FollowingTab } from './following/FollowingTab';
+import { BrowseTab } from './browse/BrowseTab';
+import { CategoriesTab } from './categories/CategoriesTab';
+import { SettingsPanel } from './settings/SettingsPanel';
+import { useAvatar } from './shared/useAvatar';
 
 const POPUP_WIDTH = 380;
 const POPUP_HEIGHT = 560;

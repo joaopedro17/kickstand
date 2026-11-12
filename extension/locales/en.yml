@@ -17,28 +17,49 @@ app:
   primaryNav: Primary navigation
 
 following:
-  slugPlaceholder: channel-slug
+  slugPlaceholder: Channel name or kick.com link
   addButton: Add
   addButtonLoading: Adding…
   addChannelTitle: Add a channel
-  addChannelKicker: Follow by exact slug
-  slugHelp1: Kickstand can't look channels up by name — Kick's API only supports finding a channel by its exact slug, so you'll need to type it in yourself.
-  slugHelp2Prefix: "The slug is the part of the channel's URL after kick.com/ — for kick.com/xqc it's"
+  addChannelKicker: By name or link
+  addHelp: Type or paste channel names or kick.com links. Separate several with spaces, commas or new lines.
   emptyState: No tracked channels yet.
-  emptyStateHint: Paste a slug above to start tracking.
+  emptyStateHint: Add a channel above to start tracking.
   mute: Mute
   unmute: Unmute
   offline: Offline
+  filterLabel: Filter channels
+  filterNoMatch: 'No tracked channel matches "{query}"'
+  liveFor: 'Live for {duration}'
+  lastLive: 'Last live {duration} ago'
+  durationMinutes: '{m}m'
+  durationHours: '{h}h {m}m'
+  durationDays: '{d}d'
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Show offline
   hideOffline: Hide offline
-  channelNotFound: 'No channel found for "{slug}"'
-  alreadyTracked: '"{slug}" is already tracked'
+  added: 'Now tracking {slugs}'
+  channelNotFound: 'No channel found for: {slugs}'
+  alreadyTracked: 'Already tracked: {slugs}'
+  invalidInput: 'Not a channel name or kick.com link: {items}'
+  tooMany: 'Only {max} channels can be added at once. The other {count} are still in the box.'
+  trackCurrentTab: 'Track {slug}'
+  currentTabHint: Open in this tab
   limitReached: 'You can track up to {max} channels. Remove one to add another.'
   refreshFailed: 'Couldn''t refresh live status. Showing the last known state.'
+  refresh: Refresh live status
+  updatedJustNow: Updated just now
+  updatedMinutesAgo: 'Updated {count} min ago'
 
 browse:
+  hideOptions: 'Hide options for {slug}'
+  hide: 'Hide {name}'
+  mature: Mature
+  language: Language
+  allLanguages: All languages
+  track: 'Track {slug}'
+  tracked: '{slug} is tracked'
   emptyLive: No live streams right now.
   filteredByPrefix: Filtered by
   clearFilter: Clear
@@ -50,6 +71,29 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  hiddenTitle: Hidden from Browse
+  hiddenNone: Nothing is hidden from Browse.
+  showAgain: 'Show {name} again'
+  browseTitle: Browse
+  browseKicker: What Browse shows
+  blurMatureToggle: Blur thumbnails of mature streams
+  soundToggle: "Play a sound with alerts"
+  focusTabToggle: Switch to the channel's open tab instead of opening a new one
+  focusTabHint: Your browser will ask to let Kickstand see your open tabs.
+  categoryChangeToggle: "Also alert when a live channel changes category"
+  quietHoursToggle: Silence alerts during quiet hours
+  quietFrom: From
+  quietTo: To
+  pollIntervalLabel: Check for live channels every
+  pollIntervalOption: '{count} min'
+  transferTitle: Move your list
+  transferKicker: Copy, download or import
+  copyList: Copy list
+  copied: Copied
+  downloadList: Download
+  importLabel: Channels to import
+  importPlaceholder: Channel names or kick.com links, one per line
+  importButton: Import
   notifyToggle: Notify when a tracked channel goes live
   notificationsTitle: Notifications
   notificationsKicker: Stay in the loop
@@ -64,6 +108,9 @@ settings:
 notifications:
   liveTitle: '{slug} is live!'
   liveDefaultMessage: Streaming now on Kick
+  liveContext: '{category} · {count} viewers'
+  liveContextNoCategory: '{count} viewers'
+  switchedTitle: '{name} switched to {category}'
 
 common:
   loading: Loading…

@@ -17,28 +17,49 @@ app:
   primaryNav: Navigazione principale
 
 following:
-  slugPlaceholder: slug-del-canale
+  slugPlaceholder: "Nome del canale o link kick.com"
   addButton: Aggiungi
   addButtonLoading: Aggiunta in corso…
   addChannelTitle: Aggiungi un canale
-  addChannelKicker: Segui tramite slug esatto
-  slugHelp1: Kickstand non può cercare i canali per nome — l'API di Kick permette di trovare un canale solo tramite il suo slug esatto, quindi dovrai digitarlo tu stesso.
-  slugHelp2Prefix: "Lo slug è la parte dell'URL del canale dopo kick.com/ — per kick.com/xqc è"
+  addChannelKicker: "Per nome o link"
+  addHelp: "Scrivi o incolla nomi di canali o link kick.com. Separane più di uno con spazi, virgole o a capo."
   emptyState: Nessun canale seguito ancora.
-  emptyStateHint: Incolla uno slug qui sopra per iniziare a seguire.
+  emptyStateHint: "Aggiungi un canale qui sopra per iniziare a seguirlo."
   mute: Disattiva audio
   unmute: Riattiva audio
   offline: Offline
+  filterLabel: "Filtra canali"
+  filterNoMatch: "Nessun canale seguito corrisponde a \"{query}\""
+  liveFor: "Live da {duration}"
+  lastLive: "Ultima live {duration} fa"
+  durationMinutes: "{m} min"
+  durationHours: "{h} h {m} min"
+  durationDays: "{d} g"
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Mostra offline
   hideOffline: Nascondi offline
-  channelNotFound: 'Nessun canale trovato per "{slug}"'
-  alreadyTracked: '"{slug}" è già seguito'
+  added: "Ora segui: {slugs}"
+  channelNotFound: "Nessun canale trovato per: {slugs}"
+  alreadyTracked: "Già seguiti: {slugs}"
+  invalidInput: "Non è un nome di canale né un link kick.com: {items}"
+  tooMany: "Puoi aggiungere solo {max} canali alla volta. Gli altri {count} sono ancora nella casella."
+  trackCurrentTab: "Segui {slug}"
+  currentTabHint: "Aperto in questa scheda"
   limitReached: 'Puoi seguire fino a {max} canali. Rimuovine uno per aggiungerne un altro.'
   refreshFailed: 'Impossibile aggiornare lo stato live. Viene mostrato l''ultimo stato noto.'
+  refresh: "Aggiorna lo stato live"
+  updatedJustNow: "Aggiornato ora"
+  updatedMinutesAgo: "Aggiornato {count} min fa"
 
 browse:
+  hideOptions: "Opzioni per nascondere {slug}"
+  hide: "Nascondi {name}"
+  mature: "Per adulti"
+  language: "Lingua"
+  allLanguages: "Tutte le lingue"
+  track: "Segui {slug}"
+  tracked: "Segui già {slug}"
   emptyLive: Nessuno stream in diretta al momento.
   filteredByPrefix: Filtrato per
   clearFilter: Rimuovi
@@ -50,6 +71,29 @@ categories:
   emptyAll: Nessuna categoria disponibile.
 
 settings:
+  hiddenTitle: "Nascosti in Esplora"
+  hiddenNone: "Niente è nascosto in Esplora."
+  showAgain: "Mostra di nuovo {name}"
+  browseTitle: "Esplora"
+  browseKicker: "Cosa mostra Esplora"
+  blurMatureToggle: "Sfoca le anteprime degli stream per adulti"
+  soundToggle: "Riproduci un suono con gli avvisi"
+  focusTabToggle: "Passa alla scheda già aperta del canale invece di aprirne una nuova"
+  focusTabHint: "Il browser chiederà di consentire a Kickstand di vedere le schede aperte."
+  categoryChangeToggle: "Avvisa anche quando un canale live cambia categoria"
+  quietHoursToggle: "Silenzia gli avvisi nelle ore di quiete"
+  quietFrom: "Dalle"
+  quietTo: "Alle"
+  pollIntervalLabel: "Controlla i canali live ogni"
+  pollIntervalOption: "{count} min"
+  transferTitle: "Sposta la tua lista"
+  transferKicker: "Copia, scarica o importa"
+  copyList: "Copia lista"
+  copied: "Copiata"
+  downloadList: "Scarica"
+  importLabel: "Canali da importare"
+  importPlaceholder: "Nomi di canali o link kick.com, uno per riga"
+  importButton: "Importa"
   notifyToggle: Notifica quando un canale seguito va in diretta
   notificationsTitle: Notifiche
   notificationsKicker: Resta aggiornato
@@ -64,6 +108,9 @@ settings:
 notifications:
   liveTitle: '{slug} è in diretta!'
   liveDefaultMessage: In diretta ora su Kick
+  liveContext: "{category} · {count} spettatori"
+  liveContextNoCategory: "{count} spettatori"
+  switchedTitle: "{name} è passato a {category}"
 
 common:
   loading: Caricamento…
