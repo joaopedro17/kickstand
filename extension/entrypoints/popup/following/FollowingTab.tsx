@@ -23,18 +23,11 @@ import {
   type TrackedChannel,
 } from '@/lib/channels/tracked';
 import { liveStatusStorage } from '@/lib/polling/storage';
-import {
-  Card,
-  EmptyState,
-  ErrorBanner,
-  Icon,
-  IconButton,
-  LiveBadge,
-  PrimaryButton,
-  SectionHeader,
-  TextInput,
-  ViewerCount,
-} from '../shared/ui';
+import { Card, SectionHeader } from '../shared/layout';
+import { EmptyState, ErrorBanner } from '../shared/feedback';
+import { Icon } from '../shared/Icon';
+import { IconButton, PrimaryButton, TextInput } from '../shared/controls';
+import { LiveBadge, ViewerCount } from '../shared/stream';
 
 function describeAddError(err: unknown): string {
   if (err instanceof TrackedListFullError) {

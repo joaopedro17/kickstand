@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { i18n } from '#i18n';
 import { translateErrorCode } from '../shared/error-messages';
 import { sendRequest } from '@/lib/messages';
-import { Icon, PrimaryButton } from '../shared/ui';
+import { Icon } from '../shared/Icon';
+import { PrimaryButton } from '../shared/controls';
 
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [error, setError] = useState<string | null>(null);

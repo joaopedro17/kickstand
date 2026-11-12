@@ -1,5 +1,5 @@
 import { i18n } from '#i18n';
-import { Icon } from './ui';
+import { Icon } from './Icon';
 
 export type TabName = 'following' | 'browse' | 'categories';
 

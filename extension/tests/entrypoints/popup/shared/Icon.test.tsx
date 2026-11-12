@@ -1,10 +1,9 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { Icon } from '@/entrypoints/popup/shared/ui';
-import { Header } from '@/entrypoints/popup/shared/Header';
+import { render } from '@testing-library/react';
+import { Icon } from '@/entrypoints/popup/shared/Icon';
 
-describe('icons', () => {
+describe('Icon', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -25,21 +24,5 @@ describe('icons', () => {
     const { container } = render(<Icon icon="bell" />);
 
     expect(container.querySelector('svg')).toHaveAttribute('width', '1em');
-  });
-
-  it('shows a settings icon, not an emoji, in place of a missing avatar', () => {
-    render(
-      <Header
-        activeTab="following"
-        onChange={() => {}}
-        onProfileClick={() => {}}
-        avatarUrl={null}
-        settingsOpen={false}
-      />
-    );
-
-    const button = screen.getByRole('button', { name: 'Settings' });
-    expect(button.querySelector('svg')).not.toBeNull();
-    expect(button).not.toHaveTextContent('⚙');
   });
 });

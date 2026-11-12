@@ -8,12 +8,10 @@ import {
   type TrackedChannel,
 } from '@/lib/channels/tracked';
 import { getSettings, updateSettings, watchSettings, type Settings } from '@/lib/settings';
-import {
-  EmptyState,
-  GhostButton,
-  Icon,
-  SectionHeader,
-} from '../shared/ui';
+import { EmptyState } from '../shared/feedback';
+import { GhostButton } from '../shared/controls';
+import { Icon } from '../shared/Icon';
+import { SectionHeader } from '../shared/layout';
 
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);

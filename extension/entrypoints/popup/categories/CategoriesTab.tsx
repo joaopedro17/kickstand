@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { i18n } from '#i18n';
 import { fetchCategoryPage, searchCategories } from '@/lib/kick/api';
-import { Card, EmptyState, Icon, IconButton } from '../shared/ui';
+import { Card } from '../shared/layout';
+import { EmptyState } from '../shared/feedback';
+import { Icon } from '../shared/Icon';
+import { IconButton } from '../shared/controls';
 import type { Category } from '@/lib/kick/types';
 import { PagedListBody } from '../shared/PagedListBody';
 import { usePagedList, type FetchPage } from '../shared/usePagedList';

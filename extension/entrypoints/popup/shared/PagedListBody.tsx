@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { i18n } from '#i18n';
-import { ErrorBanner, PrimaryButton } from './ui';
+import { ErrorBanner } from './feedback';
+import { PrimaryButton } from './controls';
 
 type PagedList = {
   items: unknown[];
