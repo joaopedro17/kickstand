@@ -11,11 +11,11 @@ import { watchSettings } from '@/lib/settings';
 import {
   ensurePollAlarm,
   forgetSessionData,
-  openNotifiedChannel,
   pollNow,
   POLL_ALARM,
   syncToTracked,
 } from '@/lib/polling/poll';
+import { openNotifiedChannel } from '@/lib/polling/alerts';
 
 // Runs the OAuth flow here rather than in the popup: launchWebAuthFlow opens
 // a new window, which steals focus and causes the extension popup to close

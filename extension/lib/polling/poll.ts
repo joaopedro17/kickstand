@@ -7,7 +7,6 @@ import {
   computeNextStatus,
   countLive,
   type BatchOutcome,
-  type LiveStatus,
   type LiveStatusCache,
 } from './live-status';
 import { withAuthRetry } from '@/lib/auth/tokens';
@@ -15,26 +14,13 @@ import { liveStatusStorage, pollPausedUntilStorage, pollRateLimitedStorage } fro
 import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
 import { getSettings, isQuietTime } from '@/lib/settings';
+import { notifyChannels } from './alerts';
 
 export const POLL_ALARM = 'kickstand-poll';
 /** How often to poll while Kick is rate-limiting, whatever the user picked. */
 const RATE_LIMITED_PERIOD_MINUTES = 5;
-const NOTIFICATION_PREFIX = 'kickstand-live-';
 /** How long to back off after a 429 that doesn't say how long to wait. */
 const DEFAULT_RATE_LIMIT_WAIT_MS = 60_000;
-
-// Dynamic import, not a static top-level one: WXT's entrypoint-scanning pass
-// (which runs on every `wxt prepare`/`wxt build`, including from a clean
-// `.wxt/` directory — e.g. a fresh clone or CI) directly executes the
-// background entrypoint, and this module with it, via a module runner, and
-// does so before `@wxt-dev/i18n`'s `#i18n` alias target has been written to
-// disk. A static `import { i18n } from '#i18n'` here fails that scan with
-// "Cannot find module '#i18n'" — reproduced against wxt@0.20.27 and
-// wxt@0.21.4, so it's an upstream ordering issue. The popup is bundled
-// through WXT's HTML pipeline instead, where the static import works.
-async function getI18n() {
-  return (await import('#i18n')).i18n;
-}
 
 /** The only place the toolbar badge is set. */
 async function showOnBadge(cache: LiveStatusCache): Promise<void> {
@@ -95,44 +81,6 @@ async function fetchAll(tracked: TrackedChannel[]): Promise<BatchOutcome[] | nul
   return batches;
 }
 
-type LiveEntry = Extract<LiveStatus, { kind: 'live' }>;
-
-/** What an alert is about: a stream starting, or a running stream changing category. */
-type AlertKind = 'live' | 'switched';
-
-async function alertText(kind: AlertKind, channel: TrackedChannel, stream: LiveEntry) {
-  const i18n = await getI18n();
-  const name = stream.broadcasterName || channel.slug;
-  const count = stream.viewerCount.toLocaleString(browser.i18n.getUILanguage());
-  const context = stream.category
-    ? i18n.t('notifications.liveContext', { category: stream.category.name, count })
-    : i18n.t('notifications.liveContextNoCategory', { count });
-  const message = stream.title || i18n.t('notifications.liveDefaultMessage');
-  return {
-    title:
-      kind === 'live'
-        ? i18n.t('notifications.liveTitle', { slug: name })
-        : i18n.t('notifications.switchedTitle', { name, category: stream.category?.name ?? '' }),
-    // Firefox ignores contextMessage, so the line goes into the message there.
-    ...(import.meta.env.FIREFOX
-      ? { message: `${message}\n${context}` }
-      : { message, contextMessage: context }),
-  };
-}
-
-async function notify(kind: AlertKind, channels: TrackedChannel[], status: LiveStatusCache): Promise<void> {
-  for (const channel of channels) {
-    const entry = status[channel.broadcasterUserId];
-    // Only channels live in this poll are passed in.
-    if (entry.status.kind !== 'live') continue;
-    await browser.notifications.create(`${NOTIFICATION_PREFIX}${channel.broadcasterUserId}`, {
-      type: 'basic',
-      iconUrl: entry.avatarUrl || browser.runtime.getURL('/icons/128.png'),
-      ...(await alertText(kind, channel, entry.status)),
-    });
-  }
-}
-
 async function runPoll(): Promise<void> {
   // While Kick has asked us to back off, keep showing what we last knew.
   if (Date.now() < (await pollPausedUntilStorage.getValue())) return;
@@ -160,9 +108,9 @@ async function runPoll(): Promise<void> {
   // so no alert for it piles up for when they end.
   const settings = await getSettings();
   if (!settings.notificationsEnabled || isQuietTime(settings.quietHours, new Date(now))) return;
-  await notify('live', channelsToNotify(tracked, wentLive), next);
+  await notifyChannels('live', channelsToNotify(tracked, wentLive), next);
   if (settings.notifyCategoryChange) {
-    await notify('switched', channelsToNotify(tracked, switchedCategory), next);
+    await notifyChannels('switched', channelsToNotify(tracked, switchedCategory), next);
   }
 }
 
@@ -194,13 +142,4 @@ export async function forgetSessionData(): Promise<void> {
   await liveStatusStorage.setValue({});
   await profileStorage.setValue(null);
   await browser.action.setBadgeText({ text: '' });
-}
-
-/** Opens the channel a live notification was about, and dismisses it. */
-export async function openNotifiedChannel(notificationId: string): Promise<void> {
-  if (!notificationId.startsWith(NOTIFICATION_PREFIX)) return;
-  const id = Number(notificationId.slice(NOTIFICATION_PREFIX.length));
-  const channel = (await getTracked()).find((c) => c.broadcasterUserId === id);
-  if (channel) await browser.tabs.create({ url: `https://kick.com/${channel.slug}` });
-  await browser.notifications.clear(notificationId);
 }
