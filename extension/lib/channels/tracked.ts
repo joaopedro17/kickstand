@@ -1,6 +1,6 @@
 import { browser } from 'wxt/browser';
-import { chunk } from './kick-api';
-import type { TrackedChannel } from './storage';
+import { chunk } from '@/lib/kick/api';
+import type { TrackedChannel } from '@/lib/storage';
 
 /**
  * The tracked-channel list, in browser sync storage.

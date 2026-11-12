@@ -1,6 +1,6 @@
-import { retryOnUnauthorized, type TokenSource } from './auth-retry';
-import { KickApiError } from './kick-api';
-import { sendRequest, type TokenReply } from './messages';
+import { retryOnUnauthorized, type TokenSource } from './retry';
+import { KickApiError } from '@/lib/kick/api';
+import { sendRequest, type TokenReply } from '@/lib/messages';
 
 /**
  * The popup's side of the session. The popup never reads or writes the stored

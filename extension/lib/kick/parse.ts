@@ -1,4 +1,4 @@
-import { KickApiError } from './kick-error';
+import { KickApiError } from './error';
 import type { Category, Channel, CurrentUser, Livestream, Page, TokenGrant } from './types';
 
 /**

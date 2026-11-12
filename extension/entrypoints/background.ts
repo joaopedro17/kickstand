@@ -1,8 +1,8 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser } from 'wxt/browser';
-import { startLoginFlow, AuthError, answerTokenRequest, logout } from '@/lib/session';
+import { startLoginFlow, AuthError, answerTokenRequest, logout } from '@/lib/auth/session';
 import { listenForRequests, type LoginResult } from '@/lib/messages';
-import { getTracked, watchTracked } from '@/lib/tracked-channels';
+import { getTracked, watchTracked } from '@/lib/channels/tracked';
 import { LEGACY_LIVE_STATUS_KEY, profileStorage } from '@/lib/storage';
 import {
   ensurePollAlarm,
@@ -11,7 +11,7 @@ import {
   pollNow,
   POLL_ALARM,
   syncToTracked,
-} from '@/lib/poll';
+} from '@/lib/polling/poll';
 
 // Runs the OAuth flow here rather than in the popup: launchWebAuthFlow opens
 // a new window, which steals focus and causes the extension popup to close

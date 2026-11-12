@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { i18n } from '#i18n';
-import { fetchCategoryPage, searchCategories } from '@/lib/kick-api';
+import { fetchCategoryPage, searchCategories } from '@/lib/kick/api';
 import { Card, EmptyState, Icon, IconButton } from './components/ui';
-import type { Category } from '@/lib/types';
+import type { Category } from '@/lib/kick/types';
 import { PagedListBody } from './components/PagedListBody';
 import { usePagedList, type FetchPage } from './usePagedList';
 

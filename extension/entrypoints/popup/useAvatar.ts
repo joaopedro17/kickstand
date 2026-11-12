@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fetchCurrentUser } from '@/lib/kick-api';
-import { withAuthRetry } from '@/lib/session-client';
+import { fetchCurrentUser } from '@/lib/kick/api';
+import { withAuthRetry } from '@/lib/auth/client';
 import { profileStorage, type CachedProfile } from '@/lib/storage';
 
 /** How long a remembered profile picture is shown before asking Kick again. */

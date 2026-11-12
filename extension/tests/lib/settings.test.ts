@@ -7,7 +7,7 @@ import {
   updateSettings,
   watchSettings,
   type Settings,
-} from './settings';
+} from '@/lib/settings';
 
 describe('parseSettings', () => {
   it('gives the defaults for nothing stored', () => {

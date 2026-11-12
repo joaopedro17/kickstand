@@ -7,7 +7,7 @@ import { fakeBackground } from '@/tests/support/fake-background';
 import type { Request } from '@/lib/messages';
 import type { TrackedChannel } from '@/lib/storage';
 import { getSettings } from '@/lib/settings';
-import { getTracked, setTracked } from '@/lib/tracked-channels';
+import { getTracked, setTracked } from '@/lib/channels/tracked';
 import { SettingsPanel } from './SettingsPanel';
 
 function tracked(id: number, slug: string): TrackedChannel {

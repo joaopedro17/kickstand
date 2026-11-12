@@ -5,14 +5,14 @@ import {
   KICK_REVOKE_URL,
   KICK_SCOPES,
   WORKER_BASE_URL,
-} from './config';
-import { authTokensStorage, type AuthTokens } from './storage';
-import type { TokenGrant } from './types';
-import { parseTokenResponse } from './kick-parse';
-import { KickApiError } from './kick-api';
-import { fetchWithTimeout } from './fetch-timeout';
-import { retryOnUnauthorized, type TokenSource } from './auth-retry';
-import type { TokenReply } from './messages';
+} from '@/lib/config';
+import { authTokensStorage, type AuthTokens } from '@/lib/storage';
+import type { TokenGrant } from '@/lib/kick/types';
+import { parseTokenResponse } from '@/lib/kick/parse';
+import { KickApiError } from '@/lib/kick/api';
+import { fetchWithTimeout } from '@/lib/fetch-timeout';
+import { retryOnUnauthorized, type TokenSource } from './retry';
+import type { TokenReply } from '@/lib/messages';
 
 export type AuthErrorCode =
   | 'cancelled'

@@ -1,5 +1,5 @@
 /**
- * Kick data as Kickstand uses it, after lib/kick-parse.ts has checked it.
+ * Kick data as Kickstand uses it, after lib/kick/parse.ts has checked it.
  * Only the fields something reads are kept; the rest of Kick's responses
  * (including the current user's email address) is dropped at the boundary.
  */

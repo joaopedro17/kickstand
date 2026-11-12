@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { computeNextStatus, channelsToNotify, countLive, isStale, STALE_AFTER_MS } from './poller';
-import type { ChannelStatus, LiveStatusCache, TrackedChannel } from './storage';
-import type { Livestream } from './types';
+import { computeNextStatus, channelsToNotify, countLive, isStale, STALE_AFTER_MS } from '@/lib/polling/live-status';
+import type { ChannelStatus, LiveStatusCache, TrackedChannel } from '@/lib/storage';
+import type { Livestream } from '@/lib/kick/types';
 
 const NOW = 1_700_000_000_000;
 const MORNING = '2026-11-11T10:00:00Z';

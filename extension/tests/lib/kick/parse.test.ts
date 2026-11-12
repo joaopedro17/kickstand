@@ -6,8 +6,8 @@ import {
   parseLivestreamPage,
   parseCategoryPage,
   parseTokenResponse,
-} from './kick-parse';
-import { KickApiError } from './kick-api';
+} from '@/lib/kick/parse';
+import { KickApiError } from '@/lib/kick/api';
 
 function rawStream(overrides: Record<string, unknown> = {}) {
   return {

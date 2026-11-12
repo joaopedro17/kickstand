@@ -1,16 +1,16 @@
-import { KICK_API_BASE } from './config';
-import { KickApiError } from './kick-error';
-import { fetchWithTimeout } from './fetch-timeout';
+import { KICK_API_BASE } from '@/lib/config';
+import { KickApiError } from './error';
+import { fetchWithTimeout } from '@/lib/fetch-timeout';
 import {
   parseCategoryPage,
   parseChannels,
   parseCurrentUser,
   parseLivestreamPage,
   parseLivestreams,
-} from './kick-parse';
+} from './parse';
 import type { Category, Channel, CurrentUser, Livestream, Page } from './types';
 
-export { KickApiError, type KickApiErrorKind } from './kick-error';
+export { KickApiError, type KickApiErrorKind } from './error';
 
 export function chunk<T>(items: T[], size: number): T[][] {
   const result: T[][] = [];

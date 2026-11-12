@@ -7,7 +7,7 @@ import { fakeBackground } from '@/tests/support/fake-background';
 import type { Request } from '@/lib/messages';
 import { FollowingTab } from './FollowingTab';
 import { liveStatusStorage, type ChannelStatus, type TrackedChannel } from '@/lib/storage';
-import { getTracked, setTracked, MAX_TRACKED } from '@/lib/tracked-channels';
+import { getTracked, setTracked, MAX_TRACKED } from '@/lib/channels/tracked';
 
 function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) {
   const fetchMock = vi.fn().mockResolvedValue({

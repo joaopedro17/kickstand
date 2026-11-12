@@ -11,9 +11,9 @@ import {
   tokenAfterRejection,
   answerTokenRequest,
   REVOKE_TIMEOUT_MS,
-} from './session';
-import { authTokensStorage, type AuthTokens } from './storage';
-import { KickApiError } from './kick-api';
+} from '@/lib/auth/session';
+import { authTokensStorage, type AuthTokens } from '@/lib/storage';
+import { KickApiError } from '@/lib/kick/api';
 
 function tokens(overrides: Partial<AuthTokens> = {}): AuthTokens {
   return {

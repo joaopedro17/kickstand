@@ -1,5 +1,5 @@
-import type { ChannelStatus, LiveStatusCache, TrackedChannel } from './storage';
-import type { Livestream } from './types';
+import type { ChannelStatus, LiveStatusCache, TrackedChannel } from '@/lib/storage';
+import type { Livestream } from '@/lib/kick/types';
 
 /** What one request for a batch of tracked channels came back with. */
 export type BatchOutcome =

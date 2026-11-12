@@ -1,7 +1,7 @@
 import { browser } from 'wxt/browser';
 import { i18n } from '#i18n';
-import { fetchLivestreams } from '@/lib/kick-api';
-import type { Livestream } from '@/lib/types';
+import { fetchLivestreams } from '@/lib/kick/api';
+import type { Livestream } from '@/lib/kick/types';
 import { Card, EmptyState, GhostButton, Icon, LiveBadge, ViewerCount } from './components/ui';
 import { PagedListBody } from './components/PagedListBody';
 import { usePagedList } from './usePagedList';

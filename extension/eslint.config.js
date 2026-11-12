@@ -20,7 +20,7 @@ export default tseslint.config(
   },
   {
     // The background is the only writer of the auth tokens (see
-    // lib/session-client.ts). The popup reaches the session through messages.
+    // lib/auth/client.ts). The popup reaches the session through messages.
     files: ['entrypoints/popup/**/*.{ts,tsx}'],
     ignores: ['**/*.test.{ts,tsx}'],
     rules: {
@@ -29,8 +29,8 @@ export default tseslint.config(
         {
           paths: [
             {
-              name: '@/lib/session',
-              message: 'The popup must not touch the stored tokens. Use @/lib/session-client.',
+              name: '@/lib/auth/session',
+              message: 'The popup must not touch the stored tokens. Use @/lib/auth/client.',
             },
           ],
         },

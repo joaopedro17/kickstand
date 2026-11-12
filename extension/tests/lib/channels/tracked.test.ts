@@ -10,8 +10,8 @@ import {
   TrackedListFullError,
   MAX_TRACKED,
   isStorageFullError,
-} from './tracked-channels';
-import type { TrackedChannel } from './storage';
+} from '@/lib/channels/tracked';
+import type { TrackedChannel } from '@/lib/storage';
 
 /** The per-item limit of chrome.storage.sync (QUOTA_BYTES_PER_ITEM), key included. */
 const SYNC_ITEM_LIMIT = 8192;

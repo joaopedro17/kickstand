@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import background from '@/entrypoints/background';
-import { POLL_ALARM } from '@/lib/poll';
+import { POLL_ALARM } from '@/lib/polling/poll';
 import { authTokensStorage, liveStatusStorage, profileStorage, type ChannelStatus } from '@/lib/storage';
-import { setTracked, removeTracked } from '@/lib/tracked-channels';
-import * as session from '@/lib/session';
+import { setTracked, removeTracked } from '@/lib/channels/tracked';
+import * as session from '@/lib/auth/session';
 
 function kickHasLive(...ids: number[]) {
   const fetchMock = vi.fn().mockImplementation(async (url: string) => ({

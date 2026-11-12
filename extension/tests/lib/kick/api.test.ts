@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { REQUEST_TIMEOUT_MS, retryAfterMs } from './kick-api';
+import { REQUEST_TIMEOUT_MS, retryAfterMs } from '@/lib/kick/api';
 import {
   chunk,
   resolveChannelsBySlug,
@@ -7,7 +7,7 @@ import {
   fetchLivestreams,
   fetchCategoryPage,
   searchCategories,
-} from './kick-api';
+} from '@/lib/kick/api';
 
 describe('chunk', () => {
   it('splits an array into groups of the given size', () => {
@@ -23,7 +23,7 @@ describe('chunk', () => {
   });
 });
 
-describe('kick-api requests', () => {
+describe('Kick API requests', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });

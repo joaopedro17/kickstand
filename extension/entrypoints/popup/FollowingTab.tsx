@@ -1,11 +1,11 @@
 import { browser } from 'wxt/browser';
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
-import { withAuthRetry } from '@/lib/session-client';
-import { resolveChannelsBySlug, KickApiError } from '@/lib/kick-api';
+import { withAuthRetry } from '@/lib/auth/client';
+import { resolveChannelsBySlug, KickApiError } from '@/lib/kick/api';
 import { translateErrorCode } from '@/lib/error-messages';
 import { sendRequest } from '@/lib/messages';
-import { isStale } from '@/lib/poller';
+import { isStale } from '@/lib/polling/live-status';
 import {
   addTracked,
   getTracked,
@@ -14,7 +14,7 @@ import {
   toggleMuted,
   TrackedListFullError,
   watchTracked,
-} from '@/lib/tracked-channels';
+} from '@/lib/channels/tracked';
 import {
   liveStatusStorage,
   type TrackedChannel,

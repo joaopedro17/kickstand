@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { KickApiError } from '@/lib/kick-api';
+import { KickApiError } from '@/lib/kick/api';
 import { translateErrorCode } from '@/lib/error-messages';
-import { withAuthRetry } from '@/lib/session-client';
-import type { Page } from '@/lib/types';
+import { withAuthRetry } from '@/lib/auth/client';
+import type { Page } from '@/lib/kick/types';
 
 type Keyed = { id: string | number };
 

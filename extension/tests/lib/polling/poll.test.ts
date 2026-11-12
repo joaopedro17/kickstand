@@ -6,15 +6,15 @@ import {
   syncToTracked,
   openNotifiedChannel,
   POLL_ALARM,
-} from './poll';
+} from '@/lib/polling/poll';
 import {
   authTokensStorage,
   liveStatusStorage,
   type ChannelStatus,
   type TrackedChannel,
-} from './storage';
-import { setTracked } from './tracked-channels';
-import { updateSettings } from './settings';
+} from '@/lib/storage';
+import { setTracked } from '@/lib/channels/tracked';
+import { updateSettings } from '@/lib/settings';
 
 const STARTED = '2026-11-11T10:00:00Z';
 
