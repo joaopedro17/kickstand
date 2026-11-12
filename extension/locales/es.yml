@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Actualizado hace {count} min"
 
 browse:
+  language: "Idioma"
+  allLanguages: "Todos los idiomas"
   track: "Seguir a {slug}"
   tracked: "Ya sigues a {slug}"
   emptyLive: No hay transmisiones en directo ahora mismo.

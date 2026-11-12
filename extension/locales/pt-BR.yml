@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Atualizado há {count} min"
 
 browse:
+  language: "Idioma"
+  allLanguages: "Todos os idiomas"
   track: "Acompanhar {slug}"
   tracked: "{slug} já é acompanhado"
   emptyLive: Nenhuma transmissão ao vivo no momento.

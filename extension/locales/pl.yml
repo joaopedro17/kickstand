@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Zaktualizowano {count} min temu"
 
 browse:
+  language: "Język"
+  allLanguages: "Wszystkie języki"
   track: "Śledź {slug}"
   tracked: "{slug} jest śledzony"
   emptyLive: Obecnie brak transmisji na żywo.

@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Uppdaterad för {count} min sedan"
 
 browse:
+  language: "Språk"
+  allLanguages: "Alla språk"
   track: "Följ {slug}"
   tracked: "{slug} följs"
   emptyLive: Inga live-sändningar just nu.

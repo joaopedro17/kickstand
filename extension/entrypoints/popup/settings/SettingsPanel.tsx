@@ -1,23 +1,17 @@
-import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { requestLogout } from '@/lib/auth/client';
 import { removeTracked } from '@/lib/channels/tracked';
-import { getSettings, watchSettings, type Settings } from '@/lib/settings';
 import { EmptyState } from '../shared/feedback';
 import { GhostButton } from '../shared/controls';
 import { Icon } from '../shared/Icon';
 import { useTracked } from '../shared/track';
+import { useSettings } from '../shared/useSettings';
 import { NotificationsSection } from './NotificationsSection';
 import { TransferSection } from './TransferSection';
 
 export function SettingsPanel() {
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const settings = useSettings();
   const channels = useTracked();
-
-  useEffect(() => {
-    getSettings().then(setSettings);
-    return watchSettings(setSettings);
-  }, []);
 
   if (!settings) return null;
 

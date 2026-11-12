@@ -7,6 +7,7 @@ import { fakeBackground } from '@/tests/support/fake-background';
 import { fakeKick, page, rawStream } from '@/tests/support/fake-kick';
 import type { Request } from '@/lib/messages';
 import { getTracked, setTracked } from '@/lib/channels/tracked';
+import { getSettings, updateSettings } from '@/lib/settings';
 import { BrowseTab } from '@/entrypoints/popup/browse/BrowseTab';
 
 const LIVESTREAMS = '/public/v2/livestreams';
@@ -98,6 +99,8 @@ describe('BrowseTab', () => {
     });
     kick.hold(LIVESTREAMS);
     const { rerender } = render(<BrowseTab categoryId={1} categoryName="Old" />);
+    // The old category's request is in flight before the user moves on.
+    await expect.poll(() => kick.requests.length).toBe(1);
 
     rerender(<BrowseTab categoryId={2} categoryName="New" />);
     await screen.findByText('new-category');
@@ -178,6 +181,45 @@ describe('BrowseTab', () => {
 
       expect(await screen.findByRole('button', { name: 'streamer2 is tracked' })).toBeDisabled();
       expect(screen.getByRole('button', { name: 'Track streamer1' })).toBeEnabled();
+    });
+  });
+
+  describe('language', () => {
+    const languageSelect = () => screen.findByRole('combobox', { name: 'Language' });
+
+    it('shows every language until one is picked, then asks Kick for that one and remembers it', async () => {
+      const kick = fakeKick({ [LIVESTREAMS]: () => page([rawStream(1, 10)]) });
+      render(<BrowseTab />);
+      await screen.findByText('streamer1');
+      expect(kick.requests[0].searchParams.has('language_code')).toBe(false);
+      expect(await languageSelect()).toHaveValue('');
+
+      await userEvent.selectOptions(await languageSelect(), 'pt');
+
+      await expect.poll(() => kick.requests.at(-1)?.searchParams.get('language_code')).toBe('pt');
+      await expect.poll(async () => (await getSettings()).browseLanguage).toBe('pt');
+    });
+
+    it('starts with the language picked last time', async () => {
+      await updateSettings({ browseLanguage: 'es' });
+      const kick = fakeKick({ [LIVESTREAMS]: () => page([rawStream(1, 10)]) });
+      render(<BrowseTab />);
+
+      await screen.findByText('streamer1');
+      expect(kick.requests.every((u) => u.searchParams.get('language_code') === 'es')).toBe(true);
+      expect(await languageSelect()).toHaveValue('es');
+    });
+
+    it('goes back to every language', async () => {
+      await updateSettings({ browseLanguage: 'es' });
+      const kick = fakeKick({ [LIVESTREAMS]: () => page([rawStream(1, 10)]) });
+      render(<BrowseTab />);
+      await screen.findByText('streamer1');
+
+      await userEvent.selectOptions(await languageSelect(), '');
+
+      await expect.poll(async () => (await getSettings()).browseLanguage).toBeNull();
+      await expect.poll(() => kick.requests.at(-1)?.searchParams.has('language_code')).toBe(false);
     });
   });
 });

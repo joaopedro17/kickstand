@@ -53,6 +53,8 @@ following:
   updatedMinutesAgo: "Vor {count} Min. aktualisiert"
 
 browse:
+  language: "Sprache"
+  allLanguages: "Alle Sprachen"
   track: "{slug} verfolgen"
   tracked: "{slug} wird verfolgt"
   emptyLive: Momentan keine Live-Streams.

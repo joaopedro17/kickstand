@@ -10,6 +10,8 @@ import { LiveBadge, ViewerCount } from '../shared/stream';
 import { PagedListBody } from '../shared/PagedListBody';
 import { usePagedList } from '../shared/usePagedList';
 import { trackChannels, useTracked } from '../shared/track';
+import { useSettings } from '../shared/useSettings';
+import { updateSettings } from '@/lib/settings';
 
 // Kick's API returns livestreams oldest-first with no sort option, so a
 // small page would mostly surface long-running low-viewer streams. Fetching
@@ -24,20 +26,63 @@ function openStream(slug: string) {
   browser.tabs.create({ url: `https://kick.com/${slug}` });
 }
 
-export function BrowseTab({
-  categoryId,
-  categoryName,
-  onClearCategory,
-}: {
+/** Languages offered in the filter: the ones most Kick streams use. */
+const LANGUAGES = ['en', 'es', 'pt', 'fr', 'de', 'it', 'pl', 'sv', 'tr', 'ru', 'ar'];
+
+function LanguageFilter({ value }: { value: string | null }) {
+  const names = new Intl.DisplayNames([browser.i18n.getUILanguage()], { type: 'language' });
+  return (
+    <label className="mb-3 flex items-center justify-end gap-2 text-xs text-muted">
+      {i18n.t('browse.language')}
+      <select
+        value={value ?? ''}
+        onChange={(e) => updateSettings({ browseLanguage: e.target.value || null })}
+        className="rounded-lg border border-white/10 bg-ink px-2 py-1 text-white"
+      >
+        <option value="">{i18n.t('browse.allLanguages')}</option>
+        {LANGUAGES.map((code) => (
+          <option key={code} value={code}>
+            {names.of(code)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+type BrowseProps = {
   categoryId?: number;
   categoryName?: string;
   onClearCategory?: () => void;
-} = {}) {
+};
+
+export function BrowseTab(props: BrowseProps = {}) {
+  // The list waits for the settings, so its first request already carries
+  // the remembered language.
+  const settings = useSettings();
+  if (!settings) return null;
+  return (
+    <div>
+      {props.categoryId && props.categoryName && (
+        <CategoryFilter name={props.categoryName} onClear={props.onClearCategory} />
+      )}
+      <LanguageFilter value={settings.browseLanguage} />
+      <StreamList categoryId={props.categoryId} language={settings.browseLanguage} />
+    </div>
+  );
+}
+
+function StreamList({ categoryId, language }: { categoryId?: number; language: string | null }) {
   const list = usePagedList(
-    String(categoryId ?? ''),
+    `${categoryId ?? ''}|${language ?? ''}`,
     (cursor, accessToken) =>
       fetchLivestreams(
-        { cursor, limit: FETCH_LIMIT, categoryId: categoryId ? [categoryId] : undefined },
+        {
+          cursor,
+          limit: FETCH_LIMIT,
+          categoryId: categoryId ? [categoryId] : undefined,
+          language: language ?? undefined,
+        },
         accessToken
       ),
     byViewersDesc
@@ -45,27 +90,22 @@ export function BrowseTab({
   const trackedIds = new Set(useTracked().map((c) => c.broadcasterUserId));
 
   return (
-    <div>
-      {categoryId && categoryName && (
-        <CategoryFilter name={categoryName} onClear={onClearCategory} />
-      )}
-      <PagedListBody
-        list={list}
-        skeleton={<StreamGridSkeleton />}
-        empty={<EmptyState icon="tv-off" title={i18n.t('browse.emptyLive')} />}
-      >
-        <div className="grid grid-cols-2 gap-2">
-          {list.items.map((stream) => (
-            <StreamCard
-              key={stream.id}
-              stream={stream}
-              tracked={trackedIds.has(stream.broadcaster.id)}
-              onOpen={() => openStream(stream.slug)}
-            />
-          ))}
-        </div>
-      </PagedListBody>
-    </div>
+    <PagedListBody
+      list={list}
+      skeleton={<StreamGridSkeleton />}
+      empty={<EmptyState icon="tv-off" title={i18n.t('browse.emptyLive')} />}
+    >
+      <div className="grid grid-cols-2 gap-2">
+        {list.items.map((stream) => (
+          <StreamCard
+            key={stream.id}
+            stream={stream}
+            tracked={trackedIds.has(stream.broadcaster.id)}
+            onOpen={() => openStream(stream.slug)}
+          />
+        ))}
+      </div>
+    </PagedListBody>
   );
 }
 
