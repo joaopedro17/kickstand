@@ -6,7 +6,7 @@ import { authTokensStorage, profileStorage } from '@/lib/auth/storage';
 import { liveStatusStorage } from '@/lib/polling/storage';
 import type { ChannelStatus } from '@/lib/polling/live-status';
 import { setTracked, removeTracked } from '@/lib/channels/tracked';
-import * as session from '@/lib/auth/session';
+import * as login from '@/lib/auth/login';
 
 function kickHasLive(...ids: number[]) {
   const fetchMock = vi.fn().mockImplementation(async (url: string) => ({
@@ -131,7 +131,7 @@ describe('background', () => {
 
   it('polls right after a successful login', async () => {
     kickHasLive(1, 2);
-    vi.spyOn(session, 'startLoginFlow').mockResolvedValue({} as never);
+    vi.spyOn(login, 'startLoginFlow').mockResolvedValue({} as never);
     await startWorker();
 
     // The fake's trigger is typed without sendResponse; the real listener takes it.
@@ -143,11 +143,11 @@ describe('background', () => {
   });
 
   it.each([
-    [new session.AuthError('cancelled', 'Login was cancelled'), { success: false, error: 'cancelled' }],
+    [new login.AuthError('cancelled', 'Login was cancelled'), { success: false, error: 'cancelled' }],
     [new Error('boom'), { success: false, error: 'unknown' }],
   ])('reports a failed login to the popup without polling', async (thrown, expected) => {
     const fetchMock = kickHasLive(1);
-    vi.spyOn(session, 'startLoginFlow').mockRejectedValue(thrown);
+    vi.spyOn(login, 'startLoginFlow').mockRejectedValue(thrown);
     await startWorker();
     fetchMock.mockClear();
 
@@ -177,7 +177,7 @@ describe('background', () => {
   it("forgets the previous account's profile picture when someone logs in", async () => {
     kickHasLive();
     await profileStorage.setValue({ avatarUrl: 'https://previous.png', fetchedAt: Date.now() });
-    vi.spyOn(session, 'startLoginFlow').mockResolvedValue({} as never);
+    vi.spyOn(login, 'startLoginFlow').mockResolvedValue({} as never);
     await startWorker();
 
     const trigger = fakeBrowser.runtime.onMessage.trigger as (...args: unknown[]) => unknown;

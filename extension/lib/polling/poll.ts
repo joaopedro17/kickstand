@@ -9,7 +9,7 @@ import {
   type BatchOutcome,
   type LiveStatusCache,
 } from './live-status';
-import { withAuthRetry } from '@/lib/auth/session';
+import { withAuthRetry } from '@/lib/auth/tokens';
 import { liveStatusStorage, pollPausedUntilStorage } from './storage';
 import { profileStorage } from '@/lib/auth/storage';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';

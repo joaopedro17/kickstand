@@ -1,6 +1,8 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser } from 'wxt/browser';
-import { startLoginFlow, AuthError, answerTokenRequest, logout } from '@/lib/auth/session';
+import { startLoginFlow, AuthError } from '@/lib/auth/login';
+import { answerTokenRequest } from '@/lib/auth/tokens';
+import { logout } from '@/lib/auth/logout';
 import { listenForRequests, type LoginResult } from '@/lib/messages';
 import { getTracked, watchTracked } from '@/lib/channels/tracked';
 import { LEGACY_LIVE_STATUS_KEY } from '@/lib/polling/storage';

@@ -1,7 +1,7 @@
 import { storage } from 'wxt/utils/storage';
 
 // What Kickstand keeps about the logged-in account. Only the background
-// writes the tokens (see lib/auth/session.ts); the popup only reads them.
+// writes the tokens (login.ts, tokens.ts, logout.ts); the popup only reads them.
 
 export interface AuthTokens {
   accessToken: string;
