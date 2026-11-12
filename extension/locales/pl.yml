@@ -83,6 +83,8 @@ settings:
 notifications:
   liveTitle: '{slug} jest na żywo!'
   liveDefaultMessage: Transmituje teraz na Kick
+  liveContext: "{category} · widzowie: {count}"
+  liveContextNoCategory: "Widzowie: {count}"
 
 common:
   loading: Ładowanie…

@@ -8,6 +8,8 @@ import type { Livestream } from '@/lib/kick/types';
 export type LiveStatus =
   | {
       kind: 'live';
+      /** Kick's username, with its capitals; may be empty. */
+      broadcasterName: string;
       /** Kick's `started_at`, compared as an opaque string; null when Kick omits it. */
       startedAt: string | null;
       viewerCount: number;
@@ -57,6 +59,7 @@ function liveEntry(
   return {
     status: {
       kind: 'live',
+      broadcasterName: stream.broadcaster.username,
       startedAt,
       viewerCount: stream.viewerCount,
       title: stream.title,

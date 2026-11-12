@@ -38,7 +38,7 @@ function kickHasLive(...ids: number[]) {
 
 function live(): ChannelStatus {
   return {
-    status: { kind: 'live', startedAt: null, viewerCount: 1, title: '', category: null, thumbnail: null },
+    status: { kind: 'live', broadcasterName: '', startedAt: null, viewerCount: 1, title: '', category: null, thumbnail: null },
     notifiedStartedAt: null,
     avatarUrl: null,
     lastCheckedAt: 1,

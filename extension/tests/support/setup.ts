@@ -12,9 +12,10 @@ afterEach(() => {
   cleanup();
 });
 
-// The fake browser has no i18n. Serve the real English strings, keyed the way
-// the browser stores them (`following.addButton` -> `following_addButton`), so
-// tests read and assert on exactly what an English-speaking user sees.
+// The fake browser has no i18n. Report an English browser, and serve the
+// real English strings, keyed the way the browser stores them
+// (`following.addButton` -> `following_addButton`), so tests read and assert
+// on exactly what an English-speaking user sees.
 // Named substitutions like {slug} are applied by @wxt-dev/i18n afterwards.
 function flatten(tree: Record<string, unknown>, prefix = ''): Record<string, string> {
   return Object.entries(tree).reduce<Record<string, string>>((acc, [key, value]) => {
@@ -41,4 +42,5 @@ beforeEach(() => {
   vi.spyOn(fakeBrowser.i18n, 'getMessage').mockImplementation(
     (name: string) => englishMessages[name] ?? ''
   );
+  vi.spyOn(fakeBrowser.i18n, 'getUILanguage').mockReturnValue('en-US');
 });

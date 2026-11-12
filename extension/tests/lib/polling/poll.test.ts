@@ -22,13 +22,13 @@ function tracked(id: number, muted = false): TrackedChannel {
 function livestream(id: number, startedAt = STARTED) {
   return {
     id: `s${id}`,
-    broadcaster_user: { id, username: `user${id}`, profile_picture: `https://pic/${id}` },
+    broadcaster_user: { id, username: `User${id}`, profile_picture: `https://pic/${id}` },
     channel: { slug: `slug${id}` },
     title: `Stream ${id}`,
     category: { id: 1, name: 'Just Chatting', thumbnail: '' },
     thumbnail: `https://thumb/${id}`,
     started_at: startedAt,
-    viewer_count: 10,
+    viewer_count: 1234,
     has_mature_content: false,
     language_code: 'en',
     tags: [],
@@ -48,6 +48,7 @@ function live(): ChannelStatus {
   return {
     status: {
       kind: 'live',
+      broadcasterName: '',
       startedAt: STARTED,
       viewerCount: 5,
       title: 't',
@@ -61,7 +62,7 @@ function live(): ChannelStatus {
 }
 
 /** Kick answers every livestream request with these streams. */
-function kickHasLive(...streams: ReturnType<typeof livestream>[]) {
+function kickHasLive(...streams: Record<string, unknown>[]) {
   const fetchMock = vi.fn().mockImplementation(async () => ({
     ok: true,
     status: 200,
@@ -91,6 +92,7 @@ describe('pollNow', () => {
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
@@ -123,9 +125,39 @@ describe('pollNow', () => {
     const all = await fakeBrowser.notifications.getAll();
     expect(all['kickstand-live-1']).toMatchObject({
       iconUrl: 'https://pic/1',
-      title: 'slug1 is live!',
+      title: 'User1 is live!',
       message: 'Stream 1',
+      contextMessage: 'Just Chatting · 1,234 viewers',
     });
+  });
+
+  it('names the channel by its slug when Kick gives no display name, and leaves out a missing category', async () => {
+    await setTracked([tracked(1)]);
+    await liveStatusStorage.setValue({ 1: offline() });
+    const bare = { ...livestream(1), category: null };
+    bare.broadcaster_user = { ...bare.broadcaster_user, username: '' };
+    kickHasLive(bare);
+
+    await pollNow();
+
+    const all = await fakeBrowser.notifications.getAll();
+    expect(all['kickstand-live-1']).toMatchObject({
+      title: 'slug1 is live!',
+      contextMessage: '1,234 viewers',
+    });
+  });
+
+  it('puts the category and viewers in the message on Firefox, which ignores contextMessage', async () => {
+    vi.stubEnv('FIREFOX', 'true');
+    await setTracked([tracked(1)]);
+    await liveStatusStorage.setValue({ 1: offline() });
+    kickHasLive(livestream(1));
+
+    await pollNow();
+
+    const notification = (await fakeBrowser.notifications.getAll())['kickstand-live-1'];
+    expect(notification.message).toBe('Stream 1\nJust Chatting · 1,234 viewers');
+    expect(notification).not.toHaveProperty('contextMessage');
   });
 
   it('falls back to the Kickstand icon and a stock message when the stream has no avatar or title', async () => {

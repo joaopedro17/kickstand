@@ -83,6 +83,8 @@ settings:
 notifications:
   liveTitle: '{slug} sänder live!'
   liveDefaultMessage: Sänder live nu på Kick
+  liveContext: "{category} · {count} tittare"
+  liveContextNoCategory: "{count} tittare"
 
 common:
   loading: Laddar…

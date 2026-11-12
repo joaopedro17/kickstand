@@ -51,6 +51,7 @@ function live(title: string, viewerCount: number): ChannelStatus {
   return {
     status: {
       kind: 'live',
+      broadcasterName: '',
       startedAt: '2026-11-11T10:00:00Z',
       viewerCount,
       title,

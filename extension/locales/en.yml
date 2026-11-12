@@ -83,6 +83,8 @@ settings:
 notifications:
   liveTitle: '{slug} is live!'
   liveDefaultMessage: Streaming now on Kick
+  liveContext: '{category} · {count} viewers'
+  liveContextNoCategory: '{count} viewers'
 
 common:
   loading: Loading…

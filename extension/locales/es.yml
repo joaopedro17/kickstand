@@ -83,6 +83,8 @@ settings:
 notifications:
   liveTitle: '¡{slug} está en directo!'
   liveDefaultMessage: Transmitiendo ahora en Kick
+  liveContext: "{category} · {count} espectadores"
+  liveContextNoCategory: "{count} espectadores"
 
 common:
   loading: Cargando…

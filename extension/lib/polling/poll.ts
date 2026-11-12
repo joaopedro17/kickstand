@@ -7,6 +7,7 @@ import {
   computeNextStatus,
   countLive,
   type BatchOutcome,
+  type LiveStatus,
   type LiveStatusCache,
 } from './live-status';
 import { withAuthRetry } from '@/lib/auth/tokens';
@@ -94,16 +95,33 @@ async function fetchAll(tracked: TrackedChannel[]): Promise<BatchOutcome[] | nul
   return batches;
 }
 
-async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): Promise<void> {
+type LiveEntry = Extract<LiveStatus, { kind: 'live' }>;
+
+async function liveNotificationText(channel: TrackedChannel, stream: LiveEntry) {
   const i18n = await getI18n();
+  const count = stream.viewerCount.toLocaleString(browser.i18n.getUILanguage());
+  const context = stream.category
+    ? i18n.t('notifications.liveContext', { category: stream.category.name, count })
+    : i18n.t('notifications.liveContextNoCategory', { count });
+  const message = stream.title || i18n.t('notifications.liveDefaultMessage');
+  return {
+    title: i18n.t('notifications.liveTitle', { slug: stream.broadcasterName || channel.slug }),
+    // Firefox ignores contextMessage, so the line goes into the message there.
+    ...(import.meta.env.FIREFOX
+      ? { message: `${message}\n${context}` }
+      : { message, contextMessage: context }),
+  };
+}
+
+async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): Promise<void> {
   for (const channel of channels) {
     const entry = status[channel.broadcasterUserId];
-    const title = entry.status.kind === 'live' ? entry.status.title : '';
+    // Only channels that just went live are passed in.
+    if (entry.status.kind !== 'live') continue;
     await browser.notifications.create(`${NOTIFICATION_PREFIX}${channel.broadcasterUserId}`, {
       type: 'basic',
       iconUrl: entry.avatarUrl || browser.runtime.getURL('/icons/128.png'),
-      title: i18n.t('notifications.liveTitle', { slug: channel.slug }),
-      message: title || i18n.t('notifications.liveDefaultMessage'),
+      ...(await liveNotificationText(channel, entry.status)),
     });
   }
 }

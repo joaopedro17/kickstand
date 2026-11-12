@@ -35,6 +35,7 @@ function live(startedAt: string | null, notifiedStartedAt: string | null): Chann
   return {
     status: {
       kind: 'live',
+      broadcasterName: '',
       startedAt,
       viewerCount: 1,
       title: 'old',
@@ -71,6 +72,7 @@ describe('computeNextStatus', () => {
     expect(next[1]).toEqual({
       status: {
         kind: 'live',
+        broadcasterName: 'user1',
         startedAt: MORNING,
         viewerCount: 123,
         title: 'title-1',
