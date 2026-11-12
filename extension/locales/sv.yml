@@ -59,6 +59,8 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  focusTabToggle: "Byt till kanalens öppna flik i stället för att öppna en ny"
+  focusTabHint: "Webbläsaren frågar om Kickstand får se dina öppna flikar."
   categoryChangeToggle: "Avisera även när en livekanal byter kategori"
   quietHoursToggle: "Tysta aviseringar under tysta timmar"
   quietFrom: "Från"

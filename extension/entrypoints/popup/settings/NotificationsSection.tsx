@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
+import { allowTabFocus, canFocusTabs, disallowTabFocus, watchTabFocus } from '@/lib/tab-focus';
 import { POLL_INTERVALS, updateSettings, type QuietHours, type Settings } from '@/lib/settings';
 import { SectionHeader } from '../shared/layout';
 
@@ -129,6 +131,31 @@ function QuietHoursFields({ quiet }: { quiet: QuietHours }) {
   );
 }
 
+/** On exactly while the browser grants the optional `tabs` permission; see lib/tab-focus. */
+function TabFocusToggle() {
+  const [allowed, setAllowed] = useState(false);
+  useEffect(() => {
+    canFocusTabs().then(setAllowed).catch(() => {});
+    return watchTabFocus(setAllowed);
+  }, []);
+
+  function change(on: boolean) {
+    // The request is made right in the click handler: browsers only show the
+    // permission prompt in response to a user action.
+    (on ? allowTabFocus() : disallowTabFocus())
+      .then(canFocusTabs)
+      .then(setAllowed)
+      .catch(() => {});
+  }
+
+  return (
+    <>
+      <Toggle id="focus-tab" label={i18n.t('settings.focusTabToggle')} checked={allowed} onChange={change} />
+      <p className="ml-6 mt-1 text-[11px] text-muted">{i18n.t('settings.focusTabHint')}</p>
+    </>
+  );
+}
+
 export function NotificationsSection({ settings }: { settings: Settings }) {
   return (
     <section
@@ -153,6 +180,7 @@ export function NotificationsSection({ settings }: { settings: Settings }) {
         checked={settings.notifyCategoryChange}
         onChange={(notifyCategoryChange) => updateSettings({ notifyCategoryChange })}
       />
+      <TabFocusToggle />
       <QuietHoursFields quiet={settings.quietHours} />
       <PollInterval settings={settings} />
     </section>

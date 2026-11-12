@@ -8,6 +8,7 @@ import type { Request } from '@/lib/messages';
 import { type TrackedChannel, getTracked, setTracked } from '@/lib/channels/tracked';
 import { getSettings } from '@/lib/settings';
 import { fakeKick } from '@/tests/support/fake-kick';
+import { fakePermissions } from '@/tests/support/fake-permissions';
 import { SettingsPanel } from '@/entrypoints/popup/settings/SettingsPanel';
 
 function tracked(id: number, slug: string): TrackedChannel {
@@ -61,6 +62,47 @@ describe('SettingsPanel', () => {
     await userEvent.click(toggle);
 
     await expect.poll(async () => (await getSettings()).notifyCategoryChange).toBe(true);
+  });
+
+  describe('switching to an open tab', () => {
+    const toggle = () =>
+      screen.findByRole<HTMLInputElement>('checkbox', {
+        name: "Switch to the channel's open tab instead of opening a new one",
+      });
+
+    it('asks the browser for access to tabs, and is on once allowed', async () => {
+      const { held } = fakePermissions();
+      render(<SettingsPanel />);
+      expect(await toggle()).not.toBeChecked();
+      expect(screen.getByText('Your browser will ask to let Kickstand see your open tabs.')).toBeInTheDocument();
+
+      await userEvent.click(await toggle());
+
+      expect(held.has('tabs')).toBe(true);
+      await expect.poll(async () => (await toggle()).checked).toBe(true);
+    });
+
+    it('stays off when the user declines', async () => {
+      const { held } = fakePermissions({ accept: false });
+      render(<SettingsPanel />);
+
+      await userEvent.click(await toggle());
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(held.has('tabs')).toBe(false);
+      expect(await toggle()).not.toBeChecked();
+    });
+
+    it('gives the access back when turned off', async () => {
+      const { held } = fakePermissions({ granted: ['tabs'] });
+      render(<SettingsPanel />);
+      await expect.poll(async () => (await toggle()).checked).toBe(true);
+
+      await userEvent.click(await toggle());
+
+      expect(held.has('tabs')).toBe(false);
+      await expect.poll(async () => (await toggle()).checked).toBe(false);
+    });
   });
 
   it('sets quiet hours, from 22:00 to 07:00 unless changed', async () => {

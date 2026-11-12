@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
+import { focusChannelTab } from '@/lib/tab-focus';
 import type { LiveStatus, LiveStatusCache } from './live-status';
 
 /** One notification id per channel: a newer alert replaces the channel's previous one. */
@@ -61,11 +62,13 @@ export async function notifyChannels(
   }
 }
 
-/** Opens the channel a live notification was about, and dismisses it. */
+/** Shows the channel an alert was about, in its open tab if allowed and there is one, and dismisses the alert. */
 export async function openNotifiedChannel(notificationId: string): Promise<void> {
   if (!notificationId.startsWith(NOTIFICATION_PREFIX)) return;
   const id = Number(notificationId.slice(NOTIFICATION_PREFIX.length));
   const channel = (await getTracked()).find((c) => c.broadcasterUserId === id);
-  if (channel) await browser.tabs.create({ url: `https://kick.com/${channel.slug}` });
+  if (channel && !(await focusChannelTab(channel.slug))) {
+    await browser.tabs.create({ url: `https://kick.com/${channel.slug}` });
+  }
   await browser.notifications.clear(notificationId);
 }

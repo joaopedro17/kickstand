@@ -59,6 +59,8 @@ categories:
   emptyAll: Brak dostępnych kategorii.
 
 settings:
+  focusTabToggle: "Przełącz na otwartą kartę kanału zamiast otwierać nową"
+  focusTabHint: "Przeglądarka poprosi o zgodę na wgląd Kickstand w otwarte karty."
   categoryChangeToggle: "Powiadamiaj też, gdy kanał na żywo zmieni kategorię"
   quietHoursToggle: "Wycisz powiadomienia w godzinach ciszy"
   quietFrom: "Od"

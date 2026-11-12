@@ -18,8 +18,6 @@ export interface Settings {
   quietHours: QuietHours;
   notifyCategoryChange: boolean;
   soundEnabled: boolean;
-  /** Clicking a notification focuses an open tab of the channel; needs the optional `tabs` permission. */
-  focusExistingTab: boolean;
   blurMature: boolean;
   /** The language Browse was last filtered by; null for every language. */
   browseLanguage: string | null;
@@ -31,7 +29,6 @@ export const DEFAULT_SETTINGS: Settings = {
   quietHours: { enabled: false, startMinute: 22 * 60, endMinute: 7 * 60 },
   notifyCategoryChange: false,
   soundEnabled: false,
-  focusExistingTab: false,
   blurMature: true,
   browseLanguage: null,
 };
@@ -84,7 +81,6 @@ export function parseSettings(stored: unknown): Settings {
     quietHours: quietHours(fields.quietHours),
     notifyCategoryChange: bool(fields.notifyCategoryChange, d.notifyCategoryChange),
     soundEnabled: bool(fields.soundEnabled, d.soundEnabled),
-    focusExistingTab: bool(fields.focusExistingTab, d.focusExistingTab),
     blurMature: bool(fields.blurMature, d.blurMature),
     browseLanguage: language(fields.browseLanguage),
   };

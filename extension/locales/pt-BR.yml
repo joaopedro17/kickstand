@@ -59,6 +59,8 @@ categories:
   emptyAll: Nenhuma categoria disponível.
 
 settings:
+  focusTabToggle: "Ir para a aba já aberta do canal em vez de abrir uma nova"
+  focusTabHint: "Seu navegador vai pedir permissão para o Kickstand ver suas abas abertas."
   categoryChangeToggle: "Avisar também quando um canal ao vivo mudar de categoria"
   quietHoursToggle: "Silenciar alertas no horário de descanso"
   quietFrom: "De"

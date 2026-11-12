@@ -59,6 +59,8 @@ categories:
   emptyAll: Nessuna categoria disponibile.
 
 settings:
+  focusTabToggle: "Passa alla scheda già aperta del canale invece di aprirne una nuova"
+  focusTabHint: "Il browser chiederà di consentire a Kickstand di vedere le schede aperte."
   categoryChangeToggle: "Avvisa anche quando un canale live cambia categoria"
   quietHoursToggle: "Silenzia gli avvisi nelle ore di quiete"
   quietFrom: "Dalle"

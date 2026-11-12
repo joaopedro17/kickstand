@@ -5,6 +5,7 @@ import { cleanup } from '@testing-library/react';
 import { load } from 'js-yaml';
 import { afterEach, beforeEach, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
+import { fakePermissions } from './fake-permissions';
 
 // Vitest runs without globals, so Testing Library cannot register its own
 // afterEach cleanup; unmount rendered components between tests here.
@@ -43,4 +44,5 @@ beforeEach(() => {
     (name: string) => englishMessages[name] ?? ''
   );
   vi.spyOn(fakeBrowser.i18n, 'getUILanguage').mockReturnValue('en-US');
+  fakePermissions();
 });

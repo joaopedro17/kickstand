@@ -24,13 +24,12 @@ describe('parseSettings', () => {
     });
   });
 
-  it('defaults to a two-minute poll, with sound, category alerts and tab focus off', () => {
+  it('defaults to a two-minute poll, with sound and category alerts off', () => {
     expect(DEFAULT_SETTINGS).toMatchObject({
       notificationsEnabled: true,
       pollIntervalMinutes: 2,
       notifyCategoryChange: false,
       soundEnabled: false,
-      focusExistingTab: false,
       blurMature: true,
       browseLanguage: null,
       quietHours: { enabled: false, startMinute: 22 * 60, endMinute: 7 * 60 },
@@ -44,7 +43,6 @@ describe('parseSettings', () => {
       quietHours: { enabled: true, startMinute: 0, endMinute: 1439 },
       notifyCategoryChange: true,
       soundEnabled: true,
-      focusExistingTab: true,
       blurMature: false,
       browseLanguage: 'pt',
     };

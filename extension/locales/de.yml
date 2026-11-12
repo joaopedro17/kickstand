@@ -59,6 +59,8 @@ categories:
   emptyAll: Keine Kategorien verfügbar.
 
 settings:
+  focusTabToggle: "Zum offenen Tab des Kanals wechseln statt einen neuen zu öffnen"
+  focusTabHint: "Dein Browser fragt, ob Kickstand deine offenen Tabs sehen darf."
   categoryChangeToggle: "Auch benachrichtigen, wenn ein Live-Kanal die Kategorie wechselt"
   quietHoursToggle: "Benachrichtigungen in Ruhezeiten stummschalten"
   quietFrom: "Von"
