@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { load } from 'js-yaml';
-import { ERROR_CODES, translateErrorCode } from '@/lib/error-messages';
+import { ERROR_CODES, translateErrorCode } from '@/entrypoints/popup/shared/error-messages';
 
 const LOCALES_DIR = join(__dirname, '../locales');
 

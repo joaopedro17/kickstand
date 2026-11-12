@@ -6,7 +6,7 @@ import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import { fakeKick, page, rawCategory, rawStream } from '@/tests/support/fake-kick';
 import { authTokensStorage, profileStorage } from '@/lib/storage';
-import App from './App';
+import App from '@/entrypoints/popup/App';
 
 const DAY = 24 * 60 * 60 * 1000;
 const USERS = '/public/v1/users';

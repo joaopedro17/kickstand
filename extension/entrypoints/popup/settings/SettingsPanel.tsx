@@ -9,7 +9,7 @@ import {
   GhostButton,
   Icon,
   SectionHeader,
-} from './components/ui';
+} from '../shared/ui';
 
 export function SettingsPanel() {
   const [settings, setSettings] = useState<Settings | null>(null);

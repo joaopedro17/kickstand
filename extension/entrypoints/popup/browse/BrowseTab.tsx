@@ -2,9 +2,9 @@ import { browser } from 'wxt/browser';
 import { i18n } from '#i18n';
 import { fetchLivestreams } from '@/lib/kick/api';
 import type { Livestream } from '@/lib/kick/types';
-import { Card, EmptyState, GhostButton, Icon, LiveBadge, ViewerCount } from './components/ui';
-import { PagedListBody } from './components/PagedListBody';
-import { usePagedList } from './usePagedList';
+import { Card, EmptyState, GhostButton, Icon, LiveBadge, ViewerCount } from '../shared/ui';
+import { PagedListBody } from '../shared/PagedListBody';
+import { usePagedList } from '../shared/usePagedList';
 
 // Kick's API returns livestreams oldest-first with no sort option, so a
 // small page would mostly surface long-running low-viewer streams. Fetching

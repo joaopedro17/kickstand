@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth/client';
 import { resolveChannelsBySlug, KickApiError } from '@/lib/kick/api';
-import { translateErrorCode } from '@/lib/error-messages';
+import { translateErrorCode } from '../shared/error-messages';
 import { sendRequest } from '@/lib/messages';
 import { isStale } from '@/lib/polling/live-status';
 import {
@@ -33,7 +33,7 @@ import {
   SectionHeader,
   TextInput,
   ViewerCount,
-} from './components/ui';
+} from '../shared/ui';
 
 function describeAddError(err: unknown): string {
   if (err instanceof TrackedListFullError) {

@@ -8,7 +8,7 @@ import type { Request } from '@/lib/messages';
 import type { TrackedChannel } from '@/lib/storage';
 import { getSettings } from '@/lib/settings';
 import { getTracked, setTracked } from '@/lib/channels/tracked';
-import { SettingsPanel } from './SettingsPanel';
+import { SettingsPanel } from '@/entrypoints/popup/settings/SettingsPanel';
 
 function tracked(id: number, slug: string): TrackedChannel {
   return { broadcasterUserId: id, slug, addedAt: id, muted: false };

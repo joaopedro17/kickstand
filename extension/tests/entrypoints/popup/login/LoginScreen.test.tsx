@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
-import { LoginScreen } from './LoginScreen';
+import { LoginScreen } from '@/entrypoints/popup/login/LoginScreen';
 
 describe('LoginScreen', () => {
   beforeEach(() => {

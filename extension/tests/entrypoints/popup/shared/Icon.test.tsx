@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Icon } from './ui';
-import { Header } from './Header';
+import { Icon } from '@/entrypoints/popup/shared/ui';
+import { Header } from '@/entrypoints/popup/shared/Header';
 
 describe('icons', () => {
   afterEach(() => {

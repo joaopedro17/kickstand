@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import { fakeKick, page, rawStream } from '@/tests/support/fake-kick';
-import { BrowseTab } from './BrowseTab';
+import { BrowseTab } from '@/entrypoints/popup/browse/BrowseTab';
 
 const LIVESTREAMS = '/public/v2/livestreams';
 

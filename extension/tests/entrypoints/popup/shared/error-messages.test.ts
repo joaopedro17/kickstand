@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { translateErrorCode } from './error-messages';
+import { translateErrorCode } from '@/entrypoints/popup/shared/error-messages';
 
 describe('translateErrorCode', () => {
   beforeEach(() => {

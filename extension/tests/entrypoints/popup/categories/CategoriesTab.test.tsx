@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import { fakeKick, page, rawCategory } from '@/tests/support/fake-kick';
-import { CategoriesTab } from './CategoriesTab';
+import { CategoriesTab } from '@/entrypoints/popup/categories/CategoriesTab';
 
 const CATEGORIES = '/public/v2/categories';
 

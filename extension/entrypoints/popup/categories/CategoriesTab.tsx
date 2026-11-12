@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { i18n } from '#i18n';
 import { fetchCategoryPage, searchCategories } from '@/lib/kick/api';
-import { Card, EmptyState, Icon, IconButton } from './components/ui';
+import { Card, EmptyState, Icon, IconButton } from '../shared/ui';
 import type { Category } from '@/lib/kick/types';
-import { PagedListBody } from './components/PagedListBody';
-import { usePagedList, type FetchPage } from './usePagedList';
+import { PagedListBody } from '../shared/PagedListBody';
+import { usePagedList, type FetchPage } from '../shared/usePagedList';
 
 /**
  * Browsing pages through all categories; a search is answered in one page,

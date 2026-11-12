@@ -2,8 +2,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { ErrorBanner, LiveBadge, ViewerCount } from './ui';
-import { Header } from './Header';
+import { ErrorBanner, LiveBadge, ViewerCount } from '@/entrypoints/popup/shared/ui';
+import { Header } from '@/entrypoints/popup/shared/Header';
 
 // Every visible word must come from the locale files. Here the fake browser
 // answers with the message name itself, so a hard-coded English string

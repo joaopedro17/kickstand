@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { LiveBadge, formatCount } from './ui';
+import { LiveBadge, formatCount } from '@/entrypoints/popup/shared/ui';
 
 describe('LiveBadge', () => {
   it('stays still by default, for tracked channels', () => {
