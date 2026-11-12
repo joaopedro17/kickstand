@@ -1,5 +1,33 @@
-import type { ChannelStatus, LiveStatusCache, TrackedChannel } from '@/lib/storage';
+import type { TrackedChannel } from '@/lib/channels/tracked';
 import type { Livestream } from '@/lib/kick/types';
+
+/**
+ * What the last poll learned about a channel. Only a live channel has stream
+ * details, so an offline channel can't carry a stale viewer count or title.
+ */
+export type LiveStatus =
+  | {
+      kind: 'live';
+      /** Kick's `started_at`, compared as an opaque string; null when Kick omits it. */
+      startedAt: string | null;
+      viewerCount: number;
+      title: string;
+      category: { id: number; name: string } | null;
+      thumbnail: string | null;
+    }
+  | { kind: 'offline'; lastLiveAt: number | null };
+
+export interface ChannelStatus {
+  status: LiveStatus;
+  /** The stream Kickstand last notified for (or adopted silently); at most one notification per stream. */
+  notifiedStartedAt: string | null;
+  avatarUrl: string | null;
+  lastCheckedAt: number;
+  lastError?: string;
+}
+
+/** Keyed by broadcaster user id. A tracked channel with no entry has never been polled. */
+export type LiveStatusCache = Record<number, ChannelStatus>;
 
 /** What one request for a batch of tracked channels came back with. */
 export type BatchOutcome =

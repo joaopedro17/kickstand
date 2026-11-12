@@ -3,7 +3,8 @@ import { browser } from 'wxt/browser';
 import { startLoginFlow, AuthError, answerTokenRequest, logout } from '@/lib/auth/session';
 import { listenForRequests, type LoginResult } from '@/lib/messages';
 import { getTracked, watchTracked } from '@/lib/channels/tracked';
-import { LEGACY_LIVE_STATUS_KEY, profileStorage } from '@/lib/storage';
+import { LEGACY_LIVE_STATUS_KEY } from '@/lib/polling/storage';
+import { profileStorage } from '@/lib/auth/storage';
 import {
   ensurePollAlarm,
   forgetSessionData,

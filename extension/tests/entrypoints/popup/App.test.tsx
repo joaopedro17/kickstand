@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import { fakeKick, page, rawCategory, rawStream } from '@/tests/support/fake-kick';
-import { authTokensStorage, profileStorage } from '@/lib/storage';
+import { authTokensStorage, profileStorage } from '@/lib/auth/storage';
 import App from '@/entrypoints/popup/App';
 
 const DAY = 24 * 60 * 60 * 1000;

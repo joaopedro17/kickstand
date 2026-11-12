@@ -6,7 +6,7 @@ import {
   KICK_SCOPES,
   WORKER_BASE_URL,
 } from '@/lib/config';
-import { authTokensStorage, type AuthTokens } from '@/lib/storage';
+import { authTokensStorage, type AuthTokens } from './storage';
 import type { TokenGrant } from '@/lib/kick/types';
 import { parseTokenResponse } from '@/lib/kick/parse';
 import { KickApiError } from '@/lib/kick/api';

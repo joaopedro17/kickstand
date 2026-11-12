@@ -6,8 +6,9 @@ import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import type { Request } from '@/lib/messages';
 import { FollowingTab } from '@/entrypoints/popup/following/FollowingTab';
-import { liveStatusStorage, type ChannelStatus, type TrackedChannel } from '@/lib/storage';
-import { getTracked, setTracked, MAX_TRACKED } from '@/lib/channels/tracked';
+import { liveStatusStorage } from '@/lib/polling/storage';
+import type { ChannelStatus } from '@/lib/polling/live-status';
+import { type TrackedChannel, getTracked, setTracked, MAX_TRACKED } from '@/lib/channels/tracked';
 
 function kickReturns(channels: { broadcaster_user_id: number; slug: string }[]) {
   const fetchMock = vi.fn().mockResolvedValue({

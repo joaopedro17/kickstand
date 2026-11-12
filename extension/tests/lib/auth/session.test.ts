@@ -12,7 +12,7 @@ import {
   answerTokenRequest,
   REVOKE_TIMEOUT_MS,
 } from '@/lib/auth/session';
-import { authTokensStorage, type AuthTokens } from '@/lib/storage';
+import { authTokensStorage, type AuthTokens } from '@/lib/auth/storage';
 import { KickApiError } from '@/lib/kick/api';
 
 function tokens(overrides: Partial<AuthTokens> = {}): AuthTokens {

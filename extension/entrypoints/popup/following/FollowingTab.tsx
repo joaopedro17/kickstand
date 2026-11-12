@@ -5,7 +5,12 @@ import { withAuthRetry } from '@/lib/auth/client';
 import { resolveChannelsBySlug, KickApiError } from '@/lib/kick/api';
 import { translateErrorCode } from '../shared/error-messages';
 import { sendRequest } from '@/lib/messages';
-import { isStale } from '@/lib/polling/live-status';
+import {
+  isStale,
+  type LiveStatusCache,
+  type ChannelStatus,
+  type LiveStatus,
+} from '@/lib/polling/live-status';
 import {
   addTracked,
   getTracked,
@@ -14,14 +19,9 @@ import {
   toggleMuted,
   TrackedListFullError,
   watchTracked,
-} from '@/lib/channels/tracked';
-import {
-  liveStatusStorage,
   type TrackedChannel,
-  type LiveStatusCache,
-  type ChannelStatus,
-  type LiveStatus,
-} from '@/lib/storage';
+} from '@/lib/channels/tracked';
+import { liveStatusStorage } from '@/lib/polling/storage';
 import {
   Card,
   EmptyState,

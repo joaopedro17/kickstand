@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import background from '@/entrypoints/background';
 import { POLL_ALARM } from '@/lib/polling/poll';
-import { authTokensStorage, liveStatusStorage, profileStorage, type ChannelStatus } from '@/lib/storage';
+import { authTokensStorage, profileStorage } from '@/lib/auth/storage';
+import { liveStatusStorage } from '@/lib/polling/storage';
+import type { ChannelStatus } from '@/lib/polling/live-status';
 import { setTracked, removeTracked } from '@/lib/channels/tracked';
 import * as session from '@/lib/auth/session';
 

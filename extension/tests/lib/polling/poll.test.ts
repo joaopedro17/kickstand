@@ -7,13 +7,10 @@ import {
   openNotifiedChannel,
   POLL_ALARM,
 } from '@/lib/polling/poll';
-import {
-  authTokensStorage,
-  liveStatusStorage,
-  type ChannelStatus,
-  type TrackedChannel,
-} from '@/lib/storage';
-import { setTracked } from '@/lib/channels/tracked';
+import { authTokensStorage } from '@/lib/auth/storage';
+import { liveStatusStorage } from '@/lib/polling/storage';
+import type { ChannelStatus } from '@/lib/polling/live-status';
+import { type TrackedChannel, setTracked } from '@/lib/channels/tracked';
 import { updateSettings } from '@/lib/settings';
 
 const STARTED = '2026-11-11T10:00:00Z';

@@ -5,9 +5,8 @@ import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import type { Request } from '@/lib/messages';
-import type { TrackedChannel } from '@/lib/storage';
+import { type TrackedChannel, getTracked, setTracked } from '@/lib/channels/tracked';
 import { getSettings } from '@/lib/settings';
-import { getTracked, setTracked } from '@/lib/channels/tracked';
 import { SettingsPanel } from '@/entrypoints/popup/settings/SettingsPanel';
 
 function tracked(id: number, slug: string): TrackedChannel {

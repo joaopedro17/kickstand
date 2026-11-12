@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchCurrentUser } from '@/lib/kick/api';
 import { withAuthRetry } from '@/lib/auth/client';
-import { profileStorage, type CachedProfile } from '@/lib/storage';
+import { profileStorage, type CachedProfile } from '@/lib/auth/storage';
 
 /** How long a remembered profile picture is shown before asking Kick again. */
 export const PROFILE_MAX_AGE_MS = 24 * 60 * 60 * 1000;

@@ -1,6 +1,5 @@
 import { browser } from 'wxt/browser';
 import { chunk } from '@/lib/kick/api';
-import type { TrackedChannel } from '@/lib/storage';
 
 /**
  * The tracked-channel list, in browser sync storage.
@@ -12,6 +11,13 @@ import type { TrackedChannel } from '@/lib/storage';
  * are removed afterwards. A crash in between leaves extra items that the meta
  * item already excludes, so reads stay correct and the next write cleans up.
  */
+
+export interface TrackedChannel {
+  broadcasterUserId: number;
+  slug: string;
+  addedAt: number;
+  muted: boolean;
+}
 
 export const MAX_TRACKED = 500;
 const CHANNELS_PER_CHUNK = 50;

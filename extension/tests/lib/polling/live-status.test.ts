@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { computeNextStatus, channelsToNotify, countLive, isStale, STALE_AFTER_MS } from '@/lib/polling/live-status';
-import type { ChannelStatus, LiveStatusCache, TrackedChannel } from '@/lib/storage';
+import {
+  computeNextStatus,
+  channelsToNotify,
+  countLive,
+  isStale,
+  STALE_AFTER_MS,
+  type ChannelStatus,
+  type LiveStatusCache,
+} from '@/lib/polling/live-status';
+import type { TrackedChannel } from '@/lib/channels/tracked';
 import type { Livestream } from '@/lib/kick/types';
 
 const NOW = 1_700_000_000_000;

@@ -5,17 +5,18 @@ import {
   KickApiError,
   MAX_USERS_PER_LIVESTREAM_REQUEST,
 } from '@/lib/kick/api';
-import { channelsToNotify, computeNextStatus, countLive, type BatchOutcome } from './live-status';
-import { withAuthRetry } from '@/lib/auth/session';
 import {
-  liveStatusStorage,
-  pollPausedUntilStorage,
-  profileStorage,
+  channelsToNotify,
+  computeNextStatus,
+  countLive,
+  type BatchOutcome,
   type LiveStatusCache,
-  type TrackedChannel,
-} from '@/lib/storage';
+} from './live-status';
+import { withAuthRetry } from '@/lib/auth/session';
+import { liveStatusStorage, pollPausedUntilStorage } from './storage';
+import { profileStorage } from '@/lib/auth/storage';
+import { type TrackedChannel, getTracked } from '@/lib/channels/tracked';
 import { getSettings } from '@/lib/settings';
-import { getTracked } from '@/lib/channels/tracked';
 
 export const POLL_ALARM = 'kickstand-poll';
 const POLL_PERIOD_MINUTES = 5;

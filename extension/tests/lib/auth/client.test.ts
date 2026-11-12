@@ -3,7 +3,7 @@ import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
 import { withAuthRetry, requestLogout } from '@/lib/auth/client';
 import { KickApiError } from '@/lib/kick/api';
-import { authTokensStorage } from '@/lib/storage';
+import { authTokensStorage } from '@/lib/auth/storage';
 
 const rejected = () => new KickApiError('unauthorized', 'Access token rejected', 401);
 

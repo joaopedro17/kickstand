@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { REQUEST_TIMEOUT_MS, retryAfterMs } from '@/lib/kick/api';
 import {
+  REQUEST_TIMEOUT_MS,
+  retryAfterMs,
   chunk,
   resolveChannelsBySlug,
   fetchLivestreamsForUsers,

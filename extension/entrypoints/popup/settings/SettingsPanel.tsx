@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { requestLogout } from '@/lib/auth/client';
-import { getTracked, removeTracked, watchTracked } from '@/lib/channels/tracked';
-import type { TrackedChannel } from '@/lib/storage';
+import {
+  getTracked,
+  removeTracked,
+  watchTracked,
+  type TrackedChannel,
+} from '@/lib/channels/tracked';
 import { getSettings, updateSettings, watchSettings, type Settings } from '@/lib/settings';
 import {
   EmptyState,

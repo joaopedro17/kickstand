@@ -16,6 +16,8 @@ export default tseslint.config(
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      // One import statement per module.
+      'no-duplicate-imports': 'error',
     },
   },
   {

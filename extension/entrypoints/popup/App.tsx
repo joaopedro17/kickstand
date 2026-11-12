@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { authTokensStorage } from '@/lib/storage';
+import { authTokensStorage } from '@/lib/auth/storage';
 import { LoginScreen } from './login/LoginScreen';
 import { Header, type TabName } from './shared/Header';
 import { FollowingTab } from './following/FollowingTab';
