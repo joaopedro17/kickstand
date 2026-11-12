@@ -5,7 +5,8 @@ import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/test/fake-background';
 import type { Request } from '@/lib/messages';
-import { settingsStorage, type TrackedChannel } from '@/lib/storage';
+import type { TrackedChannel } from '@/lib/storage';
+import { getSettings } from '@/lib/settings';
 import { getTracked, setTracked } from '@/lib/tracked-channels';
 import { SettingsPanel } from './SettingsPanel';
 
@@ -33,11 +34,11 @@ describe('SettingsPanel', () => {
     expect(toggle).toBeChecked();
 
     await userEvent.click(toggle);
-    await expect.poll(async () => (await settingsStorage.getValue()).notificationsEnabled).toBe(false);
+    await expect.poll(async () => (await getSettings()).notificationsEnabled).toBe(false);
     expect(toggle).not.toBeChecked();
 
     await userEvent.click(toggle);
-    await expect.poll(async () => (await settingsStorage.getValue()).notificationsEnabled).toBe(true);
+    await expect.poll(async () => (await getSettings()).notificationsEnabled).toBe(true);
   });
 
   it('names its sections for screen readers', async () => {

@@ -11,10 +11,10 @@ import {
   liveStatusStorage,
   pollPausedUntilStorage,
   profileStorage,
-  settingsStorage,
   type LiveStatusCache,
   type TrackedChannel,
 } from './storage';
+import { getSettings } from './settings';
 import { getTracked } from './tracked-channels';
 
 export const POLL_ALARM = 'kickstand-poll';
@@ -119,7 +119,7 @@ async function runPoll(): Promise<void> {
   await liveStatusStorage.setValue(next);
   await showOnBadge(next);
 
-  const { notificationsEnabled } = await settingsStorage.getValue();
+  const { notificationsEnabled } = await getSettings();
   const toNotify = notificationsEnabled ? channelsToNotify(tracked, wentLive) : [];
   if (toNotify.length > 0) await notifyLive(toNotify, next);
 }

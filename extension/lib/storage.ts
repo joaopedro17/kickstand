@@ -7,10 +7,6 @@ export interface TrackedChannel {
   muted: boolean;
 }
 
-export interface Settings {
-  notificationsEnabled: boolean;
-}
-
 /**
  * What the last poll learned about a channel. Only a live channel has stream
  * details, so an offline channel can't carry a stale viewer count or title.
@@ -45,14 +41,6 @@ export interface AuthTokens {
   expiresAt: number;
   refreshExpiresAt: number;
 }
-
-export const DEFAULT_SETTINGS: Settings = {
-  notificationsEnabled: true,
-};
-
-export const settingsStorage = storage.defineItem<Settings>('sync:settings', {
-  fallback: DEFAULT_SETTINGS,
-});
 
 // Stored under a new key: entries in the old flat shape (local:liveStatus)
 // are dropped, not converted. The first poll after an update then sees every

@@ -10,11 +10,11 @@ import {
 import {
   authTokensStorage,
   liveStatusStorage,
-  settingsStorage,
   type ChannelStatus,
   type TrackedChannel,
 } from './storage';
 import { setTracked } from './tracked-channels';
+import { updateSettings } from './settings';
 
 const STARTED = '2026-11-11T10:00:00Z';
 
@@ -159,7 +159,7 @@ describe('pollNow', () => {
   });
 
   it('does not notify when notifications are turned off', async () => {
-    await settingsStorage.setValue({ notificationsEnabled: false });
+    await updateSettings({ notificationsEnabled: false });
     await setTracked([tracked(1)]);
     await liveStatusStorage.setValue({ 1: offline() });
     kickHasLive(livestream(1));

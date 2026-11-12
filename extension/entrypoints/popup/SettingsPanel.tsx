@@ -2,11 +2,8 @@ import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { requestLogout } from '@/lib/session-client';
 import { getTracked, removeTracked, watchTracked } from '@/lib/tracked-channels';
-import {
-  settingsStorage,
-  type Settings,
-  type TrackedChannel,
-} from '@/lib/storage';
+import type { TrackedChannel } from '@/lib/storage';
+import { getSettings, updateSettings, watchSettings, type Settings } from '@/lib/settings';
 import {
   EmptyState,
   GhostButton,
@@ -19,9 +16,9 @@ export function SettingsPanel() {
   const [channels, setChannels] = useState<TrackedChannel[]>([]);
 
   useEffect(() => {
-    settingsStorage.getValue().then(setSettings);
+    getSettings().then(setSettings);
     getTracked().then(setChannels);
-    const unwatchSettings = settingsStorage.watch(setSettings);
+    const unwatchSettings = watchSettings(setSettings);
     const unwatchChannels = watchTracked(setChannels);
     return () => {
       unwatchSettings();
@@ -32,11 +29,8 @@ export function SettingsPanel() {
   if (!settings) return null;
 
   async function toggleNotifications() {
-    const current = await settingsStorage.getValue();
-    await settingsStorage.setValue({
-      ...current,
-      notificationsEnabled: !current.notificationsEnabled,
-    });
+    const { notificationsEnabled } = await getSettings();
+    await updateSettings({ notificationsEnabled: !notificationsEnabled });
   }
 
   async function removeChannel(id: number) {
