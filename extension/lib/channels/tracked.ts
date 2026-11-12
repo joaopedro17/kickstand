@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import { chunk } from '@/lib/chunk';
 import type { Channel } from '@/lib/kick/types';
+import { serialQueue } from '@/lib/serial';
 
 /**
  * The tracked-channel list, in browser sync storage.
@@ -90,19 +91,15 @@ export async function setTracked(list: TrackedChannel[]): Promise<void> {
   await write(list, await readMeta());
 }
 
-// Changes in this context run one after another, each reading the list the
-// previous one wrote, so two quick clicks can't overwrite each other.
-let queue: Promise<unknown> = Promise.resolve();
+const enqueue = serialQueue();
 
 function update<T>(change: (list: TrackedChannel[]) => { list: TrackedChannel[]; result: T }): Promise<T> {
-  const run = queue.then(async () => {
+  return enqueue(async () => {
     const current = await getTracked();
     const { list, result } = change(current);
     if (list !== current) await setTracked(list);
     return result;
   });
-  queue = run.catch(() => {});
-  return run;
 }
 
 export interface AddOutcome {

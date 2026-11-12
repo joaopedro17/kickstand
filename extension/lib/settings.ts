@@ -1,4 +1,5 @@
 import { storage } from 'wxt/utils/storage';
+import { serialQueue } from './serial';
 
 export const POLL_INTERVALS = [1, 2, 5] as const;
 export type PollIntervalMinutes = (typeof POLL_INTERVALS)[number];
@@ -100,19 +101,15 @@ export async function getSettings(): Promise<Settings> {
 
 type SettingsChange = Partial<Settings> | ((current: Settings) => Partial<Settings>);
 
-// Updates in this context run one after another, each reading what the
-// previous one wrote, so two quick changes can't overwrite each other.
-let queue: Promise<unknown> = Promise.resolve();
+const enqueue = serialQueue();
 
 /** Changes the named fields; a function computes them from the settings as stored. */
 export function updateSettings(change: SettingsChange): Promise<void> {
-  const run = queue.then(async () => {
+  return enqueue(async () => {
     const current = await getSettings();
     const changes = typeof change === 'function' ? change(current) : change;
     await settingsStorage.setValue({ ...current, ...changes });
   });
-  queue = run.catch(() => {});
-  return run;
 }
 
 export function watchSettings(onChange: (settings: Settings) => void): () => void {
