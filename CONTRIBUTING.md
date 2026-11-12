@@ -190,10 +190,10 @@ on file changes.
 
 **Firefox:**
 1. Run `pnpm build:firefox` inside `extension/` (outputs to
-   `extension/.output/firefox-mv3/`).
+   `extension/.output/firefox-mv2/`).
 2. Go to `about:debugging#/runtime/this-firefox`.
 3. Click "Load Temporary Add-on" and select any file inside
-   `extension/.output/firefox-mv3/` (e.g. `manifest.json`).
+   `extension/.output/firefox-mv2/` (e.g. `manifest.json`).
 
 ## When Kick adds a followed-channels endpoint
 

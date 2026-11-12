@@ -1,0 +1,31 @@
+# Weekly update proposals for both pnpm projects and for the workflow
+# actions (which are pinned to commit SHAs). Minor and patch updates are
+# grouped into one PR per project to keep the noise down.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /extension
+    schedule:
+      interval: weekly
+    target-branch: develop
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /worker
+    schedule:
+      interval: weekly
+    target-branch: develop
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: develop
+    groups:
+      actions:
+        patterns: ['*']

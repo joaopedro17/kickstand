@@ -1,21 +1,51 @@
 # <img src="extension/public/icons/48.png" width="38" align="left" /> Kickstand
 > A browser companion for Kick.com — track channels, catch who's live, browse the rest
 
-Kickstand lets you follow Kick.com channels by slug and see at a glance who's
-live, right from your browser toolbar. It notifies you when a tracked channel
-goes live, and lets you browse the platform's live streams and categories
-without leaving your current tab.
+Kickstand lets you follow Kick.com channels and see at a glance who's live,
+right from your browser toolbar. It notifies you when a tracked channel goes
+live, and lets you browse the platform's live streams and categories without
+leaving your current tab.
 
-Manifest V3, cross-browser (Chrome + Firefox), built with
+- **Add channels your way:** paste names or `kick.com` links (several at
+  once), track the channel open in your current tab in one click, or hit
+  "+" on any stream in Browse. Move your list between browsers with copy,
+  download and import.
+- **Know who's live, and for how long:** live channels first with viewers
+  and uptime, "last live" for offline ones, a filter for long lists.
+- **Alerts that fit you:** check every 1, 2 or 5 minutes, quiet hours,
+  per-channel mute, optional category-change alerts and sound, and
+  switching to the channel's open tab instead of opening another.
+- **Browse on your terms:** filter by language, blur mature thumbnails, and
+  hide channels or categories you don't want to see.
+
+Cross-browser (Chrome on Manifest V3, Firefox on Manifest V2), built with
 [WXT](https://wxt.dev) + TypeScript + React.
 
 ## Frequently Asked Questions
 
-### Why do I have to type the channel slug instead of searching by name?
+### Can I search for a channel by name?
 
-Kick's public API only supports looking up a channel by its exact slug —
-there's no search-by-display-name endpoint to query against. The slug is the
-part of the channel's URL after `kick.com/`, e.g. `xqc` for `kick.com/xqc`.
+Not by display name: Kick's public API can only look a channel up by its
+exact name in the URL (`xqc` for `kick.com/xqc`). You don't have to type it,
+though. Paste a channel's link, several names or links at once, or a whole
+list; open the popup on a channel's page and click "Track"; or add streamers
+straight from the Browse tab.
+
+### Can I import the channels I already follow on Kick?
+
+Not yet. Kick's public API doesn't offer the list of channels you follow,
+and Kickstand won't scrape Kick's website for it. Kick says it is on its
+roadmap ([KickDevDocs#87](https://github.com/KickEngineering/KickDevDocs/issues/87));
+Kickstand will add an "Import from Kick" button once it is available. Until
+then, paste your channels' names or links into the add box, or import a list
+in Settings.
+
+### Why does Kickstand ask to see my tabs?
+
+Only if you turn on "switch to the channel's open tab" in Settings. Your
+browser then asks you to allow it, and Kickstand uses it only to find an
+already-open tab of the channel when you click an alert. Turning the setting
+off gives the permission back. See the [privacy policy](PRIVACY.md).
 
 ### Why isn't the Browse tab sorted by viewer count out of the box?
 
