@@ -28,6 +28,11 @@ following:
   mute: Stummschalten
   unmute: Stummschaltung aufheben
   offline: Offline
+  liveFor: "Seit {duration} live"
+  lastLive: "Zuletzt live vor {duration}"
+  durationMinutes: "{m} Min."
+  durationHours: "{h} Std. {m} Min."
+  durationDays: "{d} T."
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Offline anzeigen

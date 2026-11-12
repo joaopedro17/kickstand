@@ -28,6 +28,11 @@ following:
   mute: Wycisz
   unmute: Wyłącz wyciszenie
   offline: Offline
+  liveFor: "Na żywo od {duration}"
+  lastLive: "Ostatnio na żywo {duration} temu"
+  durationMinutes: "{m} min"
+  durationHours: "{h} godz. {m} min"
+  durationDays: "{d} d"
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Pokaż offline

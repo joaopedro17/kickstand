@@ -28,6 +28,11 @@ following:
   mute: Tysta
   unmute: Sluta tysta
   offline: Offline
+  liveFor: "Live i {duration}"
+  lastLive: "Senast live för {duration} sedan"
+  durationMinutes: "{m} min"
+  durationHours: "{h} h {m} min"
+  durationDays: "{d} d"
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Visa offline

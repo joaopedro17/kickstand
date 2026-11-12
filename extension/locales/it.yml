@@ -28,6 +28,11 @@ following:
   mute: Disattiva audio
   unmute: Riattiva audio
   offline: Offline
+  liveFor: "Live da {duration}"
+  lastLive: "Ultima live {duration} fa"
+  durationMinutes: "{m} min"
+  durationHours: "{h} h {m} min"
+  durationDays: "{d} g"
   offlineGroupOne: Offline (1)
   offlineGroupOther: 'Offline ({count})'
   showOffline: Mostra offline

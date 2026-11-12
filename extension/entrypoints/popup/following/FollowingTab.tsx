@@ -11,6 +11,7 @@ import type { Channel } from '@/lib/kick/types';
 import { trackChannels } from '../shared/track';
 import { AddNotices, useSlugAdder } from '../shared/useSlugAdder';
 import { ChannelLists } from './ChannelList';
+import { useNow } from '../shared/useNow';
 import { liveStatusStorage } from '@/lib/polling/storage';
 import { SectionHeader } from '../shared/layout';
 import { EmptyState, ErrorBanner } from '../shared/feedback';
@@ -70,18 +71,6 @@ function useCurrentTabChannel(tracked: TrackedChannel[]): Channel | null {
 
   const isTracked = tracked.some((c) => c.broadcasterUserId === channel?.broadcasterUserId);
   return isTracked ? null : channel;
-}
-
-/** How often the "Updated … ago" label is recomputed while the popup is open. */
-const CLOCK_TICK_MS = 30_000;
-
-function useNow(): number {
-  const [now, setNow] = useState(Date.now);
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), CLOCK_TICK_MS);
-    return () => clearInterval(timer);
-  }, []);
-  return now;
 }
 
 function updatedLabel(checkedAt: number, now: number): string {

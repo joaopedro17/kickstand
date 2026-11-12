@@ -28,6 +28,11 @@ following:
   mute: Muet
   unmute: Réactiver le son
   offline: Hors ligne
+  liveFor: "En direct depuis {duration}"
+  lastLive: "Dernier direct il y a {duration}"
+  durationMinutes: "{m} min"
+  durationHours: "{h} h {m} min"
+  durationDays: "{d} j"
   offlineGroupOne: Hors ligne (1)
   offlineGroupOther: 'Hors ligne ({count})'
   showOffline: Afficher hors ligne

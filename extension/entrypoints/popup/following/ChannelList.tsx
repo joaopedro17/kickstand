@@ -7,6 +7,18 @@ import { Card } from '../shared/layout';
 import { Icon } from '../shared/Icon';
 import { IconButton } from '../shared/controls';
 import { LiveBadge, ViewerCount } from '../shared/stream';
+import { useNow } from '../shared/useNow';
+
+/** A length of time as "45m", "2h 5m" or "3d". */
+function durationText(ms: number): string {
+  const minutes = Math.floor(Math.max(0, ms) / 60_000);
+  if (minutes < 60) return i18n.t('following.durationMinutes', { m: String(minutes) });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return i18n.t('following.durationHours', { h: String(hours), m: String(minutes % 60) });
+  }
+  return i18n.t('following.durationDays', { d: String(Math.floor(hours / 24)) });
+}
 
 function openChannel(slug: string) {
   browser.tabs.create({ url: `https://kick.com/${slug}` });
@@ -85,9 +97,7 @@ function ChannelRow({
         {status?.status.kind === 'live' ? (
           <StreamDetails stream={status.status} />
         ) : (
-          <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-muted">
-            {i18n.t('following.offline')}
-          </p>
+          <OfflineDetails lastLiveAt={status?.status.lastLiveAt ?? null} />
         )}
       </div>
     </Card>
@@ -133,12 +143,36 @@ function MuteButton({ channel }: { channel: TrackedChannel }) {
   );
 }
 
+function OfflineDetails({ lastLiveAt }: { lastLiveAt: number | null }) {
+  const now = useNow();
+  return (
+    <p className="mt-1 text-[11px] text-muted">
+      {lastLiveAt === null
+        ? i18n.t('following.offline')
+        : i18n.t('following.lastLive', { duration: durationText(now - lastLiveAt) })}
+    </p>
+  );
+}
+
+function Uptime({ startedAt }: { startedAt: string | null }) {
+  const now = useNow();
+  const started = startedAt === null ? NaN : Date.parse(startedAt);
+  if (Number.isNaN(started)) return null;
+  return (
+    <>
+      <span>·</span>
+      <span>{i18n.t('following.liveFor', { duration: durationText(now - started) })}</span>
+    </>
+  );
+}
+
 function StreamDetails({ stream }: { stream: LiveStream }) {
   return (
     <>
       <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{stream.title}</p>
       <div className="mt-1 flex items-center gap-2 text-[11px] text-muted">
         <ViewerCount count={stream.viewerCount} />
+        <Uptime startedAt={stream.startedAt} />
         {stream.category?.name && (
           <>
             <span>·</span>

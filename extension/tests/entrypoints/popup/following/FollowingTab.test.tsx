@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { fakeBackground } from '@/tests/support/fake-background';
@@ -432,6 +432,70 @@ describe('FollowingTab', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /show offline/i }));
     expect(screen.getByText('sleeping')).toBeInTheDocument();
+  });
+
+  describe('how long', () => {
+    const MIN = 60_000;
+    const HOUR = 60 * MIN;
+    const startedAgo = (ms: number): ChannelStatus => {
+      const entry = live('t', 1);
+      return {
+        ...entry,
+        status: { ...entry.status, startedAt: new Date(Date.now() - ms).toISOString() } as ChannelStatus['status'],
+        lastCheckedAt: Date.now(),
+      };
+    };
+    const offlineSince = (lastLiveAt: number | null): ChannelStatus => ({
+      status: { kind: 'offline', lastLiveAt },
+      notifiedStartedAt: null,
+      avatarUrl: null,
+      lastCheckedAt: Date.now(),
+    });
+
+    it('says how long each live channel has been live', async () => {
+      await setTracked([tracked(1, 'short'), tracked(2, 'long'), tracked(3, 'marathon')]);
+      await liveStatusStorage.setValue({
+        1: startedAgo(45 * MIN + 10_000),
+        2: startedAgo(2 * HOUR + 5 * MIN),
+        3: startedAgo(26 * HOUR),
+      });
+
+      render(<FollowingTab />);
+
+      expect(await screen.findByText('Live for 45m')).toBeInTheDocument();
+      expect(screen.getByText('Live for 2h 5m')).toBeInTheDocument();
+      expect(screen.getByText('Live for 1d')).toBeInTheDocument();
+    });
+
+    it('leaves out the uptime when Kick gave no start time', async () => {
+      await setTracked([tracked(1, 'one')]);
+      const entry = live('t', 1);
+      await liveStatusStorage.setValue({
+        1: { ...entry, status: { ...entry.status, startedAt: null } as ChannelStatus['status'] },
+      });
+
+      render(<FollowingTab />);
+
+      await screen.findByText('one');
+      expect(screen.queryByText(/^Live for/)).toBeNull();
+    });
+
+    it('says when each offline channel was last seen live', async () => {
+      await setTracked([tracked(1, 'recent'), tracked(2, 'days'), tracked(3, 'never')]);
+      await liveStatusStorage.setValue({
+        1: offlineSince(Date.now() - 3 * HOUR),
+        2: offlineSince(Date.now() - 50 * HOUR),
+        3: offlineSince(null),
+      });
+      render(<FollowingTab />);
+
+      await userEvent.click(await screen.findByRole('button', { name: /show offline/i }));
+
+      expect(screen.getByText('Last live 3h 0m ago')).toBeInTheDocument();
+      expect(screen.getByText('Last live 2d ago')).toBeInTheDocument();
+      const never = screen.getByText('never').closest('li')!;
+      expect(within(never).getByText('Offline')).toBeInTheDocument();
+    });
   });
 
   it('mutes a channel from its row', async () => {
