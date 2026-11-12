@@ -53,6 +53,7 @@ following:
   updatedMinutesAgo: "Atualizado há {count} min"
 
 browse:
+  mature: "Adulto"
   language: "Idioma"
   allLanguages: "Todos os idiomas"
   track: "Acompanhar {slug}"
@@ -68,6 +69,9 @@ categories:
   emptyAll: Nenhuma categoria disponível.
 
 settings:
+  browseTitle: "Explorar"
+  browseKicker: "O que o Explorar mostra"
+  blurMatureToggle: "Desfocar miniaturas de streams adultas"
   soundToggle: "Tocar um som com os alertas"
   focusTabToggle: "Ir para a aba já aberta do canal em vez de abrir uma nova"
   focusTabHint: "Seu navegador vai pedir permissão para o Kickstand ver suas abas abertas."

@@ -146,6 +146,17 @@ describe('SettingsPanel', () => {
     expect((await getSettings()).quietHours.startMinute).toBe(22 * 60);
   });
 
+  it('blurs mature thumbnails in Browse unless turned off', async () => {
+    render(<SettingsPanel />);
+    const toggle = await screen.findByRole('checkbox', { name: 'Blur thumbnails of mature streams' });
+    expect(toggle).toBeChecked();
+
+    await userEvent.click(toggle);
+
+    await expect.poll(async () => (await getSettings()).blurMature).toBe(false);
+    expect(screen.getByRole('region', { name: 'Browse' })).toContainElement(toggle);
+  });
+
   it('names its sections for screen readers', async () => {
     render(<SettingsPanel />);
 

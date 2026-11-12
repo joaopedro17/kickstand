@@ -2,35 +2,8 @@ import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { allowTabFocus, canFocusTabs, disallowTabFocus, watchTabFocus } from '@/lib/tab-focus';
 import { POLL_INTERVALS, updateSettings, type QuietHours, type Settings } from '@/lib/settings';
-import { SectionHeader } from '../shared/layout';
-
-function Toggle({
-  id,
-  label,
-  checked,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-}) {
-  return (
-    <label
-      htmlFor={id}
-      className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-white transition hover:text-lime"
-    >
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 cursor-pointer accent-[#b8f34a]"
-      />
-      <span>{label}</span>
-    </label>
-  );
-}
+import { SettingToggle, Toggle } from './Toggle';
+import { SettingsSection } from './SettingsSection';
 
 function PollInterval({ settings }: { settings: Settings }) {
   return (
@@ -158,37 +131,18 @@ function TabFocusToggle() {
 
 export function NotificationsSection({ settings }: { settings: Settings }) {
   return (
-    <section
-      className="mb-5 rounded-2xl border border-white/[0.06] bg-panel p-4 shadow-lg shadow-black/10"
-      aria-labelledby="notifications-heading"
+    <SettingsSection
+      id="notifications"
+      icon="bell"
+      title={i18n.t('settings.notificationsTitle')}
+      kicker={i18n.t('settings.notificationsKicker')}
     >
-      <SectionHeader
-        icon="bell"
-        title={i18n.t('settings.notificationsTitle')}
-        headingId="notifications-heading"
-        kicker={i18n.t('settings.notificationsKicker')}
-      />
-      <Toggle
-        id="live-notifications"
-        label={i18n.t('settings.notifyToggle')}
-        checked={settings.notificationsEnabled}
-        onChange={(notificationsEnabled) => updateSettings({ notificationsEnabled })}
-      />
-      <Toggle
-        id="alert-sound"
-        label={i18n.t('settings.soundToggle')}
-        checked={settings.soundEnabled}
-        onChange={(soundEnabled) => updateSettings({ soundEnabled })}
-      />
-      <Toggle
-        id="category-alerts"
-        label={i18n.t('settings.categoryChangeToggle')}
-        checked={settings.notifyCategoryChange}
-        onChange={(notifyCategoryChange) => updateSettings({ notifyCategoryChange })}
-      />
+      <SettingToggle settings={settings} name="notificationsEnabled" label={i18n.t('settings.notifyToggle')} />
+      <SettingToggle settings={settings} name="soundEnabled" label={i18n.t('settings.soundToggle')} />
+      <SettingToggle settings={settings} name="notifyCategoryChange" label={i18n.t('settings.categoryChangeToggle')} />
       <TabFocusToggle />
       <QuietHoursFields quiet={settings.quietHours} />
       <PollInterval settings={settings} />
-    </section>
+    </SettingsSection>
   );
 }

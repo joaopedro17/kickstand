@@ -53,6 +53,7 @@ following:
   updatedMinutesAgo: "Zaktualizowano {count} min temu"
 
 browse:
+  mature: "Dla dorosłych"
   language: "Język"
   allLanguages: "Wszystkie języki"
   track: "Śledź {slug}"
@@ -68,6 +69,9 @@ categories:
   emptyAll: Brak dostępnych kategorii.
 
 settings:
+  browseTitle: "Przeglądaj"
+  browseKicker: "Co pokazuje Przeglądaj"
+  blurMatureToggle: "Rozmywaj miniatury streamów dla dorosłych"
   soundToggle: "Odtwarzaj dźwięk przy powiadomieniach"
   focusTabToggle: "Przełącz na otwartą kartę kanału zamiast otwierać nową"
   focusTabHint: "Przeglądarka poprosi o zgodę na wgląd Kickstand w otwarte karty."

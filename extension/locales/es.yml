@@ -53,6 +53,7 @@ following:
   updatedMinutesAgo: "Actualizado hace {count} min"
 
 browse:
+  mature: "Adultos"
   language: "Idioma"
   allLanguages: "Todos los idiomas"
   track: "Seguir a {slug}"
@@ -68,6 +69,9 @@ categories:
   emptyAll: No hay categorías disponibles.
 
 settings:
+  browseTitle: "Explorar"
+  browseKicker: "Lo que muestra Explorar"
+  blurMatureToggle: "Difuminar las miniaturas de streams para adultos"
   soundToggle: "Reproducir un sonido con los avisos"
   focusTabToggle: "Ir a la pestaña abierta del canal en lugar de abrir una nueva"
   focusTabHint: "Tu navegador pedirá permiso para que Kickstand vea tus pestañas abiertas."

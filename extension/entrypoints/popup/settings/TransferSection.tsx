@@ -3,8 +3,8 @@ import { i18n } from '#i18n';
 import type { TrackedChannel } from '@/lib/channels/tracked';
 import { GhostButton, PrimaryButton } from '../shared/controls';
 import { Icon } from '../shared/Icon';
-import { SectionHeader } from '../shared/layout';
 import { AddNotices, useSlugAdder } from '../shared/useSlugAdder';
+import { SettingsSection } from './SettingsSection';
 
 const FILE_NAME = 'kickstand-channels.txt';
 const COPIED_FOR_MS = 2000;
@@ -37,16 +37,12 @@ export function TransferSection({ channels }: { channels: TrackedChannel[] }) {
   }
 
   return (
-    <section
-      className="mb-5 rounded-2xl border border-white/[0.06] bg-panel p-4 shadow-lg shadow-black/10"
-      aria-labelledby="transfer-heading"
+    <SettingsSection
+      id="transfer"
+      icon="list"
+      title={i18n.t('settings.transferTitle')}
+      kicker={i18n.t('settings.transferKicker')}
     >
-      <SectionHeader
-        icon="list"
-        title={i18n.t('settings.transferTitle')}
-        headingId="transfer-heading"
-        kicker={i18n.t('settings.transferKicker')}
-      />
       <div className="mb-3 flex gap-2">
         <GhostButton type="button" disabled={empty} onClick={() => copy().catch(() => {})}>
           <Icon icon={copied ? 'check' : 'copy'} className="text-sm" />
@@ -81,6 +77,6 @@ export function TransferSection({ channels }: { channels: TrackedChannel[] }) {
         </PrimaryButton>
       </form>
       <AddNotices notices={notices} />
-    </section>
+    </SettingsSection>
   );
 }

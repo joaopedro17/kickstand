@@ -222,4 +222,36 @@ describe('BrowseTab', () => {
       await expect.poll(() => kick.requests.at(-1)?.searchParams.has('language_code')).toBe(false);
     });
   });
+
+  describe('mature streams', () => {
+    const thumbnailOf = (slug: string) => screen.getByText(slug).closest('[class*="group"]')!.querySelector('img')!;
+
+    it('blurs the thumbnail of a stream marked mature, and says why', async () => {
+      fakeKick({
+        [LIVESTREAMS]: () =>
+          page([
+            rawStream(1, 10, { thumbnail: 'https://thumb/1', has_mature_content: true }),
+            rawStream(2, 5, { thumbnail: 'https://thumb/2' }),
+          ]),
+      });
+      render(<BrowseTab />);
+
+      await screen.findByText('streamer1');
+      expect(thumbnailOf('streamer1')).toHaveClass('blur-xl');
+      expect(screen.getAllByText('Mature')).toHaveLength(1);
+      expect(thumbnailOf('streamer2')).not.toHaveClass('blur-xl');
+    });
+
+    it('shows mature thumbnails as they are once the user turns blurring off', async () => {
+      await updateSettings({ blurMature: false });
+      fakeKick({
+        [LIVESTREAMS]: () => page([rawStream(1, 10, { thumbnail: 'https://thumb/1', has_mature_content: true })]),
+      });
+      render(<BrowseTab />);
+
+      await screen.findByText('streamer1');
+      expect(thumbnailOf('streamer1')).not.toHaveClass('blur-xl');
+      expect(screen.queryByText('Mature')).toBeNull();
+    });
+  });
 });

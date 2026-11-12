@@ -67,12 +67,24 @@ export function BrowseTab(props: BrowseProps = {}) {
         <CategoryFilter name={props.categoryName} onClear={props.onClearCategory} />
       )}
       <LanguageFilter value={settings.browseLanguage} />
-      <StreamList categoryId={props.categoryId} language={settings.browseLanguage} />
+      <StreamList
+        categoryId={props.categoryId}
+        language={settings.browseLanguage}
+        blurMature={settings.blurMature}
+      />
     </div>
   );
 }
 
-function StreamList({ categoryId, language }: { categoryId?: number; language: string | null }) {
+function StreamList({
+  categoryId,
+  language,
+  blurMature,
+}: {
+  categoryId?: number;
+  language: string | null;
+  blurMature: boolean;
+}) {
   const list = usePagedList(
     `${categoryId ?? ''}|${language ?? ''}`,
     (cursor, accessToken) =>
@@ -101,6 +113,7 @@ function StreamList({ categoryId, language }: { categoryId?: number; language: s
             key={stream.id}
             stream={stream}
             tracked={trackedIds.has(stream.broadcaster.id)}
+            blurred={blurMature && stream.hasMatureContent}
             onOpen={() => openStream(stream.slug)}
           />
         ))}
@@ -147,10 +160,13 @@ function TrackButton({ stream, tracked }: { stream: Livestream; tracked: boolean
 function StreamCard({
   stream,
   tracked,
+  blurred,
   onOpen,
 }: {
   stream: Livestream;
   tracked: boolean;
+  /** A mature stream's thumbnail, hidden behind a blur. */
+  blurred: boolean;
   onOpen: () => void;
 }) {
   return (
@@ -163,7 +179,11 @@ function StreamCard({
           <img
             src={stream.thumbnail}
             alt=""
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            className={
+              blurred
+                ? 'h-full w-full scale-110 object-cover blur-xl'
+                : 'h-full w-full object-cover transition duration-300 group-hover:scale-105'
+            }
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted">
@@ -171,6 +191,11 @@ function StreamCard({
           </div>
         )}
         <LiveBadge animated />
+        {blurred && (
+          <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+            {i18n.t('browse.mature')}
+          </span>
+        )}
       </div>
       <div className="p-3">
         <div className="flex items-center justify-between gap-2">

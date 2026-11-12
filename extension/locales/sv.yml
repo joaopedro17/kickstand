@@ -53,6 +53,7 @@ following:
   updatedMinutesAgo: "Uppdaterad för {count} min sedan"
 
 browse:
+  mature: "Vuxet"
   language: "Språk"
   allLanguages: "Alla språk"
   track: "Följ {slug}"
@@ -68,6 +69,9 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  browseTitle: "Utforska"
+  browseKicker: "Vad Utforska visar"
+  blurMatureToggle: "Göra miniatyrer av vuxenströmmar suddiga"
   soundToggle: "Spela ett ljud vid aviseringar"
   focusTabToggle: "Byt till kanalens öppna flik i stället för att öppna en ny"
   focusTabHint: "Webbläsaren frågar om Kickstand får se dina öppna flikar."

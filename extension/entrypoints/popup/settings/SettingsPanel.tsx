@@ -7,6 +7,7 @@ import { Icon } from '../shared/Icon';
 import { useTracked } from '../shared/track';
 import { useSettings } from '../shared/useSettings';
 import { NotificationsSection } from './NotificationsSection';
+import { BrowseSection } from './BrowseSection';
 import { TransferSection } from './TransferSection';
 
 export function SettingsPanel() {
@@ -22,6 +23,7 @@ export function SettingsPanel() {
   return (
     <div>
       <NotificationsSection settings={settings} />
+      <BrowseSection settings={settings} />
 
       <section
         className="mb-5 rounded-2xl border border-white/[0.06] bg-panel p-4 shadow-lg shadow-black/10"

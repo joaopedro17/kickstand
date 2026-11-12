@@ -53,6 +53,7 @@ following:
   updatedMinutesAgo: "Vor {count} Min. aktualisiert"
 
 browse:
+  mature: "Ab 18"
   language: "Sprache"
   allLanguages: "Alle Sprachen"
   track: "{slug} verfolgen"
@@ -68,6 +69,9 @@ categories:
   emptyAll: Keine Kategorien verfügbar.
 
 settings:
+  browseTitle: "Entdecken"
+  browseKicker: "Was Entdecken zeigt"
+  blurMatureToggle: "Vorschaubilder von Streams ab 18 unscharf zeigen"
   soundToggle: "Bei Benachrichtigungen einen Ton abspielen"
   focusTabToggle: "Zum offenen Tab des Kanals wechseln statt einen neuen zu öffnen"
   focusTabHint: "Dein Browser fragt, ob Kickstand deine offenen Tabs sehen darf."

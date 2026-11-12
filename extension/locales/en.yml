@@ -53,6 +53,7 @@ following:
   updatedMinutesAgo: 'Updated {count} min ago'
 
 browse:
+  mature: Mature
   language: Language
   allLanguages: All languages
   track: 'Track {slug}'
@@ -68,6 +69,9 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  browseTitle: Browse
+  browseKicker: What Browse shows
+  blurMatureToggle: Blur thumbnails of mature streams
   soundToggle: "Play a sound with alerts"
   focusTabToggle: Switch to the channel's open tab instead of opening a new one
   focusTabHint: Your browser will ask to let Kickstand see your open tabs.
