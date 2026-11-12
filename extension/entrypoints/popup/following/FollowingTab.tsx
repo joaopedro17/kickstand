@@ -2,7 +2,8 @@ import { browser } from 'wxt/browser';
 import { useEffect, useState } from 'react';
 import { i18n } from '#i18n';
 import { withAuthRetry } from '@/lib/auth/client';
-import { resolveChannelsBySlug, KickApiError } from '@/lib/kick/api';
+import { resolveChannelsBySlug } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 import { translateErrorCode } from '../shared/error-messages';
 import { sendRequest } from '@/lib/messages';
 import {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { KickApiError } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 import { translateErrorCode } from './error-messages';
 import { withAuthRetry } from '@/lib/auth/client';
 import type { Page } from '@/lib/kick/types';

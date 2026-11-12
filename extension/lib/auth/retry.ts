@@ -1,4 +1,4 @@
-import { KickApiError } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 
 /** Where a context gets its access tokens from. */
 export interface TokenSource {

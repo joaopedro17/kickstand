@@ -1,5 +1,5 @@
 import { retryOnUnauthorized, type TokenSource } from './retry';
-import { KickApiError } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 import { sendRequest, type TokenReply } from '@/lib/messages';
 
 /**

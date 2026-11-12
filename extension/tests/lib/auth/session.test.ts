@@ -13,7 +13,7 @@ import {
   REVOKE_TIMEOUT_MS,
 } from '@/lib/auth/session';
 import { authTokensStorage, type AuthTokens } from '@/lib/auth/storage';
-import { KickApiError } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 
 function tokens(overrides: Partial<AuthTokens> = {}): AuthTokens {
   return {

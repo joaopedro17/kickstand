@@ -7,7 +7,7 @@ import {
   parseCategoryPage,
   parseTokenResponse,
 } from '@/lib/kick/parse';
-import { KickApiError } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 
 function rawStream(overrides: Record<string, unknown> = {}) {
   return {

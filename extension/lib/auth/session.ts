@@ -9,7 +9,7 @@ import {
 import { authTokensStorage, type AuthTokens } from './storage';
 import type { TokenGrant } from '@/lib/kick/types';
 import { parseTokenResponse } from '@/lib/kick/parse';
-import { KickApiError } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 import { fetchWithTimeout } from '@/lib/fetch-timeout';
 import { retryOnUnauthorized, type TokenSource } from './retry';
 import type { TokenReply } from '@/lib/messages';

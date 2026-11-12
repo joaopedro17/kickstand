@@ -1,10 +1,7 @@
 import { browser } from 'wxt/browser';
-import {
-  chunk,
-  fetchLivestreamsForUsers,
-  KickApiError,
-  MAX_USERS_PER_LIVESTREAM_REQUEST,
-} from '@/lib/kick/api';
+import { chunk } from '@/lib/chunk';
+import { fetchLivestreamsForUsers, MAX_USERS_PER_LIVESTREAM_REQUEST } from '@/lib/kick/api';
+import { KickApiError } from '@/lib/kick/error';
 import {
   channelsToNotify,
   computeNextStatus,

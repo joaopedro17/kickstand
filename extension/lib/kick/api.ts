@@ -9,16 +9,7 @@ import {
   parseLivestreams,
 } from './parse';
 import type { Category, Channel, CurrentUser, Livestream, Page } from './types';
-
-export { KickApiError, type KickApiErrorKind } from './error';
-
-export function chunk<T>(items: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    result.push(items.slice(i, i + size));
-  }
-  return result;
-}
+import { chunk } from '@/lib/chunk';
 
 type QueryParams = Record<string, string | number | string[] | number[] | undefined>;
 
