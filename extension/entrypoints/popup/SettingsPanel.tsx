@@ -32,9 +32,10 @@ export function SettingsPanel() {
   if (!settings) return null;
 
   async function toggleNotifications() {
+    const current = await settingsStorage.getValue();
     await settingsStorage.setValue({
-      ...settings!,
-      notificationsEnabled: !settings!.notificationsEnabled,
+      ...current,
+      notificationsEnabled: !current.notificationsEnabled,
     });
   }
 
@@ -51,6 +52,7 @@ export function SettingsPanel() {
         <SectionHeader
           icon="bell"
           title={i18n.t('settings.notificationsTitle')}
+          headingId="notifications-heading"
           kicker={i18n.t('settings.notificationsKicker')}
         />
         <label

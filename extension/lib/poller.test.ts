@@ -1,25 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import { computeNextStatus, channelsToNotify, countLive, isStale, STALE_AFTER_MS } from './poller';
 import type { ChannelStatus, LiveStatusCache, TrackedChannel } from './storage';
-import type { KickLivestream } from './types';
+import type { Livestream } from './types';
 
 const NOW = 1_700_000_000_000;
 const MORNING = '2026-11-11T10:00:00Z';
 const EVENING = '2026-11-11T20:00:00Z';
 
-function stream(userId: number, overrides: Partial<KickLivestream> = {}): KickLivestream {
+function stream(userId: number, overrides: Partial<Livestream> = {}): Livestream {
   return {
     id: `stream-${userId}`,
-    broadcaster_user: { id: userId, username: `user${userId}`, profile_picture: `pic-${userId}` },
-    channel: { slug: `slug${userId}` },
+    broadcaster: { id: userId, username: `user${userId}`, profilePicture: `pic-${userId}` },
+    slug: `slug${userId}`,
     title: `title-${userId}`,
-    category: { id: 7, name: 'Just Chatting', thumbnail: 'cat.png' },
+    category: { id: 7, name: 'Just Chatting' },
     thumbnail: `thumb-${userId}`,
-    started_at: MORNING,
-    viewer_count: 123,
-    has_mature_content: false,
-    language_code: 'en',
-    tags: [],
+    startedAt: MORNING,
+    viewerCount: 123,
+    hasMatureContent: false,
+    languageCode: 'en',
     ...overrides,
   };
 }
@@ -49,7 +48,7 @@ function offline(notifiedStartedAt: string | null, lastLiveAt: number | null = n
   };
 }
 
-function poll(previous: LiveStatusCache, livestreams: KickLivestream[], ids = [1]) {
+function poll(previous: LiveStatusCache, livestreams: Livestream[], ids = [1]) {
   return computeNextStatus(previous, [{ ids, livestreams }], NOW);
 }
 
@@ -67,7 +66,7 @@ describe('computeNextStatus', () => {
         startedAt: MORNING,
         viewerCount: 123,
         title: 'title-1',
-        category: { id: 7, name: 'Just Chatting', thumbnail: 'cat.png' },
+        category: { id: 7, name: 'Just Chatting' },
         thumbnail: 'thumb-1',
       },
       notifiedStartedAt: MORNING,
@@ -167,22 +166,22 @@ describe('who to notify', () => {
   });
 
   it('does not notify again when the same stream comes back after a short drop', () => {
-    expect(poll({ 1: offline(MORNING) }, [stream(1, { started_at: MORNING })]).wentLive).toEqual([]);
+    expect(poll({ 1: offline(MORNING) }, [stream(1, { startedAt: MORNING })]).wentLive).toEqual([]);
   });
 
   it('notifies for a new stream after the previous one ended', () => {
-    const { next, wentLive } = poll({ 1: offline(MORNING) }, [stream(1, { started_at: EVENING })]);
+    const { next, wentLive } = poll({ 1: offline(MORNING) }, [stream(1, { startedAt: EVENING })]);
 
     expect(wentLive).toEqual([1]);
     expect(next[1].notifiedStartedAt).toBe(EVENING);
   });
 
   it('notifies for a new stream even if no offline poll was seen in between', () => {
-    expect(poll({ 1: live(MORNING, MORNING) }, [stream(1, { started_at: EVENING })]).wentLive).toEqual([1]);
+    expect(poll({ 1: live(MORNING, MORNING) }, [stream(1, { startedAt: EVENING })]).wentLive).toEqual([1]);
   });
 
   describe('when Kick sends no start time', () => {
-    const noStart = { started_at: null as unknown as string };
+    const noStart = { startedAt: null };
 
     it('notifies on going from offline to live', () => {
       expect(poll({ 1: offline(MORNING) }, [stream(1, noStart)]).wentLive).toEqual([1]);

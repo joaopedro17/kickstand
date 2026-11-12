@@ -1,5 +1,6 @@
 export const KICK_API_BASE = 'https://api.kick.com';
 export const KICK_AUTHORIZE_URL = 'https://id.kick.com/oauth/authorize';
+export const KICK_REVOKE_URL = 'https://id.kick.com/oauth/revoke';
 
 export const KICK_CLIENT_ID = '01KYA3RK1R4ASRD322CQSQ7D0J';
 

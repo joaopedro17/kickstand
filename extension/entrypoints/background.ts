@@ -3,9 +3,10 @@ import { browser } from 'wxt/browser';
 import { startLoginFlow, AuthError, answerTokenRequest, logout } from '@/lib/session';
 import { listenForRequests, type LoginResult } from '@/lib/messages';
 import { getTracked, watchTracked } from '@/lib/tracked-channels';
-import { LEGACY_LIVE_STATUS_KEY } from '@/lib/storage';
+import { LEGACY_LIVE_STATUS_KEY, profileStorage } from '@/lib/storage';
 import {
   ensurePollAlarm,
+  forgetSessionData,
   openNotifiedChannel,
   pollNow,
   POLL_ALARM,
@@ -26,6 +27,8 @@ async function login(): Promise<LoginResult> {
       ? { success: false, error: err.code, detail: err.detail }
       : { success: false, error: 'unknown' };
   }
+  // The picture of whoever was logged in before must not show for this account.
+  await profileStorage.setValue(null);
   // Fill the badge now rather than at the next alarm.
   pollNow();
   return { success: true };
@@ -68,7 +71,11 @@ export default defineBackground(() => {
       'poll-now': () => pollNow(),
       login: () => login(),
       'get-access-token': answerTokenRequest,
-      logout: () => logout(),
+      // Local data first: logout() then waits on Kick to revoke the tokens.
+      logout: async () => {
+        await forgetSessionData();
+        await logout();
+      },
     })
   );
 

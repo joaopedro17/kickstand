@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { authTokensStorage } from '@/lib/storage';
-import { withAuthRetry } from '@/lib/session-client';
-import { fetchCurrentUser } from '@/lib/kick-api';
 import { LoginScreen } from './LoginScreen';
 import { Header, type TabName } from './components/Header';
 import { FollowingTab } from './FollowingTab';
 import { BrowseTab } from './BrowseTab';
 import { CategoriesTab } from './CategoriesTab';
 import { SettingsPanel } from './SettingsPanel';
+import { useAvatar } from './useAvatar';
 
 const POPUP_WIDTH = 380;
 const POPUP_HEIGHT = 560;
@@ -19,19 +18,12 @@ export default function App() {
     { id: number; name: string } | null
   >(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const avatarUrl = useAvatar(loggedIn === true);
 
   useEffect(() => {
     authTokensStorage.getValue().then((tokens) => setLoggedIn(tokens !== null));
     return authTokensStorage.watch((tokens) => setLoggedIn(tokens !== null));
   }, []);
-
-  useEffect(() => {
-    if (!loggedIn) return;
-    withAuthRetry((accessToken) => fetchCurrentUser(accessToken)).then(
-      (user) => user && setAvatarUrl(user.profile_picture)
-    );
-  }, [loggedIn]);
 
   if (loggedIn === null) return null;
   if (!loggedIn) return <LoginScreen onLoggedIn={() => setLoggedIn(true)} />;

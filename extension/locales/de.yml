@@ -14,6 +14,7 @@ login:
 
 app:
   settingsTitle: Einstellungen
+  primaryNav: Hauptnavigation
 
 following:
   slugPlaceholder: kanal-slug
@@ -35,6 +36,7 @@ following:
   channelNotFound: 'Kein Kanal für „{slug}“ gefunden'
   alreadyTracked: '„{slug}“ wird bereits verfolgt'
   limitReached: 'Du kannst bis zu {max} Kanäle verfolgen. Entferne einen, um einen neuen hinzuzufügen.'
+  refreshFailed: 'Live-Status konnte nicht aktualisiert werden. Angezeigt wird der letzte bekannte Stand.'
 
 browse:
   emptyLive: Momentan keine Live-Streams.
@@ -48,7 +50,6 @@ categories:
   emptyAll: Keine Kategorien verfügbar.
 
 settings:
-  title: Einstellungen
   notifyToggle: Benachrichtigen, wenn ein verfolgter Kanal live geht
   notificationsTitle: Benachrichtigungen
   notificationsKicker: Immer auf dem Laufenden
@@ -69,6 +70,7 @@ common:
   loadMore: Mehr laden
   retry: Erneut versuchen
   viewers: Zuschauer
+  live: Live
   remove: Entfernen
 
 errors:

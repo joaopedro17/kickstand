@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import background from '@/entrypoints/background';
 import { POLL_ALARM } from '@/lib/poll';
-import { authTokensStorage, liveStatusStorage, type ChannelStatus } from '@/lib/storage';
+import { authTokensStorage, liveStatusStorage, profileStorage, type ChannelStatus } from '@/lib/storage';
 import { setTracked, removeTracked } from '@/lib/tracked-channels';
 import * as session from '@/lib/session';
 
@@ -154,5 +154,33 @@ describe('background', () => {
 
     expect(reply).toEqual({ ok: true, value: expect.objectContaining(expected) });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('forgets live status, the badge and the profile picture on logout', async () => {
+    kickHasLive();
+    await liveStatusStorage.setValue({ 1: live() });
+    await profileStorage.setValue({ avatarUrl: 'https://me.png', fetchedAt: Date.now() });
+    await fakeBrowser.action.setBadgeText({ text: '1' });
+    await startWorker();
+
+    const trigger = fakeBrowser.runtime.onMessage.trigger as (...args: unknown[]) => unknown;
+    await new Promise((resolve) => trigger({ type: 'logout' }, {}, resolve));
+
+    expect(await authTokensStorage.getValue()).toBeNull();
+    expect(await liveStatusStorage.getValue()).toEqual({});
+    expect(await profileStorage.getValue()).toBeNull();
+    expect(await badge()).toBe('');
+  });
+
+  it("forgets the previous account's profile picture when someone logs in", async () => {
+    kickHasLive();
+    await profileStorage.setValue({ avatarUrl: 'https://previous.png', fetchedAt: Date.now() });
+    vi.spyOn(session, 'startLoginFlow').mockResolvedValue({} as never);
+    await startWorker();
+
+    const trigger = fakeBrowser.runtime.onMessage.trigger as (...args: unknown[]) => unknown;
+    await new Promise((resolve) => trigger({ type: 'login' }, {}, resolve));
+
+    expect(await profileStorage.getValue()).toBeNull();
   });
 });

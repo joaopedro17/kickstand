@@ -5,11 +5,15 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "compile": "tsc --noEmit"
+    "compile": "tsc --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage --coverage.provider=istanbul --coverage.reporter=lcov --coverage.include=src/**"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250101.0",
+    "@vitest/coverage-istanbul": "4.1.10",
     "typescript": "^5.6.0",
+    "vitest": "4.1.10",
     "wrangler": "^3.90.0"
   }
 }

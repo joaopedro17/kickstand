@@ -2,12 +2,15 @@ import { browser } from 'wxt/browser';
 import {
   KICK_AUTHORIZE_URL,
   KICK_CLIENT_ID,
+  KICK_REVOKE_URL,
   KICK_SCOPES,
   WORKER_BASE_URL,
 } from './config';
 import { authTokensStorage, type AuthTokens } from './storage';
-import type { TokenResponse } from './types';
+import type { TokenGrant } from './types';
+import { parseTokenResponse } from './kick-parse';
 import { KickApiError } from './kick-api';
+import { fetchWithTimeout } from './fetch-timeout';
 import { retryOnUnauthorized, type TokenSource } from './auth-retry';
 import type { TokenReply } from './messages';
 
@@ -48,21 +51,30 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   return base64UrlEncode(digest);
 }
 
-function toAuthTokens(response: TokenResponse): AuthTokens {
+function toAuthTokens(grant: TokenGrant): AuthTokens {
   const now = Date.now();
   return {
-    accessToken: response.access_token,
-    refreshToken: response.refresh_token,
-    expiresAt: now + response.expires_in * 1000,
-    refreshExpiresAt: now + response.refresh_expires_in * 1000,
+    accessToken: grant.accessToken,
+    refreshToken: grant.refreshToken,
+    expiresAt: now + grant.expiresInSeconds * 1000,
+    refreshExpiresAt: now + grant.refreshExpiresInSeconds * 1000,
   };
+}
+
+/** The token proxy's answer as a grant, or null when it isn't a usable one. */
+async function readGrant(res: Response): Promise<TokenGrant | null> {
+  try {
+    return parseTokenResponse(await res.json());
+  } catch {
+    return null;
+  }
 }
 
 async function exchangeCodeForTokens(
   code: string,
   codeVerifier: string,
   redirectUri: string
-): Promise<TokenResponse> {
+): Promise<TokenGrant> {
   const res = await fetch(`${WORKER_BASE_URL}/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -71,7 +83,9 @@ async function exchangeCodeForTokens(
   if (!res.ok) {
     throw new AuthError('exchange_failed', `Token exchange failed: ${res.status}`, String(res.status));
   }
-  return res.json();
+  const grant = await readGrant(res);
+  if (!grant) throw new AuthError('exchange_failed', 'Token exchange returned no usable tokens', 'malformed');
+  return grant;
 }
 
 export async function startLoginFlow(): Promise<AuthTokens> {
@@ -116,8 +130,8 @@ export async function startLoginFlow(): Promise<AuthTokens> {
   }
   if (returnedState !== state) throw new AuthError('state_mismatch', 'OAuth state mismatch');
 
-  const tokenResponse = await exchangeCodeForTokens(code, verifier, redirectUri);
-  const tokens = toAuthTokens(tokenResponse);
+  const grant = await exchangeCodeForTokens(code, verifier, redirectUri);
+  const tokens = toAuthTokens(grant);
   await authTokensStorage.setValue(tokens);
   return tokens;
 }
@@ -154,7 +168,11 @@ export async function refreshTokens(tokens: AuthTokens): Promise<RefreshResult> 
   if (!res.ok) {
     return { ok: false, reason: REJECTED_STATUSES.has(res.status) ? 'rejected' : 'transient' };
   }
-  const refreshed = toAuthTokens((await res.json()) as TokenResponse);
+  // A 200 without usable tokens says nothing about the refresh token itself,
+  // so it must not end the session.
+  const grant = await readGrant(res);
+  if (!grant) return { ok: false, reason: 'transient' };
+  const refreshed = toAuthTokens(grant);
   await authTokensStorage.setValue(refreshed);
   return { ok: true, tokens: refreshed };
 }
@@ -251,6 +269,39 @@ export async function answerTokenRequest(request: {
   }
 }
 
+/** A revoke Kick hasn't answered after this long is given up on; the local logout already happened. */
+export const REVOKE_TIMEOUT_MS = 5_000;
+
+/** Asks Kick to invalidate `token`. Best-effort: a failure changes nothing for the user. */
+async function revoke(token: string, hint: 'access_token' | 'refresh_token'): Promise<void> {
+  // Kick's docs list these as query parameters while declaring a form body,
+  // so they go in both.
+  const params = new URLSearchParams({ token, token_hint_type: hint });
+  try {
+    await fetchWithTimeout(
+      `${KICK_REVOKE_URL}?${params}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      },
+      REVOKE_TIMEOUT_MS
+    );
+  } catch {
+    // Offline or Kick down: the tokens expire on their own.
+  }
+}
+
+/**
+ * Ends the session here first, so nothing can block it, then asks Kick to
+ * revoke both tokens. Kick doesn't document whether revoking one revokes
+ * the other; the refresh token goes first, since it is the one that can
+ * mint new access tokens.
+ */
 export async function logout(): Promise<void> {
+  const tokens = await authTokensStorage.getValue();
   await authTokensStorage.setValue(null);
+  if (!tokens) return;
+  await revoke(tokens.refreshToken, 'refresh_token');
+  await revoke(tokens.accessToken, 'access_token');
 }
