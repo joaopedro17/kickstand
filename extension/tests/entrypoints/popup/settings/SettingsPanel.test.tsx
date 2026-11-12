@@ -53,6 +53,16 @@ describe('SettingsPanel', () => {
     expect(screen.getByRole('radiogroup', { name: 'Check for live channels every' })).toBeInTheDocument();
   });
 
+  it('turns category-change alerts on, which start off', async () => {
+    render(<SettingsPanel />);
+    const toggle = await screen.findByRole('checkbox', { name: 'Also alert when a live channel changes category' });
+    expect(toggle).not.toBeChecked();
+
+    await userEvent.click(toggle);
+
+    await expect.poll(async () => (await getSettings()).notifyCategoryChange).toBe(true);
+  });
+
   it('sets quiet hours, from 22:00 to 07:00 unless changed', async () => {
     render(<SettingsPanel />);
     const toggle = await screen.findByRole('checkbox', { name: 'Silence alerts during quiet hours' });

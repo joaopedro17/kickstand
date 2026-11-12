@@ -59,6 +59,7 @@ categories:
   emptyAll: Inga kategorier tillgängliga.
 
 settings:
+  categoryChangeToggle: "Avisera även när en livekanal byter kategori"
   quietHoursToggle: "Tysta aviseringar under tysta timmar"
   quietFrom: "Från"
   quietTo: "Till"
@@ -88,6 +89,7 @@ notifications:
   liveDefaultMessage: Sänder live nu på Kick
   liveContext: "{category} · {count} tittare"
   liveContextNoCategory: "{count} tittare"
+  switchedTitle: "{name} bytte till {category}"
 
 common:
   loading: Laddar…

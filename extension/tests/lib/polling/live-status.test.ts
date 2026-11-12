@@ -209,6 +209,39 @@ describe('who to notify', () => {
   });
 });
 
+describe('who switched category', () => {
+  function liveIn(category: { id: number; name: string } | null, startedAt = MORNING): ChannelStatus {
+    const entry = live(startedAt, startedAt);
+    return { ...entry, status: { ...entry.status, category } as ChannelStatus['status'] };
+  }
+  const SLOTS = { id: 9, name: 'Slots' };
+  const CHATTING = { id: 7, name: 'Just Chatting' };
+
+  it('reports a live channel that moved to another category during the same stream', () => {
+    expect(poll({ 1: liveIn(SLOTS) }, [stream(1, { category: CHATTING })]).switchedCategory).toEqual([1]);
+  });
+
+  it('ignores a channel that stayed in its category', () => {
+    expect(poll({ 1: liveIn(CHATTING) }, [stream(1, { category: CHATTING })]).switchedCategory).toEqual([]);
+  });
+
+  it('ignores a new stream, which is a go-live rather than a switch', () => {
+    const result = poll({ 1: liveIn(SLOTS) }, [stream(1, { category: CHATTING, startedAt: EVENING })]);
+    expect(result.switchedCategory).toEqual([]);
+    expect(result.wentLive).toEqual([1]);
+  });
+
+  it('ignores a category that is missing on either side', () => {
+    expect(poll({ 1: liveIn(null) }, [stream(1, { category: CHATTING })]).switchedCategory).toEqual([]);
+    expect(poll({ 1: liveIn(SLOTS) }, [stream(1, { category: null })]).switchedCategory).toEqual([]);
+  });
+
+  it('ignores a channel that was offline or never polled', () => {
+    expect(poll({ 1: offline(null) }, [stream(1)]).switchedCategory).toEqual([]);
+    expect(poll({}, [stream(1)]).switchedCategory).toEqual([]);
+  });
+});
+
 describe('channelsToNotify', () => {
   it('returns the tracked channels that went live, in tracked order', () => {
     expect(channelsToNotify([channel(1), channel(2), channel(3)], [3, 1])).toEqual([

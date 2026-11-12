@@ -147,6 +147,12 @@ export function NotificationsSection({ settings }: { settings: Settings }) {
         checked={settings.notificationsEnabled}
         onChange={(notificationsEnabled) => updateSettings({ notificationsEnabled })}
       />
+      <Toggle
+        id="category-alerts"
+        label={i18n.t('settings.categoryChangeToggle')}
+        checked={settings.notifyCategoryChange}
+        onChange={(notifyCategoryChange) => updateSettings({ notifyCategoryChange })}
+      />
       <QuietHoursFields quiet={settings.quietHours} />
       <PollInterval settings={settings} />
     </section>

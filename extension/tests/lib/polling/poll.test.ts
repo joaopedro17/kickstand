@@ -228,6 +228,60 @@ describe('pollNow', () => {
     }
   });
 
+  describe('category changes', () => {
+    function liveInSlots(): ChannelStatus {
+      const entry = live();
+      return { ...entry, status: { ...entry.status, category: { id: 9, name: 'Slots' } } as ChannelStatus['status'] };
+    }
+
+    it('tells the user when a live channel moves to another category, once they opted in', async () => {
+      await updateSettings({ notifyCategoryChange: true });
+      await setTracked([tracked(1)]);
+      await liveStatusStorage.setValue({ 1: liveInSlots() });
+      kickHasLive(livestream(1));
+
+      await pollNow();
+
+      const all = await fakeBrowser.notifications.getAll();
+      expect(all['kickstand-live-1']).toMatchObject({
+        title: 'User1 switched to Just Chatting',
+        message: 'Stream 1',
+      });
+    });
+
+    it('stays quiet about category changes by default', async () => {
+      await setTracked([tracked(1)]);
+      await liveStatusStorage.setValue({ 1: liveInSlots() });
+      kickHasLive(livestream(1));
+
+      await pollNow();
+
+      expect(await notifications()).toEqual([]);
+    });
+
+    it('stays quiet about a muted channel moving', async () => {
+      await updateSettings({ notifyCategoryChange: true });
+      await setTracked([tracked(1, true)]);
+      await liveStatusStorage.setValue({ 1: liveInSlots() });
+      kickHasLive(livestream(1));
+
+      await pollNow();
+
+      expect(await notifications()).toEqual([]);
+    });
+
+    it('stays quiet while notifications are off', async () => {
+      await updateSettings({ notifyCategoryChange: true, notificationsEnabled: false });
+      await setTracked([tracked(1)]);
+      await liveStatusStorage.setValue({ 1: liveInSlots() });
+      kickHasLive(livestream(1));
+
+      await pollNow();
+
+      expect(await notifications()).toEqual([]);
+    });
+  });
+
   it('does not notify for a muted channel, but still counts it on the badge', async () => {
     await setTracked([tracked(1, true)]);
     await liveStatusStorage.setValue({ 1: offline() });

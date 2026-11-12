@@ -97,15 +97,22 @@ async function fetchAll(tracked: TrackedChannel[]): Promise<BatchOutcome[] | nul
 
 type LiveEntry = Extract<LiveStatus, { kind: 'live' }>;
 
-async function liveNotificationText(channel: TrackedChannel, stream: LiveEntry) {
+/** What an alert is about: a stream starting, or a running stream changing category. */
+type AlertKind = 'live' | 'switched';
+
+async function alertText(kind: AlertKind, channel: TrackedChannel, stream: LiveEntry) {
   const i18n = await getI18n();
+  const name = stream.broadcasterName || channel.slug;
   const count = stream.viewerCount.toLocaleString(browser.i18n.getUILanguage());
   const context = stream.category
     ? i18n.t('notifications.liveContext', { category: stream.category.name, count })
     : i18n.t('notifications.liveContextNoCategory', { count });
   const message = stream.title || i18n.t('notifications.liveDefaultMessage');
   return {
-    title: i18n.t('notifications.liveTitle', { slug: stream.broadcasterName || channel.slug }),
+    title:
+      kind === 'live'
+        ? i18n.t('notifications.liveTitle', { slug: name })
+        : i18n.t('notifications.switchedTitle', { name, category: stream.category?.name ?? '' }),
     // Firefox ignores contextMessage, so the line goes into the message there.
     ...(import.meta.env.FIREFOX
       ? { message: `${message}\n${context}` }
@@ -113,15 +120,15 @@ async function liveNotificationText(channel: TrackedChannel, stream: LiveEntry) 
   };
 }
 
-async function notifyLive(channels: TrackedChannel[], status: LiveStatusCache): Promise<void> {
+async function notify(kind: AlertKind, channels: TrackedChannel[], status: LiveStatusCache): Promise<void> {
   for (const channel of channels) {
     const entry = status[channel.broadcasterUserId];
-    // Only channels that just went live are passed in.
+    // Only channels live in this poll are passed in.
     if (entry.status.kind !== 'live') continue;
     await browser.notifications.create(`${NOTIFICATION_PREFIX}${channel.broadcasterUserId}`, {
       type: 'basic',
       iconUrl: entry.avatarUrl || browser.runtime.getURL('/icons/128.png'),
-      ...(await liveNotificationText(channel, entry.status)),
+      ...(await alertText(kind, channel, entry.status)),
     });
   }
 }
@@ -142,7 +149,7 @@ async function runPoll(): Promise<void> {
   const now = Date.now();
   await pauseIfRateLimited(batches, now);
   const previous = await liveStatusStorage.getValue();
-  const { next, wentLive } = computeNextStatus(previous, batches, now);
+  const { next, wentLive, switchedCategory } = computeNextStatus(previous, batches, now);
 
   // Saved before notifying: if the worker is stopped in between, the next
   // poll sees these streams as already notified instead of notifying twice.
@@ -151,10 +158,12 @@ async function runPoll(): Promise<void> {
 
   // A stream that starts during quiet hours is recorded as notified above,
   // so no alert for it piles up for when they end.
-  const { notificationsEnabled, quietHours } = await getSettings();
-  const silent = !notificationsEnabled || isQuietTime(quietHours, new Date(now));
-  const toNotify = silent ? [] : channelsToNotify(tracked, wentLive);
-  if (toNotify.length > 0) await notifyLive(toNotify, next);
+  const settings = await getSettings();
+  if (!settings.notificationsEnabled || isQuietTime(settings.quietHours, new Date(now))) return;
+  await notify('live', channelsToNotify(tracked, wentLive), next);
+  if (settings.notifyCategoryChange) {
+    await notify('switched', channelsToNotify(tracked, switchedCategory), next);
+  }
 }
 
 let inFlightPoll: Promise<void> | null = null;

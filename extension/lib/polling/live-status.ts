@@ -36,7 +36,7 @@ export type BatchOutcome =
   | { ids: number[]; livestreams: Livestream[] }
   | { ids: number[]; error: string; rateLimitedForMs?: number };
 
-type Polled = { id: number; entry: ChannelStatus; wentLive: boolean };
+type Polled = { id: number; entry: ChannelStatus; wentLive: boolean; switchedCategory: boolean };
 
 /**
  * Whether a live stream deserves a notification. At most one per stream:
@@ -48,6 +48,12 @@ function isNewStream(previous: ChannelStatus | undefined, startedAt: string | nu
   if (!previous) return false;
   if (startedAt === null) return previous.status.kind === 'offline';
   return startedAt !== previous.notifiedStartedAt;
+}
+
+/** Whether a stream that was already live moved from one known category to another. */
+function isCategorySwitch(previous: ChannelStatus | undefined, stream: Livestream): boolean {
+  const before = previous?.status.kind === 'live' ? previous.status.category : null;
+  return before !== null && stream.category !== null && before.id !== stream.category.id;
 }
 
 function liveEntry(
@@ -100,35 +106,41 @@ function pollBatch(previous: LiveStatusCache, batch: BatchOutcome, now: number):
         id,
         entry: { ...previous[id], lastError: batch.error, lastCheckedAt: now },
         wentLive: false,
+        switchedCategory: false,
       }));
   }
   const streamByUser = new Map(batch.livestreams.map((s) => [s.broadcaster.id, s]));
   return batch.ids.map((id) => {
     const stream = streamByUser.get(id);
-    return stream
-      ? {
-          id,
-          entry: liveEntry(previous[id], stream, now),
-          wentLive: isNewStream(previous[id], stream.startedAt),
-        }
-      : { id, entry: offlineEntry(previous[id], now), wentLive: false };
+    if (!stream) {
+      return { id, entry: offlineEntry(previous[id], now), wentLive: false, switchedCategory: false };
+    }
+    const wentLive = isNewStream(previous[id], stream.startedAt);
+    return {
+      id,
+      entry: liveEntry(previous[id], stream, now),
+      wentLive,
+      switchedCategory: !wentLive && isCategorySwitch(previous[id], stream),
+    };
   });
 }
 
 /**
  * Builds the next live-status cache from the outcome of each polled batch,
- * and the ids of channels that started a new stream. Starts empty rather
+ * the ids of channels that started a new stream, and of channels whose
+ * running stream moved to another category. Starts empty rather
  * than from `previous`, so a channel that is no longer tracked is pruned.
  */
 export function computeNextStatus(
   previous: LiveStatusCache,
   batches: BatchOutcome[],
   now: number
-): { next: LiveStatusCache; wentLive: number[] } {
+): { next: LiveStatusCache; wentLive: number[]; switchedCategory: number[] } {
   const polled = batches.flatMap((batch) => pollBatch(previous, batch, now));
   return {
     next: Object.fromEntries(polled.map((p) => [p.id, p.entry])),
     wentLive: polled.filter((p) => p.wentLive).map((p) => p.id),
+    switchedCategory: polled.filter((p) => p.switchedCategory).map((p) => p.id),
   };
 }
 

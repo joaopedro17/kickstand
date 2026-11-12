@@ -59,6 +59,7 @@ categories:
   emptyAll: No categories available.
 
 settings:
+  categoryChangeToggle: "Also alert when a live channel changes category"
   quietHoursToggle: Silence alerts during quiet hours
   quietFrom: From
   quietTo: To
@@ -88,6 +89,7 @@ notifications:
   liveDefaultMessage: Streaming now on Kick
   liveContext: '{category} · {count} viewers'
   liveContextNoCategory: '{count} viewers'
+  switchedTitle: '{name} switched to {category}'
 
 common:
   loading: Loading…

@@ -59,6 +59,7 @@ categories:
   emptyAll: Nenhuma categoria disponível.
 
 settings:
+  categoryChangeToggle: "Avisar também quando um canal ao vivo mudar de categoria"
   quietHoursToggle: "Silenciar alertas no horário de descanso"
   quietFrom: "De"
   quietTo: "Até"
@@ -88,6 +89,7 @@ notifications:
   liveDefaultMessage: Transmitindo agora no Kick
   liveContext: "{category} · {count} espectadores"
   liveContextNoCategory: "{count} espectadores"
+  switchedTitle: "{name} mudou para {category}"
 
 common:
   loading: Carregando…
